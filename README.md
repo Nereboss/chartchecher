@@ -1,3 +1,8 @@
+# ChartChecker: an automated tool to help enhance user awareness about misinformation in charts
+
+This Bachelor thesis by Niklas Kneißl is based on the work by Fan et al.
+The original readme is included below:
+
 # Annotating Line Charts for Addressing Deception
 Arlen Fan, Yuxin Ma, Michelle Mancenido, Ross Maciejewski
 
