@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='utf-8'>
+  <title>LineChartAnalyzer</title>
+  <link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>
+
+  <script src='../src/wpd.js'></script>
+  <script src='../src/jquery-3.5.1.min.js'></script>
+  <script src='../src/d3.v4.js'></script>
+
+  <!--  BOOTSTRAP-->
+  <link href='../bootstrap/bootstrap.min.css' rel='stylesheet'>
+  <script src='../bootstrap/popper.min.js'></script>
+  <script src='../bootstrap/jquery-3.2.1.slim.min.js'></script>
+  <script src='../bootstrap/bootstrap.min.js'></script>
+  <!-- END BOOTSTRAP-->
+
+</head>
+<body style='background-color:#303030; overflow: hidden'>
+<!--completely transparent image 600x600-->
+<img id='id'
+     src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAlgAAAJYCAYAAAC+ZpjcAAAdsUlEQVR4Xu3WMREAAAgDMerfNCZ+DAI65Bh+5wgQIECAAAECBFKBpWvGCBAgQIAAAQIETmB5AgIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBAQWH6AAAECBAgQIBALCKwY1BwBAgQIECBAQGD5AQIECBAgQIBALCCwYlBzBAgQIECAAAGB5QcIECBAgAABArGAwIpBzREgQIAAAQIEBJYfIECAAAECBAjEAgIrBjVHgAABAgQIEBBYfoAAAQIECBAgEAsIrBjUHAECBAgQIEBAYPkBAgQIECBAgEAsILBiUHMECBAgQIAAAYHlBwgQIECAAAECsYDAikHNESBAgAABAgQElh8gQIAAAQIECMQCAisGNUeAAAECBAgQEFh+gAABAgQIECAQCwisGNQcAQIECBAgQEBg+QECBAgQIECAQCwgsGJQcwQIECBAgAABgeUHCBAgQIAAAQKxgMCKQc0RIECAAAECBASWHyBAgAABAgQIxAICKwY1R4AAAQIECBB4CI8CWV89EyAAAAAASUVORK5CYII='>
+
+
+<!--MODAL-->
+<div class='modal' id='Modal2'>
+  <span class='close'>&times;</span>
+  <img id='mainChart' src='' style='display:none;z-index:1;'>
+  <img class='modal-content' id='ModalImage'>
+  <svg height='775' id='gameCanvasModal' width='1350'></svg>
+  <div id='caption'></div>
+</div>
+<!--END MODAL-->
+
+<!-- Wilkinson Popup -->
+<div class='popup' id='WilkinsonPopup' style='width: 900px; z-index: 1000000000'>
+  <div class='popupheading'>Step Size Table</div>
+
+  <iframe height='700px' src='../wilkinson_table/index.htm' width='800px'></iframe>
+  <a class='btn btn-primary' href='#' id='CloseStepSize' style='text-align: center'>Close</a>
+</div>
+
+
+<!--ASPECT POPUP-->
+<div class='popup' id='AspectPopup' style='width: 900px; z-index: 1000000000'>
+  <div class='popupheading'>Aspect Ratio</div>
+  <iframe height='700px' src='../aspect_tutorial/index.htm' width='800px'></iframe>
+  <a class='btn btn-primary' href='#' id='CloseAspectPopup' style='text-align: center'>Close</a>
+</div>
+
+<!--Stuff that we don't need but need id references to-->
+<div id='stuffWeDontNeed' style='display: none'>
+
+  <div id='shadow'
+       style='width:100%; height:100%; background-color: rgba(0,0,0,0.3); position:absolute; top:0px; left:0px; z-index:50; visibility:hidden;'>
+  </div>
+  <div class='card' id='graphicsContainer'>
+    <!-- the main canvas goes here -->
+    <div id='sidebarContainer'>
+      <!-- zoom window goes here -->
+      <!--    HIDE THE ZOOM VIEW FOR NOW-->
+      <div id='zoomDiv' style='position:relative; display:none'>
+        <canvas class='zoomLayers' height='250' id='zoomCanvas'
+                style='position:relative; top: 0px; left: 0px; z-index:1;'
+                width='250'></canvas>
+        <canvas class='zoomLayers' height='250' id='zoomCrossHair'
+                style='position:absolute; top: 0px; left: 0px; z-index:2; background:transparent;'
+                width='250'></canvas>
+        <div id='cursorPosition' style='position:relative;'>
+          [<span id='mousePosition'></span>]
+        </div>
+      </div>
+      <div id='zoom-settings-container'><input id='zoom-settings-button'
+                                               title='Change zoom settings'
+                                               type='button' value='&#9881;' /></div>
+
+
+      <div id='sidebarControlsContainer' style='position:relative;'>
+
+
+        <div class='sidebar' id='acquireDataSidebar'>
+          <p>Manual Extraction</p>
+          <p>
+
+
+            <a class='btn btn-primary' href='#' id='manual-select-button'>Add Point</a>
+            <a class='btn btn-primary' href='#' id='delete-point-button'>Delete Point</a>
+
+
+            <a class='btn btn-primary' href='#' id='extractData2'>Extract Data</a>
+
+
+          </p>
+          <p>
+            <input id='manual-adjust-button' style='width: 115px; display: none'
+                   type='button'
+                   value='Adjust Point (S)'>
+
+            <input id='edit-data-labels'
+                   style='display: none; width: 115px;'
+                   type='button'
+                   value='Edit Labels (E)'>
+          </p>
+          <br />
+
+
+          <!--        AUTOMATIC EXTRACTION-->
+          <!--        AUTOMATIC EXTRACTION disabled for now-->
+
+          <!--toggle visibility -->
+          <div id='automaticExtractionDiv' style='display: none'>
+            <p class='sidebar-title'>Automatic Extraction</p>
+            <p>Mask <input id='box-mask' onclick='wpd.dataMask.markBox();' style='width:50px;' type='button'
+                           value='Box'><input id='pen-mask' onClick='wpd.dataMask.markPen();'
+                                              style='width:45px;'
+                                              type='button' value='Pen'><input id='erase-mask'
+                                                                               onClick='wpd.dataMask.eraseMarks();'
+                                                                               style='width:50px;'
+                                                                               type='button'
+                                                                               value='Erase'><input
+              id='view-mask' onclick='wpd.dataMask.viewMask();' style='width:40px;' type='button'
+              value='View' /></p>
+            <div class='sidebar-extras' id='mask-erase-container'>
+              <p align='center'>Width <input id='eraseThickness' max='150' min='1' style='width:80px;'
+                                             type='range'
+                                             value='20'> <input id='clearMaskBtn'
+                                                                onclick='wpd.dataMask.clearMask();'
+                                                                style='width:80px;'
+                                                                type='button'
+                                                                value='Erase All' /></p>
+            </div>
+            <div class='sidebar-extras' id='mask-paint-container'>
+              <p align='center'>Width <input id='paintThickness' max='150' min='1' style='width:120px;'
+                                             type='range'
+                                             value='20'></p>
+            </div>
+            <hr />
+            <p>Color <select id='color-detection-mode-select' onchange='wpd.colorPicker.changeDetectionMode();'>
+              <option value='fg'>Foreground Color</option>
+              <option value='bg'>Background Color</option>
+            </select><input id='color-button' onclick='wpd.colorPicker.startPicker();' style='width: 25px;'
+                            title='Click to change color'
+                            type='button' value=' ' /></p>
+            <p>Distance <input id='color-distance-value' onchange='wpd.colorPicker.changeColorDistance();'
+                               size='3'
+                               type='text' />
+              <input onclick='wpd.colorPicker.testColorDetection();' style='width: 90px;' type='button'
+                     value='Filter Colors'></p>
+            <hr />
+            <p>Algorithm
+              <select id='auto-extract-algo-name' onchange='wpd.algoManager.applyAlgoSelection();'></select>
+            </p>
+            <div id='algo-parameter-container' style='margin-left: 10px; margin-top: 5px;'></div>
+            <p style='margin-top: 5px;'>
+              <input onclick='wpd.algoManager.run();' style='width:40px;' type='button' value='Run' />
+            </p>
+
+          </div>
+
+          <!--        END AUTOMATIC EXTRACTION-->
+          <!--        END AUTOMATIC EXTRACTION-->
+
+          <div hidden id='value-overrides-controls'>
+            <br />
+            <p class='sidebar-title'>Overrides</p>
+            <p>
+              <input id='override-data-values' style='width: 140px;' type='button' value='Override Values (R)'>
+              <span hidden id='overridden-data-indicator'>&#8682;</span>
+            </p>
+          </div>
+        </div>
+        <!--      end acquire data sidebar-->
+        <!--      end acquire data sidebar-->
+
+
+        <!-- edit image -->
+        <div class='sidebar' id='editImageToolbar'>
+          <p align='center'><b>Edit Image</b></p>
+          <p align='center'><input onclick='hflip();' style='width: 75px;' type='button' value='H. Flip'><input
+            onClick='vflip();' style='width: 75px;' type='button' value='V. Flip'></p>
+          <p align='center'><input onclick='cropPlot();' style='width: 150px;' type='button' value='Crop'></p>
+          <p align='center'><input onclick='restoreOriginalImage();' style='width: 150px;' type='button'
+                                   value='Restore'>
+          </p>
+          <p align='center'><input onclick='savePNG();' style='width: 150px;' type='button' value='Save .PNG'>
+          </p>
+        </div>
+
+        <!-- distance measurement -->
+        <div class='sidebar' id='measure-distances-sidebar'>
+          <p class='sidebar-title'>Measure Distances</p>
+          <p>
+            <input id='add-pair-button' onclick='wpd.measurement.addItem();' style='width: 115px;' type='button'
+                   value='Add Pair (A)' />
+            <input id='delete-pair-button' onclick='wpd.measurement.deleteItem();' style='width: 115px;'
+                   type='button'
+                   value='Delete Pair (D)' />
+          </p>
+        </div>
+
+        <!-- angle measurement -->
+        <div class='sidebar' id='measure-angles-sidebar'>
+          <p class='sidebar-title'>Measure Angles</p>
+          <p>
+            <input id='add-angle-button' onclick='wpd.measurement.addItem();' style='width: 115px;'
+                   type='button'
+                   value='Add Angle (A)' />
+            <input id='delete-angle-button' onclick='wpd.measurement.deleteItem();' style='width: 115px;'
+                   type='button'
+                   value='Delete Angle (D)' />
+          </p>
+        </div>
+
+        <!-- distance measurement -->
+        <div class='sidebar' id='measure-area-sidebar'>
+          <p class='sidebar-title'>Measure Area/Perimeter</p>
+          <p align='center'><input id='add-polygon-button' onclick='wpd.measurement.addItem();'
+                                   style='width: 145px;'
+                                   type='button'
+                                   value='Add Polygon (A)' /></p>
+          <p align='center'><input id='delete-polygon-button' onclick='wpd.measurement.deleteItem();'
+                                   style='width: 145px;'
+                                   type='button' value='Delete Polygon (D)' /></p>
+          <br />
+          <p><span id='add-polygon-info'>Press Enter or Esc key to complete the polygon</span></p>
+        </div>
+
+
+        <!-- open path measurement -->
+        <div class='sidebar' id='measure-open-path-sidebar'>
+          <p class='sidebar-title'>Measure Path</p>
+          <p>
+            <input id='add-open-path-button' onclick='wpd.measurement.addItem();' style='width: 115px;'
+                   type='button'
+                   value='Add Path (A)' />
+            <input id='delete-open-path-button' onclick='wpd.measurement.deleteItem();' style='width: 115px;'
+                   type='button'
+                   value='Delete Path (D)' />
+          </p>
+        </div>
+
+        <!-- closed path measurement -->
+        <div class='sidebar' id='measure-closed-path-sidebar'>
+          <p class='sidebar-title'>Measure Closed Path</p>
+          <p>
+            <input id='add-closed-path-button' onclick='wpd.measurement.addItem();' style='width: 115px;'
+                   type='button'
+                   value='Add Path (A)' />
+            <input id='delete-closed-path-button' onclick='wpd.measurement.deleteItem();' style='width: 115px;'
+                   type='button'
+                   value='Delete Path (D)' />
+          </p>
+        </div>
+
+        <!-- grid detection -->
+        <div class='sidebar' id='grid-detection-sidebar'>
+          <p class='sidebar-title'>Detect Grid</p>
+          <p>
+            Mask
+            <input id='grid-mask-box' onclick='wpd.gridDetection.markBox();' style='width: 60px;' type='button'
+                   value='Box' />
+            <input id='grid-mask-clear' onclick='wpd.gridDetection.clearMask();' style='width: 60px;'
+                   type='button'
+                   value='Clear' />
+            <input id='grid-mask-view' onclick='wpd.gridDetection.viewMask();' style='width: 60px;'
+                   type='button'
+                   value='View' />
+          </p>
+          <hr />
+          <p>
+            Color
+            <input id='grid-color-picker-button' onclick='wpd.gridDetection.startColorPicker();'
+                   style='width: 60px;'
+                   type='button'
+                   value='Pick' />
+            <input id='grid-color-distance' onchange='wpd.gridDetection.changeColorDistance();'
+                   style='width: 60px;'
+                   type='text'
+                   value='10' />
+            <input id='grid-color-test' onclick='wpd.gridDetection.testColor();' style='width: 60px;'
+                   type='button'
+                   value='Test' />
+          </p>
+          <p align='center'><input checked id='grid-background-mode'
+                                   onchange='wpd.gridDetection.changeBackgroundMode();'
+                                   type='checkbox' /> Background Mode</p>
+          <hr />
+          <table>
+            <tr>
+              <td align='right'>Horizontal</td>
+              <td><input checked id='grid-horiz-enable' type='checkbox' /></td>
+            </tr>
+            <tr>
+              <td align='right'>X%</td>
+              <td>&nbsp; <input id='grid-horiz-perc' style='width: 40px;' type='text' value='80' /></td>
+            </tr>
+            <tr>
+              <td align='right'>Vertical</td>
+              <td><input checked id='grid-vert-enable' type='checkbox' /></td>
+            </tr>
+            <tr>
+              <td align='right'>Y%</td>
+              <td>&nbsp; <input id='grid-vert-perc' style='width: 40px;' type='text' value='80' /></td>
+            </tr>
+          </table>
+          <hr />
+          <p align='center'>
+            <input onclick='wpd.gridDetection.run();' style='width: 100px;' type='button' value='Detect' />
+            &nbsp;
+            <input onclick='wpd.gridDetection.reset();' style='width: 100px;' type='button' value='Reset' />
+          </p>
+        </div>
+
+        <!-- startup sidebar -->
+        <div class='sidebar' id='start-sidebar' style='display: none'>
+          <p class='sidebar-title'>WebPlotDigitizer 4.4</p>
+          <br />
+          <center>
+            <p><input onclick="wpd.popup.show('loadNewImage');" style='width: 180px;' type='button'
+                      value='Load Image' />
+            </p>
+            <p><input onclick="window.open('https://youtu.be/P7GbGdMvopU','_blank');" style='width: 180px;'
+                      type='button'
+                      value='Tutorial Video' /></p>
+            <p><input onclick="window.open('https://automeris.io/WebPlotDigitizer','_blank');"
+                      style='width: 180px;'
+                      type='button'
+                      value='Visit Website' /></p>
+            <p><input onclick="window.open('https://github.com/ankitrohatgi/WebPlotDigitizer','_blank');"
+                      style='width: 180px;' type='button'
+                      value='Visit GitHub' /></p>
+          </center>
+        </div>
+
+        <!-- image editing sidebar -->
+        <div class='sidebar' id='image-editing-sidebar'>
+          <p class='sidebar-title'>Image Editing</p>
+          <br />
+          <center>
+            <p align='center'>
+              <input id='image-editing-undo' style='width: 120px;'
+                     type='button'
+                     value='Undo' />
+              <input id='image-editing-redo' style='width: 120px;'
+                     type='button'
+                     value='Redo' />
+            </p>
+            <br />
+            <p align='center'>
+              <input id='image-editing-crop' style='width: 120px;'
+                     type='button'
+                     value='Crop' />
+              <!-- <input type="button" value="Fix Perspective" style="width: 120px;" onclick="wpd.imageEditing.startPerspective()" id="image-editing-perspective" /> -->
+            </p>
+            <!--
+            <p align="center">
+                <input type="button" value="Rotate" style="width: 120px;" onclick="" id="image-editing-rotate" />
+                <input type="button" value="?" style="width: 120px;" onclick="" id="image-editing-misc" />
+            </p>
+            -->
+            <p><span id='image-editing-crop-info'>Click and drag to mark the crop region. Press Enter to complete cropping, Esc to cancel</span>
+            </p>
+          </center>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id='left-side-container' style='width:200px; flex: 0 0 169px;'>
+    <!-- tree control -->
+    <div>
+      <div id='tree-container' style='flex: 1; overflow-y: auto; outline:none;' tabindex='1'>
+        <!-- tree -->
+      </div>
+
+      <!-- tree widgets -->
+      <div class='tree-widget' id='image-item-tree-widget' style='flex: 0 0 100px;'>
+        <p class='sidebar-title'>Image</p>
+        <center>
+          <p><input id=showImageInfo' style='width:150px;' type='button'
+                    value='Image Info' /></p>
+        </center>
+      </div>
+
+      <div class='tree-widget' id='axes-group-tree-widget' style='flex: 0 0 100px;'>
+        <p class='sidebar-title'>Axes</p>
+        <center>
+
+          <a class='btn btn-primary' href='#' id='calibrateAxes'>Add Calibration</a>
+        </center>
+      </div>
+
+      <div class='tree-widget' id='axes-item-tree-widget' style='flex: 0 0 100px;'>
+        <p class='sidebar-title'>Axes</p>
+        <center>
+          <!--                      <p><input id='renameAxes' onclick='wpd.alignAxes.showRenameAxes();' style='width:150px;'-->
+          <!--                                type='button'-->
+          <!--                                value='Rename' />-->
+          <!--                      </p>-->
+          <p><input id='tweak-axes-calibration-button'
+                    onclick='wpd.alignAxes.reloadCalibrationForEditing();'
+                    style='width:150px;'
+                    type='button' value='Tweak Calibration' /></p>
+          <p><input id='deleteCal' onclick='wpd.alignAxes.deleteCalibration();' style='width:150px;'
+                    type='button'
+                    value='Delete' /></p>
+        </center>
+      </div>
+
+      <div class='tree-widget' id='dataset-group-tree-widget' style='flex: 0 0 100px;'>
+        <p class='sidebar-title'>Datasets</p>
+        <center>
+
+          <a class='btn btn-primary' href='#' id='addDataset'>Add Dataset</a>
+
+          <p><input onclick="wpd.popup.show('export-all-data-popup');" style=' display:none;width:150px;'
+                    type='button'
+                    value='Export All Data' /></p>
+        </center>
+      </div>
+
+      <div class='tree-widget' id='measurement-group-tree-widget' style='flex: 0 0 100px; display:none'>
+        <p class='sidebar-title'>Measurements</p>
+        <center>
+          <p><input onclick='wpd.tree.addMeasurement(wpd.measurementModes.distance);' style='width:150px;'
+                    type='button'
+                    value='Distance' /></p>
+          <p><input onclick='wpd.tree.addMeasurement(wpd.measurementModes.angle);' style='width:150px;'
+                    type='button'
+                    value='Angle' /></p>
+          <p><input onclick='wpd.tree.addMeasurement(wpd.measurementModes.area);' style='width:150px;'
+                    type='button'
+                    value='Area/Perimeter' /></p>
+        </center>
+      </div>
+
+      <div class='tree-widget' id='dataset-item-tree-widget' style='flex: 0 0 100px;'>
+        <p class='sidebar-title'>Dataset</p>
+        <center>
+          <p>Axes: <select id='dataset-item-axes-select'
+                           onchange='wpd.dataSeriesManagement.changeAxes(this.value);'
+                           style='min-width:100px; max-width:150px;'></select></p>
+          <p><input id='dataset-display-color-picker-button'
+                    onclick='wpd.dataSeriesManagement.startColorPicker();'
+                    style='width: 150px; display:none'
+                    type='button'
+                    value='Display Color' /></p>
+          <!--                      <p><input id='renameDatasetButton'-->
+          <!--                                style='width:150px;'-->
+          <!--                                type='button'-->
+          <!--                                value='Rename Dataset' /></p>-->
+          <p><input id='deleteDatasetButton'
+                    style='width:150px;' type='button'
+                    value='Delete Dataset' /></p>
+          <p><input id='viewData' style='width:150px;' type='button' value='View Data' /></p>
+          <p><input id='clearDataButton' style='width:150px;'
+                    type='button'
+                    value='Clear Data' />
+          </p>
+          <p>Data Points: <span class='data-point-counter'>0</span></p>
+        </center>
+      </div>
+
+      <div class='tree-widget' id='distance-item-tree-widget' style='flex: 0 0 100px;'>
+        <p class='sidebar-title'>Distance</p>
+        <center>
+          <p>Axes: <select id='distance-item-axes-select' onchange='wpd.measurement.changeAxes(this.value);'
+                           style='min-width:100px; max-width:150px;'></select></p>
+          <p><input onclick='wpd.measurement.clearAll();' style='width:150px;' type='button'
+                    value='Clear All' />
+          </p>
+          <p><input onclick='wpd.dataTable.showDistanceData();' style='width:150px;' type='button'
+                    value='View_Data' /></p>
+        </center>
+      </div>
+
+      <div class='tree-widget' id='angle-item-tree-widget' style='flex: 0 0 100px;'>
+        <p class='sidebar-title'>Angle</p>
+        <center>
+          <p><input onclick='wpd.measurement.clearAll();' style='width:150px;' type='button'
+                    value='Clear All' />
+          </p>
+          <p><input onclick='wpd.dataTable.showAngleData();' style='width:150px;' type='button'
+                    value='View_Data' />
+          </p>
+        </center>
+      </div>
+
+      <div class='tree-widget' id='area-item-tree-widget' style='flex: 0 0 100px;'>
+        <p class='sidebar-title'>Area/Perimeter</p>
+        <center>
+          <p>Axes: <select id='area-item-axes-select' onchange='wpd.measurement.changeAxes(this.value);'
+                           style='min-width:100px; max-width:150px;'></select></p>
+          <p><input onclick='wpd.measurement.clearAll();' style='width:150px;' type='button'
+                    value='Clear All' />
+          </p>
+          <p><input onclick='wpd.dataTable.showAreaData();' style='width:150px;' type='button'
+                    value='View_Data' />
+          </p>
+        </center>
+      </div>
+
+    </div>
+  </div>
+  <div id='allContainer'>
+    <!-- toolbar + graphics -->
+    <div id='mainContainer'>
+      <div id='topContainer'>
+        <div id='menuButtonsContainer'>
+          <div class='wpd-menu'>
+            <!--          <div class='wpd-menu-header'>File</div>-->
+
+            <div class='wpd-menu-dropdown' style='display: none'>
+              <!--            HIDDEN FOR NOW-->
+              <ul>
+                <li onclick="wpd.popup.show('loadNewImage');">Load Image(s)</li>
+                <li onclick='wpd.saveResume.load();'>Load Project</li>
+                <li onclick='wpd.saveResume.save();'>Save Project</li>
+                <li onclick='wpd.scriptInjector.start();'>Run Script</li>
+              </ul>
+            </div>
+
+
+          </div>
+
+          <!--        WPD MENU -->
+          <div class='wpd-menu' style='display: none'>
+            <div class='wpd-menu-header'>Help</div>
+            <div class='wpd-menu-dropdown'>
+              <ul>
+                <li id='wpd-helpmenu-about' onclick="wpd.popup.show('helpWindow');">About WebPlotDigitizer</li>
+                <li id='wpd-helpmenu-tutorial'><a href='https://automeris.io/WebPlotDigitizer/tutorial.html'
+                                                  target='_blank'>Tutorials</a></li>
+                <li id='wpd-helpmenu-manual'><a href='https://automeris.io/WebPlotDigitizer/userManual.pdf'
+                                                target='_blank'>User Manual</a></li>
+                <li id='wpd-helpmenu-github'><a href='https://github.com/ankitrohatgi/WebPlotDigitizer' target='_blank'>GitHub
+                  Page</a></li>
+                <li id='wpd-helpmenu-issues'><a href='https://github.com/ankitrohatgi/WebPlotDigitizer/issues'
+                                                target='_blank'>Report Issues</a></li>
+                <li id='wpd-helpmenu-donate'><a
+                  href='https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=CVFJGV5SNEV9J&lc=US&item_name=WebPlotDigitizer&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donateCC_LG%2egif%3aNonHosted'
+                  target='_blank'>Donate (PayPal)</a></li>
+              </ul>
+            </div>
+          </div>
+          <!--        WPD MENU END-->
+
+        </div>
+
+
+        <div id='topToolbarContainer' style='display:none;'>
+          <!-- controls that show on top -->
+          <div style='position:relative;'>
+            <!-- Extra toolbars go here -->
+            <!-- Adjust Points Toolbar -->
+            <div class='toolbar' id='adjustDataPointsToolbar' style='width:350px;'>
+              <p><input onclick="wpd.popup.show('adjust-data-points-keyboard-shortcuts-window');" type='button'
+                        value='View Keyboard Shortcuts' /></p>
+            </div>
+          </div>
+        </div>
+
+        <!--                <div style="display:inline-block; position: absolute; top: 5px; right: 290px;">-->
+        <!--                    <button type="button" title="Zoom in" onclick="wpd.graphicsWidget.zoomIn();" style="border:none; width:20px;">+</button>-->
+        <!--                    <button type="button" title="Zoom out" onclick="wpd.graphicsWidget.zoomOut();" style="border:none; width:20px;">-</button>-->
+        <!--                    <button type="button" title="View actual size" onclick="wpd.graphicsWidget.zoom100perc();" style="border:none;">100%</button>-->
+        <!--                    <button type="button" title="Fit to graphics area" onclick="wpd.graphicsWidget.zoomFit();" style="border:none;">Fit</button>-->
+        <!--                    <button title="Toggle extended crosshair" onclick="wpd.graphicsWidget.toggleExtendedCrosshairBtn();" style="border:none; width:20px; background-image: url('../images/crosshair.png'); background-repeat: no-repeat; background-position: center;" id="extended-crosshair-btn">&nbsp;</button>-->
+        <!--                </div>-->
+
+      </div>
+
+
+      <div id='bottomContainer'>
+        <div id='bottomNavbarContainer'><!-- Image and Page navigation bar -->
+          <div id='imageAndPageNavbar'>
+            <span class='files' hidden>Image: </span>
+            <div class='files' hidden><select id='image-file-select'
+                                              onchange='wpd.appData.getFileManager().switch(this.value);'
+                                              style='width:100%;'></select></div>
+            <div hidden id='navSeparator'></div>
+            <span class='paged' hidden>Page: </span>
+            <div class='paged' hidden><select id='image-page-nav-select'
+                                              onchange='wpd.appData.getPageManager().switch(this.value);'
+                                              style='width:100%;'></select></div>
+            <div class='paged' hidden><input onclick='wpd.appData.getPageManager().previous();' style='width:100px;'
+                                             type='button'
+                                             value='Previous' /></div>
+            <div class='paged' hidden><input onclick='wpd.appData.getPageManager().next();' style='width:100px;'
+                                             type='button'
+                                             value='Next' /></div>
+            <div class='paged' hidden><input onclick="wpd.popup.show('image-page-relabel-popup');" style='width:100px;'
+                                             type='button'
+                                             value='Page Labels' /></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </div>
+  <div id='loadingCurtain'
+       style='position: absolute; top: 0px; left: 0px; z-index: 100; width: 100%; height: 100%; background-color: white;'>
+
+  </div>
+
+</div>
+<!--Stuff that we don't need but need id references to-->
+
+
+
+
+
+</div>
+<script src='../src/auto_analyze.js'></script>
+<!--<script src='../src/analyze.js'></script>-->
+<link href='../stylesheets/analyze.css' rel='stylesheet'>
+</body>
+</html>

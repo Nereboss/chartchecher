@@ -1,0 +1,1738 @@
+html,
+body {
+    height: 100%;
+    width: 100%;
+    overflow: scroll;
+}
+
+
+.custom-nav span.title {
+    color: white;
+    display: inline-block;
+    font-size: 1.35rem;
+    padding: 0;
+    margin: 0 20px 0 10px;
+}
+
+.custom-nav .input-container {
+    display: inline-block;
+    /* position: relative; */
+    margin-right: 10px;
+}
+
+.custom-nav .select-wrapper input {
+    /* margin: 15px 0 0 !important; */
+    color: lightsteelblue;
+}
+
+nav .brand-logo {
+    margin-left: 10px;
+}
+
+.top-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    float: left;
+    float: right;
+    width: 99%;
+    height: 93.5%;
+    margin-left: 1%;
+    margin-right: 1%;
+}
+
+input[type="text"], textarea {
+
+    background-color: #d1d1d1;
+
+}
+
+#mainContainer {
+    display: none;
+}
+
+
+.bottom-container {
+    column-gap: 8px;
+    row-gap: 8px;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    float: left;
+    float: right;
+    width: 100%;
+    height: 100%;
+    background-color: #e3e3e3;
+}
+
+
+#main {
+    width: 100%;
+    height: 50%;
+}
+
+#mainSimple {
+    width: 100%;
+    height: calc(100% - 64px);
+
+}
+
+#scatter-inputs-container,
+#scatter-outputs-container {
+    height: 50%;
+    width: 100%;
+}
+
+#model-plot-container {
+    height: 55%;
+    width: 95%;
+}
+
+#model-brush-container {
+    height: 10%;
+    width: 95%;
+}
+
+#concept-container {
+    height: 35%;
+    width: 95%;
+}
+
+#brushed-scatter-container {
+    height: 30%;
+    width: 95%;
+}
+
+#scatter-container {
+    height: 100%;
+    width: 98%;
+}
+
+#scatter-scroll {
+    height: 98%;
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#svg, #g {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* centered */
+    /*height: 55px; !* larger *!*/
+    padding-left: 5%;
+    padding-right: 5%;
+}
+
+#MainView {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0px;
+    height: 97.5%;
+    width: 75%;
+    margin-bottom: 10px;
+    border: 1px solid black;
+}
+
+
+#MainLineChartView {
+    height: 97.5%;
+    width: 100%;
+}
+
+
+#SimpleImageView {
+    height: 97.5%;
+    width: 100%;
+}
+
+
+#DataView {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0px;
+    height: 97.5%;
+    width: 15%;
+    margin-bottom: 10px;
+    border: 1px solid black;
+}
+
+
+#Simple21 {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    margin-top: 0px;
+    height: 99.5%;
+    width: 60%;
+    margin-bottom: 10px;
+    /*border: 1px solid black;*/
+    position: relative;
+    z-index: 90;
+    z-index: 90;
+    /*to stay above the canvasDiv*/
+}
+
+#gameCanvas {
+    position: fixed;
+    z-index: 1;
+}
+
+#Simple22 {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0px;
+    height: 99.5%;
+    width: 40%;
+    margin-bottom: 10px;
+    /*border: 1px solid black;*/
+    z-index: 50;
+    /*try to stay above canvas*/
+}
+
+.tree-folder {
+    cursor: pointer;
+    font-family: "Segoe UI";
+    font-weight: bold;
+}
+
+#Modal2 {
+    position: relative;
+
+    display: none;
+    margin: auto;
+    z-index: 999;
+    background-color: #ffffff; /* Black w/ opacity */
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%);
+
+}
+
+#ModalImage {
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.5s;
+    /*z-index: 100;*/
+}
+
+#gameCanvasModal {
+    display: block;
+    margin: auto;
+    position: fixed;
+    z-index: 1000;
+    /*text-align: center; !* align center all inline elements *!*/
+
+
+}
+
+.popupheading {
+    font-size: 14px;
+    text-align: left;
+    cursor: move;
+    background-color: #333333;
+    color: white;
+    align-content: center;
+    text-align: center;
+    align-items: center;
+    margin: 0 -5px 0 -5px;
+    padding: 5px;
+}
+
+
+.canvasLayers {
+    background: transparent;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    max-height: 650px;
+    max-width: 850px;
+}
+
+
+.popup {
+    padding: 0px 5px 12px 5px;
+    margin: 0;
+    border: thin #444444 solid;
+    background: white;
+    z-index: 100;
+    position: absolute;
+    top: 0;
+    left: 0;
+    visibility: hidden;
+}
+
+
+#zoom-settings-container {
+    display: none;
+
+}
+
+
+.popup p {
+    padding: 0;
+    margin: 5px 5px;
+}
+
+.popup-drag-mask {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    background: none;
+    z-index: 5000;
+    display: none;
+}
+
+
+rect {
+    position: absolute;
+    z-index: 1;
+}
+
+img {
+    position: absolute;
+    z-index: -1;
+}
+
+
+.box-shadow {
+    background: #373737;
+    box-shadow: 4px 3px 8px 1px #353535;
+    -webkit-box-shadow: 4px 3px 8px 1px #323232;
+    width: 150px;
+    height: 150px;
+
+}
+
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    width: 320px;
+    height: 100px;
+    padding: 5px;
+    color: white;
+    font: bold 12px "Segoe UI";
+    background: black;
+    border: 0px;
+    border-radius: 15px;
+    pointer-events: none;
+    z-index: 100000;
+}
+
+div.tooltip_on_click {
+    position: relative;
+    text-align: center;
+    width: 420px;
+    height: 200px;
+    padding: 5px;
+    color: black;
+    font: bold 12px "Segoe UI";
+    background: #dbdbdb;
+    border: 0px;
+    border-radius: 5px;
+    z-index: 100;
+    border-color: black transparent transparent transparent;
+}
+
+#WilkinsonAdvice, #WhatIsAspectRatio{
+    z-index: 100000000000;
+}
+#WilkinsonAdvice:hover, #WhatIsAspectRatio:hover{
+    cursor: pointer;
+}
+
+.tooltip_svg {
+    z-index: 100000;
+}
+
+.xaxiswhite line {
+    stroke: black !important;
+    z-index: 10000000000;
+}
+
+.xaxiswhite path {
+    stroke: black !important;
+    z-index: 10000000000;
+}
+
+.xaxiswhite text {
+    stroke: black !important;
+    z-index: 10000000000;
+}
+
+.yaxisblack line {
+    stroke: black !important;
+    z-index: 10000000000;
+}
+
+.yaxisblack path {
+    stroke: black !important;
+    z-index: 10000000000;
+}
+
+.yaxisblack text {
+    stroke: black !important;
+    z-index: 10000000000;
+}
+
+
+#image-p {
+    text-align: center;
+    min-height: 200px;
+}
+
+#xyaxes-png {
+    /*text-align: center;*/
+    align-content: center;
+    display: block;
+}
+
+#mainCanvas {
+    background-color: transparent;
+    z-index: 1;
+    /*copy the html*/
+}
+
+#dataCanvas {
+    background-color: transparent;
+    z-index: 2;
+    /*copy the html*/
+}
+
+#drawCanvas {
+    background-color: transparent;
+    z-index: 3;
+    /*copy the html*/
+}
+
+#hoverCanvas {
+    background-color: transparent;
+    z-index: 4;
+    /*copy the html*/
+}
+
+#topCanvas {
+    background-color: transparent;
+    z-index: 5;
+    /*copy the html*/
+}
+
+#Simple11 {
+    position: relative;
+
+    z-index: 90;
+    /*z-index is high to be on top of the canvases*/
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    margin-top: 0px;
+    height: 98.5%;
+    width: 53%;
+    margin-bottom: 10px;
+    /*border: 1px solid black;*/
+}
+
+.chips .input {
+    background: none;
+    border: 0;
+    color: rgba(0, 0, 0, 0.6);
+    display: inline-block;
+    font-size: 16px;
+    height: 3rem;
+    line-height: 32px;
+    outline: 0;
+    margin: 0;
+    padding: 0 !important;
+    width: 120px !important
+}
+
+.chips .input:focus {
+    border: 0 !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important
+}
+
+
+.input-field {
+    position: relative;
+    margin-top: 1rem;
+    margin-bottom: 1rem
+}
+
+.input-field.inline {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 5px
+}
+
+.input-field.inline input, .input-field.inline .select-dropdown {
+    margin-bottom: 1rem
+}
+
+.input-field.col label {
+    left: .75rem
+}
+
+.input-field.col .prefix ~ label, .input-field.col .prefix ~ .validate ~ label {
+    width: calc(100% - 3rem - 1.5rem)
+}
+
+.input-field > label {
+    color: #9e9e9e;
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 1rem;
+    cursor: text;
+    -webkit-transition: color .2s ease-out, -webkit-transform .2s ease-out;
+    transition: color .2s ease-out, -webkit-transform .2s ease-out;
+    transition: transform .2s ease-out, color .2s ease-out;
+    transition: transform .2s ease-out, color .2s ease-out, -webkit-transform .2s ease-out;
+    -webkit-transform-origin: 0% 100%;
+    transform-origin: 0% 100%;
+    text-align: initial;
+    -webkit-transform: translateY(12px);
+    transform: translateY(12px)
+}
+
+.input-field > label:not(.label-icon).active {
+    -webkit-transform: translateY(-14px) scale(0.8);
+    transform: translateY(-14px) scale(0.8);
+    -webkit-transform-origin: 0 0;
+    transform-origin: 0 0
+}
+
+.input-field > input[type]:-webkit-autofill:not(.browser-default):not([type="search"]) + label, .input-field > input[type=date]:not(.browser-default) + label, .input-field > input[type=time]:not(.browser-default) + label {
+    -webkit-transform: translateY(-14px) scale(0.8);
+    transform: translateY(-14px) scale(0.8);
+    -webkit-transform-origin: 0 0;
+    transform-origin: 0 0
+}
+
+.input-field .helper-text {
+    position: relative;
+    min-height: 18px;
+    display: block;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.54)
+}
+
+.input-field .helper-text::after {
+    opacity: 1;
+    position: absolute;
+    top: 0;
+    left: 0
+}
+
+.input-field .prefix {
+    position: absolute;
+    width: 3rem;
+    font-size: 2rem;
+    -webkit-transition: color .2s;
+    transition: color .2s;
+    top: .5rem
+}
+
+.input-field .prefix.active {
+    color: #26a69a
+}
+
+.input-field .prefix ~ input, .input-field .prefix ~ textarea, .input-field .prefix ~ label, .input-field .prefix ~ .validate ~ label, .input-field .prefix ~ .helper-text, .input-field .prefix ~ .autocomplete-content {
+    margin-left: 3rem;
+    width: 92%;
+    width: calc(100% - 3rem)
+}
+
+.input-field .prefix ~ label {
+    margin-left: 3rem
+}
+
+
+.input-field input[type=search] {
+    display: block;
+    line-height: inherit;
+    -webkit-transition: .3s background-color;
+    transition: .3s background-color
+}
+
+#Simple12 {
+
+    display: flex;
+    flex-direction: column;
+    margin-top: 0px;
+    height: 38.75%;
+    width: 45%;
+    /*margin-bottom: 10px;*/
+    /*border: 1px solid black;*/
+    z-index: 20;
+    /*try to stay above canvas*/
+}
+
+#DataContainer {
+    column-gap: 8px;
+    row-gap: 8px;
+    display: flex;
+    flex-direction: row;
+    margin-top: 0px;
+    height: 58.5%;
+    width: 45%;
+    margin-bottom: 10px;
+
+    background-color: #e3e3e3;
+}
+
+#DataUtil {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0px;
+    height: 100%;
+    width: 70%;
+    margin-bottom: 0px;
+    /*border: 1px solid black;*/
+}
+
+
+#DataTools {
+    display: flex;
+    flex-direction: row;
+    height: calc(100% - 49px);
+    /*49 px comes from height of card header*/
+    width: 100%;
+}
+
+#DataToolsLeft {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 50%;
+}
+
+#DataToolsRight {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 50%;
+}
+
+#DataOnly {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0px;
+    height: 100%;
+    width: 30%;
+    margin-bottom: 0px;
+    /*border: 1px solid black;*/
+}
+
+#DataViewButtons {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+#Buttons11, Buttons12 {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+#DataTable {
+    margin-top: 0px;
+    margin-right: 10px;
+    margin-left: 10px;
+    height: 97.5%;
+    overflow: scroll;
+
+}
+
+#BoundingBoxTable {
+    margin-top: 0px;
+    margin-right: 10px;
+    margin-left: 10px;
+    height: 99.5%;
+    overflow: scroll;
+}
+
+#BoundingBoxTableTable {
+    width: 100%;
+    height: 100%;
+    overflow: scroll;
+    /*padding-right: 17px; !* Increase/decrease this value for cross-browser compatibility *!*/
+    /*box-sizing: content-box; !* So the width will be 100% + 17px *!*/
+}
+
+
+#left-side-container {
+    max-height: 500px;
+}
+
+
+table {
+    border: none;
+    border-collapse: collapse;
+}
+
+table td {
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;
+}
+
+table td:first-child {
+    border-left: 1px solid #000;
+}
+
+.dropdown-content {
+    overflow-y: auto;
+    max-height: 300%;
+}
+
+
+.fixed_header {
+    width: 100%;
+    border-collapse: collapse;
+
+}
+
+
+.fixed_header thead tr {
+    display: block;
+}
+
+.fixed_header thead {
+    background: black;
+    color: #fff;
+}
+
+.fixed_header th, .fixed_header td {
+    padding: 5px;
+    width: 2000px;
+    text-align: center;
+}
+
+thead.fixedHeader tr {
+    position: relative;
+}
+
+html > body thead.fixedHeader {
+    display: table;
+    overflow: auto;
+    width: 100%
+}
+
+thead.fixedHeader th {
+
+       background: #FFF;
+    border-left: 1px solid #000;
+    border-right: 1px solid #000;
+    border-top: 1px solid #000;
+    border-bottom: 1px solid #000;
+    font-weight: normal;
+    padding: 4px 3px;
+    text-align: left;
+    width: 1%;
+}
+
+
+table.highlight tbody tr:hover {
+    background-color: #eee !important;
+}
+
+.fixed_header tbody {
+    display: block;
+    width: 100%;
+    overflow: auto;
+}
+
+html > body tbody.scrollContent {
+    display: block;
+    height: 262px;
+    overflow: auto;
+    width: 100%
+}
+
+tbody.scrollContent td, tbody.scrollContent tr.normalRow td {
+    background: #FFF;
+    border-bottom: 1px solid #000;
+    border-left: 1px solid #000;
+    border-right: 1px solid #000;
+    border-top: 1px solid #000;
+    padding: 2px 3px 3px 4px;
+    width: 1%;
+}
+
+tbody.scrollContent tr.alternateRow td {
+    background: #EEE;
+    border-bottom: none;
+    border-left: none;
+    border-right: 1px solid #CCC;
+    border-top: 1px solid #DDD;
+    width: 100%;
+    padding: 2px 3px 3px 4px
+}
+
+
+.png-over {
+    position: absolute;
+}
+
+
+.mySlides {
+    display: none;
+
+}
+
+/* Add a pointer when hovering over the thumbnail images */
+.cursor {
+    cursor: pointer;
+}
+
+/* Next & previous buttons */
+.prev,
+.next {
+    cursor: pointer;
+    position: absolute;
+    top: 40%;
+    width: auto;
+    padding: 16px;
+    margin-top: -50px;
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+    border-radius: 0 3px 3px 0;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+
+/* Position the "next button" to the right */
+.next {
+    right: 0;
+    border-radius: 3px 0 0 3px;
+}
+
+/* On hover, add a black background color with a little bit see-through */
+.prev:hover,
+.next:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Number text (1/3 etc) */
+.numbertext {
+    color: #f2f2f2;
+    font-size: 12px;
+    padding: 8px 12px;
+    position: absolute;
+    top: 0;
+}
+
+/* Container for image text */
+.caption-container {
+    text-align: center;
+    background-color: #222;
+    padding: 2px 16px;
+    color: white;
+}
+
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+
+.sidebar-title {
+    background: #ddd;
+    color: black;
+    padding: 2px;
+}
+
+.sidebar {
+    position: absolute;
+    padding: 0px 0px;
+    margin: 0;
+    background: white;
+    width: 250px;
+    display: none;
+    font-size: 13px;
+    overflow: auto;
+}
+
+#acquireDataSidebar {
+    max-height: 430px;
+}
+
+.sidebar p {
+    padding: 1px 0px 1px 1px;
+    margin: 2px 1px 2px 1px;
+    font-size: 13px;
+}
+
+
+/* Six columns side by side */
+.column {
+    float: left;
+    width: 16.66%;
+}
+
+/* Add a transparency effect for thumnbail images */
+.demo {
+    opacity: 0.6;
+}
+
+.active,
+.demo:hover {
+    opacity: 1;
+}
+
+
+.modal-overlay {
+    display: none !important;
+}
+
+#model-loading {
+    width: 500px;
+    position: absolute;
+    top: 20px;
+    display: none;
+}
+
+.container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+
+.scroll {
+    overflow: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Zebra striping */
+tr:nth-of-type(odd) {
+    background: #eee;
+}
+
+
+
+
+.infoBoxSVG {
+    background-size: 20px 30px;
+    z-index: 2000;
+}
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0, 0, 0); /* Fallback color */
+    background-color: rgba(0, 0, 0, 0.9); /* Black w/ opacity */
+}
+
+
+.draggable {
+    cursor: pointer;
+}
+
+/* Modal Content (image) */
+.modal-content {
+    z-index: 100;
+    /*make it appear above the rest*/
+    margin: auto;
+    display: block;
+}
+
+
+/* Caption of Modal Image */
+#caption {
+    /*margin: auto;*/
+    /*display: block;*/
+    /*width: 80%;*/
+    /*max-width: 700px;*/
+    /*text-align: center;*/
+    /*color: #ccc;*/
+    /*padding: 10px 0;*/
+    /*height: 150px;*/
+}
+
+/* Add Animation */
+.modal-content, #caption {
+    -webkit-animation-name: zoom;
+    -webkit-animation-duration: 0.6s;
+    animation-name: zoom;
+    animation-duration: 0.6s;
+}
+
+
+.zoomLayers {
+    display: none;
+}
+
+
+@-webkit-keyframes zoom {
+    from {
+        -webkit-transform: scale(0)
+    }
+    to {
+        -webkit-transform: scale(1)
+    }
+}
+
+@keyframes zoom {
+    from {
+        transform: scale(0)
+    }
+    to {
+        transform: scale(1)
+    }
+}
+
+/* The Close Button */
+.close {
+    position: absolute;
+    top: 15px;
+    right: 35px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.close:hover,
+.close:focus {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+
+td{
+    padding: 6px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
+
+
+th {
+    padding: 6px;
+    border: 1px solid #000000;
+    text-align: center;
+    align-content: center;
+    background: white;
+    position: sticky;
+    top: 0; /* Don't forget this, required for the stickiness */
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.4);
+}
+
+th.des:after {
+    content: "\21E9";
+}
+
+th.aes:after {
+    content: "\21E7";
+}
+
+
+/*This is for log plot wilkinson_table*/
+.line {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+}
+
+.axis--x text {
+    font: 10px "Segoe UI";
+}
+
+.axis--y text {
+    font: 10px "Segoe UI";
+}
+
+
+* {
+    box-sizing: border-box
+}
+
+/* Slideshow container */
+.slideshow-container {
+    max-width: 1000px;
+    position: relative;
+    margin: auto;
+}
+
+/* Hide the images by default */
+.slideshow-container .mySlides {
+    display: none;
+}
+
+.slideshow-container .mySlidesAdv {
+    display: none;
+}
+
+/* Next & previous buttons */
+.slideshow-container .prev, .slideshow-container .next {
+    cursor: pointer;
+    position: absolute;
+    top: 50%;
+    width: auto;
+    margin-top: -22px;
+    padding: 16px;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    transition: 0.6s ease;
+    border-radius: 0 3px 3px 0;
+    user-select: none;
+}
+
+/* Position the "next button" to the right */
+.next {
+    right: 0;
+    border-radius: 3px 0 0 3px;
+}
+
+/* On hover, add a black background color with a little bit see-through */
+.prev:hover, .next:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Caption text */
+.text {
+    color: #f2f2f2;
+    font-size: 15px;
+    padding: 8px 12px;
+    position: absolute;
+    bottom: 8px;
+    width: 100%;
+    text-align: center;
+}
+
+/* Number text (1/3 etc) */
+.numbertext {
+    color: #f2f2f2;
+    font-size: 12px;
+    padding: 8px 12px;
+    position: absolute;
+    top: 0;
+}
+
+/* The dots/bullets/indicators */
+.dot {
+    cursor: pointer;
+    height: 15px;
+    width: 15px;
+    margin: 0 2px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    transition: background-color 0.6s ease;
+}
+
+.infoBoxColumn {
+    position: absolute;
+    background-color: white;
+    height: 1200px;
+    width: 700px;
+    left: 1100px;
+}
+
+#originalDesign {
+    max-width: 315px;
+    background-color: white;
+}
+
+#alternateDesign {
+    max-width: 315px;
+    background-color: white;
+}
+
+
+/* Fading animation */
+.fade {
+    -webkit-animation-name: fade;
+    -webkit-animation-duration: 1.5s;
+    animation-name: fade;
+    animation-duration: 1.5s;
+}
+
+@-webkit-keyframes fade {
+    from {
+        opacity: .4
+    }
+    to {
+        opacity: 1
+    }
+}
+
+@keyframes fade {
+    from {
+        opacity: .4
+    }
+    to {
+        opacity: 1
+    }
+}
+
+
+.sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 10;
+    top: 0;
+    left: 20px;
+    background-color: #373737;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 160px;
+    margin-left: 0%
+}
+
+.sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+}
+
+.sidenav a:hover {
+    color: #f1f1f1;
+}
+
+.sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+}
+
+
+.grey-text.text-darken-1 {
+    color: #757575 !important
+}
+
+.grey.darken-2 {
+    background-color: #616161 !important
+}
+
+.grey-text.text-darken-2 {
+    color: #616161 !important
+}
+
+.grey.darken-3 {
+    background-color: #424242 !important
+}
+
+.grey-text.text-darken-3 {
+    color: #424242 !important
+}
+
+.grey.darken-4 {
+    background-color: #212121 !important
+}
+
+.grey-text.text-darken-4 {
+    color: #212121 !important
+}
+
+.black {
+    background-color: #e3e3e3 !important
+}
+
+
+#mySidenav {
+    margin-right: 2%;
+    background-color: #343434;
+
+
+}
+
+.black-text {
+    color: #000 !important
+}
+
+.white {
+    background-color: #fff !important
+}
+
+.white-text {
+    color: #fff !important
+}
+
+.transparent {
+    background-color: rgba(0, 0, 0, 0) !important
+}
+
+.transparent-text {
+    color: rgba(0, 0, 0, 0) !important
+}
+
+/*! normalize.css v7.0.0 | MIT License | github.com/necolas/normalize.css */
+html {
+    line-height: 1.15;
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%
+}
+
+body {
+    margin: 0
+}
+
+#AdvView {
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+
+#StdView {
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+
+article, aside, footer, header, nav, section {
+    display: block
+}
+
+tr {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12)
+}
+
+td, th {
+    padding: 15px 5px;
+    display: table-cell;
+    text-align: left;
+    vertical-align: middle;
+    border-radius: 2px
+}
+
+
+.right-align {
+    text-align: right
+}
+
+.center, .center-align {
+    text-align: center
+}
+
+.left {
+    float: left !important
+}
+
+.right {
+    float: right !important
+}
+
+.no-select, input[type=range], input[type=range] + .thumb {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none
+}
+
+.circle {
+    border-radius: 50%
+}
+
+.center-block {
+    display: block;
+    margin-left: auto;
+    margin-right: auto
+}
+
+.truncate {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis
+}
+
+.no-padding {
+    padding: 0 !important
+}
+
+span.badge {
+    min-width: 3rem;
+    padding: 0 6px;
+    margin-left: 14px;
+    text-align: center;
+    font-size: 1rem;
+    line-height: 22px;
+    height: 22px;
+    color: #757575;
+    float: right;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box
+}
+
+span.badge.new {
+    font-weight: 300;
+    font-size: 0.8rem;
+    color: #fff;
+    background-color: #26a69a;
+    border-radius: 2px
+}
+
+span.badge.new:after {
+    content: " new"
+}
+
+span.badge[data-badge-caption]::after {
+    content: " " attr(data-badge-caption)
+}
+
+nav ul a span.badge {
+    display: inline-block;
+    float: none;
+    margin-left: 4px;
+    line-height: 22px;
+    height: 22px;
+}
+
+.collection-item span.badge {
+    margin-top: calc(.75rem - 11px)
+}
+
+.collapsible span.badge {
+    margin-left: auto
+}
+
+.sidenav span.badge {
+    margin-top: calc(24px - 11px)
+}
+
+table span.badge {
+    display: inline-block;
+    float: none;
+    margin-left: auto
+}
+
+.material-icons {
+    text-rendering: optimizeLegibility;
+    -webkit-font-feature-settings: 'liga';
+    -moz-font-feature-settings: 'liga';
+    font-feature-settings: 'liga'
+}
+
+.container {
+    margin: 0 auto;
+    max-width: 1280px;
+    width: 90%
+}
+
+
+.row .col.push-l9 {
+    left: 75%
+}
+
+.row .col.offset-l10 {
+    margin-left: 83.3333333333%
+}
+
+.row .col.pull-l10 {
+    right: 83.3333333333%
+}
+
+.row .col.push-l10 {
+    left: 83.3333333333%
+}
+
+.row .col.offset-l11 {
+    margin-left: 91.6666666667%
+}
+
+.row .col.pull-l11 {
+    right: 91.6666666667%
+}
+
+.row .col.push-l11 {
+    left: 91.6666666667%
+}
+
+.row .col.offset-l12 {
+    margin-left: 100%
+}
+
+.row .col.pull-l12 {
+    right: 100%
+}
+
+.row .col.push-l12 {
+    left: 100%
+}
+
+
+nav {
+    /*margin-left: 20px;*/
+    color: #fff;
+    width: 100%;
+    height: 39px;
+    line-height: 39px
+}
+
+nav.nav-extended {
+    height: auto
+}
+
+nav.nav-extended .nav-wrapper {
+    min-height: 39px;
+    height: auto
+}
+
+nav.nav-extended .nav-content {
+    position: relative;
+    line-height: normal
+}
+
+nav a {
+    color: #fff
+}
+
+nav i, nav [class^="mdi-"], nav [class*="mdi-"], nav i.material-icons {
+    display: block;
+    font-size: 24px;
+    height: 39px;
+    line-height: 56px
+}
+
+nav .nav-wrapper {
+    position: relative;
+    height: 100%
+}
+
+
+nav .sidenav-trigger {
+    float: left;
+    position: relative;
+    z-index: 1;
+    height: 56px;
+    margin: 0 18px
+}
+
+nav .sidenav-trigger i {
+    height: 56px;
+    line-height: 56px
+}
+
+nav .brand-logo {
+    position: absolute;
+    color: #000000;
+    display: inline-block;
+    font-size: 1.35rem;
+    padding: 0
+}
+
+nav .brand-logo.center {
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    transform: translateX(-50%)
+}
+
+
+nav .brand-logo.right {
+    right: 0.5rem;
+    padding: 0
+}
+
+nav .brand-logo i, nav .brand-logo [class^="mdi-"], nav .brand-logo [class*="mdi-"], nav .brand-logo i.material-icons {
+    float: left;
+    margin-right: 15px
+}
+
+nav .nav-title {
+    display: inline-block;
+    font-size: 32px;
+    padding: 28px 0
+}
+
+nav ul {
+    margin: 0
+}
+
+nav ul li {
+    -webkit-transition: background-color .3s;
+    transition: background-color .3s;
+    float: left;
+    padding: 0
+}
+
+nav ul li.active {
+    background-color: rgba(0, 0, 0, 0.1)
+}
+
+nav ul a {
+    -webkit-transition: background-color .3s;
+    transition: background-color .3s;
+    font-size: 1rem;
+    color: #fff;
+    display: block;
+    padding: 0 15px;
+    cursor: pointer
+}
+
+nav ul a.btn, nav ul a.btn-large, nav ul a.btn-small, nav ul a.btn-large, nav ul a.btn-flat, nav ul a.btn-floating {
+    margin-top: -2px;
+    margin-left: 15px;
+    margin-right: 15px
+}
+
+nav ul a.btn > .material-icons, nav ul a.btn-large > .material-icons, nav ul a.btn-small > .material-icons, nav ul a.btn-large > .material-icons, nav ul a.btn-flat > .material-icons, nav ul a.btn-floating > .material-icons {
+    height: inherit;
+    line-height: inherit
+}
+
+nav ul a:hover {
+    background-color: rgba(0, 0, 0, 0.1)
+}
+
+nav ul.left {
+    float: left
+}
+
+nav form {
+    height: 100%
+}
+
+nav .input-field {
+    margin: 0;
+    height: 100%
+}
+
+nav .input-field input {
+    height: 100%;
+    font-size: 1.2rem;
+    border: none;
+    padding-left: 2rem
+}
+
+nav .input-field input:focus, nav .input-field input[type=text]:valid, nav .input-field input[type=password]:valid, nav .input-field input[type=email]:valid, nav .input-field input[type=url]:valid, nav .input-field input[type=date]:valid {
+    border: none;
+    -webkit-box-shadow: none;
+    box-shadow: none
+}
+
+nav .input-field label {
+    top: 0;
+    left: 0
+}
+
+nav .input-field label i {
+    color: rgba(255, 255, 255, 0.7);
+    -webkit-transition: color .3s;
+    transition: color .3s
+}
+
+nav .input-field label.active i {
+    color: #fff
+}
+
+.navbar-fixed {
+    position: relative;
+    height: 56px;
+    z-index: 997
+}
+
+.navbar-fixed nav {
+    position: fixed
+}
+
+
+.sideNavImage {
+    max-width: 900px;
+    max-height: 900px;
+    align-content: center;
+}
+
+
+a {
+    text-decoration: none
+}
+
+html {
+    line-height: 1.5;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    font-weight: normal;
+    color: rgba(0, 0, 0, 0.87)
+}
+
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 400;
+    line-height: 1.3
+}
+
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+    font-weight: inherit
+}
+
+h1 {
+    font-size: 4.2rem;
+    line-height: 110%;
+    margin: 2.8rem 0 1.68rem 0
+}
+
+h2 {
+    font-size: 3.56rem;
+    line-height: 110%;
+    margin: 2.3733333333rem 0 1.424rem 0
+}
+
+h3 {
+    font-size: 2.92rem;
+    line-height: 110%;
+    margin: 1.9466666667rem 0 1.168rem 0
+}
+
+h4 {
+    font-size: 2.28rem;
+    line-height: 110%;
+    margin: 1.52rem 0 .912rem 0
+}
+
+h5 {
+    font-size: 1.64rem;
+    line-height: 110%;
+    margin: 1.0933333333rem 0 .656rem 0
+}
+
+h6 {
+    font-size: 1.15rem;
+    line-height: 110%;
+    margin: .7666666667rem 0 .46rem 0
+}
+
+em {
+    font-style: italic
+}
+
+strong {
+    font-weight: 500
+}
+
+small {
+    font-size: 75%
+}
+
+.light {
+    font-weight: 300
+}
+
+.thin {
+    font-weight: 200
+}

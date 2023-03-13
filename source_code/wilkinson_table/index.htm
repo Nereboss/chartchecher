@@ -1,0 +1,640 @@
+<html>
+
+<head>
+  <meta content='text/html; charset=windows-1252' http-equiv='Content-Type'>
+  <meta content='Microsoft Word 15 (filtered)' name='Generator'>
+
+
+</head>
+
+<body lang='EN-US'>
+
+
+<style>
+    <!--
+    /* Font Definitions */
+    @font-face {
+        font-family: "Cambria Math";
+        panose-1: 2 4 5 3 5 4 6 3 2 4;
+    }
+
+    @font-face {
+        font-family: Calibri;
+        panose-1: 2 15 5 2 2 2 4 3 2 4;
+    }
+
+    @font-face {
+        font-family: "Segoe UI Semibold";
+        panose-1: 2 11 7 2 4 2 4 2 2 3;
+    }
+
+    /* Style Definitions */
+    p.MsoNormal, li.MsoNormal, div.MsoNormal {
+        margin-top: 0in;
+        margin-right: 0in;
+        margin-bottom: 8.0pt;
+        margin-left: 0in;
+        line-height: 107%;
+        font-size: 11.0pt;
+        font-family: "Calibri", sans-serif;
+    }
+
+    .MsoChpDefault {
+        font-family: "Calibri", sans-serif;
+    }
+
+    .MsoPapDefault {
+        margin-bottom: 8.0pt;
+        line-height: 107%;
+    }
+
+    @page WordSection1 {
+        size: 8.5in 11.0in;
+        margin: 1.0in 1.0in 1.0in 1.0in;
+    }
+
+    div.WordSection1 {
+        page: WordSection1;
+    }
+
+    -->
+</style>
+<div class='WordSection1'>
+  <h3 style='font-family: "Segoe UI Semibold"; align-text: center; align-items: center'>
+    Step Sizes and Tick Mark Design
+  </h3>
+  <p style='font-family: "Segoe UI"; align-text: center; max-width: 600px'>
+    Choosing the right increment and tick marks for a chart is also a critical design factor.
+    Some step sizes make it easy for a user to read and are easy for mental math calculations, while others can pose a
+    problem to readibility.
+
+    <img alt='Checkmark' height='22'
+         src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'> means a good increment.
+
+    <img height='22' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg=='
+         width='22'> may be a suboptimal or problematic increment.
+  </p>
+
+
+  <table border='1' cellpadding='0' cellspacing='0' class='MsoTableGrid'
+         style='border-collapse:collapse;border:none'>
+    <tr style='height:35.5pt'>
+      <td colspan='2' rowspan='2' style='width:122.45pt;
+  border:solid windowtext 1.0pt;padding:0in 5.4pt 0in 5.4pt;height:35.5pt' valign='top' width='163'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><span style='font-family:"Segoe UI Semibold",sans-serif'>&nbsp;</span></p>
+      </td>
+      <td colspan='9' style='width:345.05pt;border:solid windowtext 1.0pt;
+  border-left:none;padding:0in 5.4pt 0in 5.4pt;height:35.5pt' valign='top' width='460'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><span style='font-family:"Segoe UI Semibold",sans-serif'>Step
+  Size</span></p>
+      </td>
+    </tr>
+    <tr style='height:17.5pt'>
+      <td style='width:38.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:17.5pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><span style='font-family:"Segoe UI Semibold",sans-serif'>1</span></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:17.5pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><span style='font-family:"Segoe UI Semibold",sans-serif'>2</span></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:17.5pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><span style='font-family:"Segoe UI Semibold",sans-serif'>3</span></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:17.5pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><span style='font-family:"Segoe UI Semibold",sans-serif'>4</span></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:17.5pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><span style='font-family:"Segoe UI Semibold",sans-serif'>5</span></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:17.5pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><span style='font-family:"Segoe UI Semibold",sans-serif'>6</span></p>
+      </td>
+      <td style='width:38.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:17.5pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><span style='font-family:"Segoe UI Semibold",sans-serif'>7</span></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:17.5pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><span style='font-family:"Segoe UI Semibold",sans-serif'>8</span></p>
+      </td>
+      <td style='width:37.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:17.5pt' valign='top' width='50'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><span style='font-family:"Segoe UI Semibold",sans-serif'>9</span></p>
+      </td>
+    </tr>
+    <tr>
+      <td rowspan='6' style='width:61.5pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt' valign='top' width='82'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><span style='font-family:"Segoe UI Semibold",sans-serif'>&nbsp;</span></p>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><span style='font-family:"Segoe UI Semibold",sans-serif'>&nbsp;</span></p>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><span style='font-family:"Segoe UI Semibold",sans-serif'>Base
+  Increment</span></p>
+      </td>
+      <td style='width:60.95pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='81'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><span style='font-family:"Segoe UI Semibold",sans-serif'>1</span></p>
+      </td>
+      <td style='width:38.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'>
+          <img alt='Checkmark' height='22' id='Graphic 1'
+               src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'>
+        </p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Checkmark' height='22' id='Graphic 4'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 62'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Checkmark' height='22' id='Graphic 10'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Checkmark' height='22' id='Graphic 13'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 61'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 36'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 37'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:37.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='50'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 35'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+    </tr>
+    <tr>
+      <td style='width:60.95pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='81'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><span style='font-family:"Segoe UI Semibold",sans-serif'>5</span></p>
+      </td>
+      <td style='width:38.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Checkmark' height='22' id='Graphic 2'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Checkmark' height='22' id='Graphic 5'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Checkmark' height='22' id='Graphic 8'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Checkmark' height='22' id='Graphic 11'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Checkmark' height='22' id='Graphic 14'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Checkmark' height='22' id='Graphic 17'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'></p>
+      </td>
+      <td style='width:38.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 38'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Checkmark' height='22' id='Graphic 60'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'></p>
+      </td>
+      <td style='width:37.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='50'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 34'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+    </tr>
+    <tr>
+      <td style='width:60.95pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='81'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><span style='font-family:"Segoe UI Semibold",sans-serif'>2</span></p>
+      </td>
+      <td style='width:38.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Checkmark' height='22' id='Graphic 3'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Checkmark' height='22' id='Graphic 6'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 64'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 65'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Checkmark' height='22' id='Graphic 15'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 66'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 40'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 41'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:37.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='50'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 33'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+    </tr>
+    <tr>
+      <td style='width:60.95pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='81'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><span style='font-family:"Segoe UI Semibold",sans-serif'>2.5</span></p>
+      </td>
+      <td style='width:38.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Checkmark' height='22' id='Graphic 19'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Checkmark' height='22' id='Graphic 20'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 42'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Checkmark' height='22' id='Graphic 57'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 44'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Checkmark' height='22' id='Graphic 58'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'></p>
+      </td>
+      <td style='width:38.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 46'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Checkmark' height='22' id='Graphic 59'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'></p>
+      </td>
+      <td style='width:37.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='50'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 32'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+    </tr>
+    <tr>
+      <td style='width:60.95pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='81'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><span style='font-family:"Segoe UI Semibold",sans-serif'>4</span></p>
+      </td>
+      <td style='width:38.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 23'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 24'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 25'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 26'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Checkmark' height='22' id='Graphic 67'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 28'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 29'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 30'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:37.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='50'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 31'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+    </tr>
+    <tr>
+      <td style='width:60.95pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='81'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><span style='font-family:"Segoe UI Semibold",sans-serif'>3</span></p>
+      </td>
+      <td style='width:38.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 48'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 49'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 50'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 51'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Checkmark' height='22' id='Graphic 63'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 53'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.45pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 54'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:38.55pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='51'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 55'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+      <td style='width:37.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt' valign='top' width='50'>
+        <p align='center' class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><img alt='Forbidden' height='26' id='Graphic 56'
+                                             src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg==' width='26'></p>
+      </td>
+    </tr>
+  </table>
+
+
+  <p align='center' style='text-align:left; max-width: 600px;font-family: "Segoe UI"'>&nbsp;
+
+    <img alt='Checkmark' height='22'
+         src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAADGSURBVEjHY2hsbGSgBWYY2QYzrAtUoLrBQEMNGDYEvGfYGNBPNYOBhjqADd0Q8B+M1wUmUN9QoIsZVoUKUGpoArqhFIcx0NACXIbCDYZ6Zz/ICyQY+h+O1wc0YKiBxyZE0XlChmMYCuRjVQcOaJCBCMXncRoKdBmSuvegMMabQYgxHCg2n1hDUSIPi+H7kcTRDQ0gKUtjMxyI15NqKNbkBsrvKMmIDENxpmMshoMMdaBK6YZk+H3kUosqxSY4jZNh6GgNgoIBuybuP3ffra0AAAAASUVORK5CYII=' width='22'> Some examples of good increments and tick marks:
+    <br>
+    1,
+    2, 2.5,
+    5,
+    10,
+    15,
+    20,
+    25,
+    30,
+    40,
+    50,
+    60,
+    70,
+    75,
+    80,
+    90,
+    100,
+    125,
+    250,
+    500,
+    1000
+
+<br>
+    <img height='22' src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0ICQMB9xQAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUATWljcm9zb2Z0IE9mZmljZX/tNXEAAAD+SURBVEjHzZbBEcIgEEW3BEuwBEqghJRgCZYQKrAES0gBHsAKKIESKAGBoAMKSLJEc/gzOWR42c/P7gJjDH4h2B3I3OBgOBytiBV1z11B/uA7XIwAbWUyurZAv0HOFUAqDuNikLdIwNQESCVL1eVBAvgKyFOqCRTsMijZM6qgYJlGg2YYKYNcgnpAZk01kOoI0llQsO31EkJZ+9Ifs3KZzR2Ewyk6h+ZAdAPQ8AlyvSy1TiFUti6EQfcMg/v4P8c7TR6umigIpRY0okF2rLQ2VYkAyfhuWsaE3HxMrLBR+66fqWTZKC+nUfvZ9dap0VtQWEyGsJyQWgX7X7ewegBj7XKdCw+VaQAAAABJRU5ErkJggg=='
+         width='22'> Some examples of problematic increments and tick marks:<br>
+    prime numbers,
+    8,
+    12,
+    21,
+    33,
+    63,
+    91
+
+
+
+  </p>
+
+
+  </p>
+
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,29 @@
+{
+  "name": "Line Chart Analyzer",
+  "description": "Deceptive Vis Project",
+  "version": "2.1.1",
+  "minimum_chrome_version": "31",
+  "manifest_version": 2,
+  "permissions": [
+    "activeTab",
+    "downloads",
+    "*://*/*",
+    "storage",
+    "contextMenus"
+  ],
+  "browser_action": {
+    "default_icon": "/images/ico.png",
+    "default_popup": "/views/popup.html"
+  },
+  "web_accessible_resources": [
+    "/images/open.png",
+    "/images/download.png"
+  ],
+  "background": {
+    "page": "/src/rightclicker.html"
+  },
+
+  "content_security_policy": "script-src  'self' https://cdn.jsdelivr.net/gh/naptha/tesseract.js-core@0.1.0/index.js 'unsafe-eval'   ; object-src 'self'; "
+}
+
+
