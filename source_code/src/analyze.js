@@ -602,7 +602,7 @@ function extractDataToTable() {
     var processedData = [];
     for (var i = 0; i < rawData.length; i++) {
       var o = {};
-      var splitter = rawData[i].split(', ');
+      var splitter = rawData[i].split('; ');
       o.x = splitter[0];
       o.y = splitter[1];
       processedData.push(o);
