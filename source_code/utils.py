@@ -283,10 +283,10 @@ def summarize_axes(filename, full=False):
     x_increment = parse_num(x_labels[1]) - parse_num(x_labels[0])
     y_increment = parse_num(y_labels[1]) - parse_num(y_labels[0])
 
-    # print("Summary: The x-axis is bounded by ", x_range,
-    #       "\nThe y-axis is bounded by", y_range,
-    #       "\nThe x-axis increments by", x_increment,
-    #       "\nThe y-axis increments by", y_increment)
+    print("Summary: The x-axis is bounded by ", x_range,
+          "\nThe y-axis is bounded by", y_range,
+          "\nThe x-axis increments by", x_increment,
+          "\nThe y-axis increments by", y_increment)
     if full == False:
         return x_range, y_range, x_increment, y_increment
     else:

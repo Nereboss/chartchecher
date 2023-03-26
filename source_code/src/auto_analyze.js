@@ -54,11 +54,11 @@ chrome.storage.sync.get(['key'], function (result) {
 
     const endpoint = 'http://localhost:'
         + portNumber.toString()
-        + '/api/analyzeauto';
+        + '/api/analyzeauto';               //refers to the AnalyzeAuto class in app.py
 
     fetch(endpoint,
         {
-            method: 'POST',
+            method: 'POST',                 //calls the post method
             headers:
                 {
                     'Access-Control-Allow-Origin': '*',
