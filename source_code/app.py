@@ -45,6 +45,8 @@ class AnalyzeAuto(Resource):
             coords = []
             messages = []
 
+            detect_changed_y_max(fn_d, fn_b)    # only writes a comment for now
+
             # Detect inverted axis and add the result
             x, y, m = detect_inverted_axis(fn_b)
             if (x != None):

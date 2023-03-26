@@ -45,6 +45,31 @@ def detect_inverted_axis(f):
     else:
         return None, None, None
 
+def detect_changed_y_max(chart_data, box_data):
+    """
+    Function takes in chart and bounding box data and
+    identifies if the Y-axis maximum is at a reasonable value for the chart
+    return: TODO, currently only prints result in console
+    """
+    x_range_list, y_range_list, x_increment, y_increment = summarize_axes(box_data)
+    y_min = float(y_range_list[0])     #y min and max are in str format, - not supported; how do other functions get results from summarize axes?
+    y_max = float(y_range_list[1])
+    y_range = y_max - y_min
+    graph_data = pd.read_csv(chart_data)
+    graph_y_data = graph_data['y'].to_numpy()
+    graph_max = graph_y_data.max()
+    graph_min = graph_y_data.min()
+    inverted = False if y_min < y_max else True
+    if inverted:
+        used_range = graph_min - y_max
+    else:
+        used_range = graph_max - y_min
+    used_range_factor = abs(used_range / y_range)
+    if used_range_factor < 0.67:
+        print("\n", f"The y-axis maximum is not well adjusted for the chart with {(1-round(used_range_factor, 4))*100}% of the space wasted!", "\n")
+
+    
+
 
 def comment_aspect_ratio(d, f):
     """
@@ -372,8 +397,8 @@ def bank_slopes_ms(x, y, cull=False, scale_x=1, scale_y=1):
 
 
 def ms_helper(s, dx, dy, Rx, Ry, cull=False):
-    print(s)
-    print("s for slopes? in line 435")
-    print("note to calculate angles")
+    # print(s)
+    # print("s for slopes? in line 435")
+    # print("note to calculate angles")
     ret = np.median(abs(s)) * Rx / Ry
     return abs(ret)
