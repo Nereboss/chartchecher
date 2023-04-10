@@ -52,7 +52,7 @@ chrome.storage.sync.get(['key'], function (result) {
     const base_filename = filename.split('.')[0]; //chart
 
 
-    const endpoint = 'http://localhost:'
+    const endpoint = 'http://localhost:'        //endpoint is the AnalyzeAuto class in app.py
         + portNumber.toString()
         + '/api/analyzeauto';
 
@@ -79,7 +79,7 @@ chrome.storage.sync.get(['key'], function (result) {
                 return response.json();
             throw new Error('Network response was not ok.');
         })
-        .then(function (arr) {
+        .then(function (arr) {          //arr gets returned as a json object containing messages, coords, xRange, yRange, aspectRatio, data
             {
                 console.log(arr, 'arr from complete analysis');
                 const local_xr = arr.xRange;
