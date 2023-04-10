@@ -127,7 +127,7 @@ class CompleteAnalysis(Resource):
             fn_d = 'CompleteAnalysis_data.csv'
             df_d = pd.read_json(data)
             df_d.drop(df_d.tail(1).index, inplace=True)  # drop last one
-            df_d.to_csv(fn_d, index=False)
+            df_d.to_csv(fn_d, index=False)                  # creates the csv data which seems to be in the wrong data format (comma as decimal separator and numbers as strings)
 
             fn_b = 'c-pred1-texts.csv'
             df_b = pd.read_json(boxes)

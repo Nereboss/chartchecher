@@ -18,6 +18,7 @@ function contextClick(info, tab){
   imageSearch(menus[info.menuItemId], query);
 }
 
+//opens the new window for analysis (either automatic or manual)
 function imageSearch(service, query){
   var myServices = localStorage.services.split(',');
       if (service == 'auto') {
@@ -53,6 +54,7 @@ function openService(service,query){
   chrome.tabs.create({url: url, selected: false});
 }
 
+// Creates the rightclick menu for the extension (including sub menus)
 function create_submenu() {
   // create main menu item
   var rootmenu = chrome.contextMenus.create({
