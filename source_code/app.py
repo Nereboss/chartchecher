@@ -45,7 +45,11 @@ class AnalyzeAuto(Resource):
             coords = []
             messages = []
 
+            # Detect if the Y-Axis maximum was artificially change or isn't optimal
             detect_changed_y_max(fn_d, fn_b)    # only writes a comment for now
+
+            # Detect if there are any important labels missing
+            detect_missing_labels(fn_d, fn_b)
 
             # Detect inverted axis and add the result
             x, y, m = detect_inverted_axis(fn_b)

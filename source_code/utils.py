@@ -68,7 +68,26 @@ def detect_changed_y_max(chart_data, box_data):
     if used_range_factor < 0.67:
         print("\n", f"The y-axis maximum is not well adjusted for the chart with {(1-round(used_range_factor, 4))*100}% of the space wasted!", "\n")
 
+def detect_missing_labels(chart_data, box_data):
+    """
+    Function takes in bounding box data and detects if there are any labels missing.
+    Missing title, x-axis-title or y-axis-title will lead to those placed being marked in the improved chart
+    while missing x-axis-labels or y-axis labels will make it so we are unable to draw a chart
+    """
+    box_data = pd.read_csv(box_data)
+    possible_types = ['title', 'x-axis-title', 'x-axis-label', 'y-axis-title', 'y-axis-label', 'legend-title', 'legend-label'] # we intentionally left out 'text-label' as that is optional
+    type_values = box_data['type'].values
+    missing = []
+    for type in possible_types:
+        if type not in type_values:
+            missing.append(type)
     
+    # TODO add missing labels to the csv-file (with -1 for all fields except text and type; that way we can know which fields were missing later)
+    # differenciate between labels that makes it unable to draw a chart (if those exist) and others 
+            
+    #print missing elements to console
+    print("\nThe chart is missing "+" and ".join([", ".join(missing[:-1]),missing[-1]] if len(missing) > 2 else missing)+". This may cause the chart to be taken out of context or make the shown data hard to validate.\n")
+
 
 
 def comment_aspect_ratio(d, f):
