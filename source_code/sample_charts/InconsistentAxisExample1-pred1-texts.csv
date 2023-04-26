@@ -1,0 +1,44 @@
+id,x,y,width,height,text,type
+0,233.0,54.0,177.0,90.0,Bottom 50% captured 14% of total growth,text-label
+1,1022.0,56.0,174.0,90.0,Top 1% captured 23% of total growth,text-label
+2,40.0,90.0,72.0,26.0,400,y-axis-label
+3,0.0,124.0,30.0,418.0,Real income growth per adult (%),y-axis-title
+4,40.0,224.0,72.0,26.0,300,y-axis-label
+5,40.0,358.0,72.0,28.0,200,y-axis-label
+6,42.0,492.0,70.0,26.0,100,y-axis-label
+7,69.0,627.0,44.0,24.0,0,y-axis-label
+8,114.0,660.0,34.0,28.0,10,x-axis-label
+9,208.0,660.0,36.0,28.0,20,x-axis-label
+10,304.0,660.0,36.0,26.0,30,x-axis-label
+11,400.0,660.0,36.0,26.0,40,x-axis-label
+12,496.0,660.0,38.0,28.0,50,x-axis-label
+13,592.0,660.0,36.0,26.0,60,x-axis-label
+14,688.0,660.0,36.0,26.0,70,x-axis-label
+15,784.0,660.0,38.0,28.0,80,x-axis-label
+16,882.0,660.0,36.0,28.0,90,x-axis-label
+17,968.0,660.0,34.0,26.0,99,x-axis-label
+18,1046.0,660.0,52.0,28.0,99.9,x-axis-label
+19,1126.0,660.0,62.0,26.0,99.99,x-axis-label
+20,1202.0,662.0,67.0,24.0,99.999,x-axis-label
+21,516.0,700.0,331.0,37.0,Income group (percentile),x-axis-title
+22,2.0,742.0,652.0,31.0,Source: WID.world (2017). See wir2018wid.world /methodology.html for data series,text-label
+23,687.0,751.0,46.0,16.0,notes_,text-label
+24,0.0,778.0,452.0,24.0,"On the horizontal axis, the world population is divided into",text-label
+25,462.0,780.0,314.0,24.0,hundred groups of equal population size,text-label
+26,807.0,781.0,72.0,18.0,sorted in,text-label
+27,877.0,775.0,365.0,29.0,"ascending order from left to right, according to",text-label
+28,0.0,800.0,990.0,24.0,"cach group's income Ievel. The Top 1% group is divided into ten groups, the richest of these groups is also divided into ten groups_",text-label
+29,994.0,798.0,240.0,27.0,and the very top group is again,text-label
+30,0.0,820.0,460.0,26.0,divided into ten groups of equal population size. The vertica,text-label
+31,466.0,818.0,792.0,28.0,axis shows the total income growth of an average individual in each group between 1980 and 2016.For,x-axis-title
+32,2.0,842.0,550.0,24.0,percentile group p99p99.1 (the poorest 10% among the world's richest,text-label
+33,558.0,842.0,122.0,24.0,%) . growth was,text-label
+34,699.0,843.0,90.0,20.0,'% between,text-label
+35,799.0,843.0,184.0,20.0,980and 2016. The Top,text-label
+36,992.0,842.0,248.0,24.0,% captured 23% of total growth,text-label
+37,1.0,869.0,38.0,13.0,over,text-label
+38,39.0,863.0,86.0,19.0,this period,text-label
+39,130.0,862.0,616.0,20.0,Income estimates account for differences in the cost of living between countries_,text-label
+40,750.0,862.0,200.0,20.0,Values are net of inflation,text-label
+41,650.7805784783006,750.4147520217908,33.83930576478542,16.170495956418335,and,text-label
+42,774.6546544120074,784.5201198532081,32.009446176668234,13.959760293583711,and,text-label

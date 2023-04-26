@@ -173,8 +173,8 @@ class CompleteAnalysis(Resource):
             ar = calculate_aspect(fn_b)
             # data
         except:
-            os.remove(fn_d)
-            os.remove(fn_b)
+            # os.remove(fn_d)
+            # os.remove(fn_b)
             raise Exception("Something went wrong. Try again."
                             "Make sure that there are bounding boxes and data.")
 
@@ -251,8 +251,8 @@ class AutofillType(Resource):
             typeX = typeX[0]
         except:
             # need to DELETE autofill pred 1 texts every time, or else we run into errors
-            os.remove(texts_filename)
-            os.remove(preds_filename)
+            # os.remove(texts_filename)
+            # os.remove(preds_filename)
             raise Exception("Something went wrong. Try again")
 
         # need to DELETE autofill pred 1 texts every time, or else we run into errors
