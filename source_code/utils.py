@@ -1,4 +1,5 @@
 import math
+import re
 
 import numpy as np
 from scipy.signal import butter, lfilter, freqz
@@ -88,6 +89,74 @@ def detect_missing_labels(chart_data, box_data):
     #print missing elements to console
     print("\nThe chart is missing "+" and ".join([", ".join(missing[:-1]),missing[-1]] if len(missing) > 2 else missing)+". This may cause the chart to be taken out of context or make the shown data hard to validate.\n")
 
+def detect_inconsistent_scales(box_data):
+    """
+    Function takes in bounding boxes and detects if one or more of the axis do not follow a linear scale
+    TODO maybe needs to be extended to be able to handle multiple axis (or create helper function that gets BBs for one axis and checks this for them that can be called on all axis)
+    """
+    box_data = pd.read_csv(box_data)
+    
+    # different_axis_frames is a list of the different dataframes of the different axis
+    different_axis_frames = []
+    for type in box_data['type'].unique():
+        if re.match('^[xy][0-9]?-axis-label$', type):       # regex represents x/y-axis-labels as a chart might have multiple of each
+            different_axis_frames.append(box_data[box_data['type'] == type])          
+
+    for different_axis_frame in different_axis_frames:
+        check_axis_consistency(different_axis_frame)
+
+def check_axis_consistency(axis_data):
+    """
+    Takes in bounding boxes from axis lables of one axis and calculates whether the axis scale and/or the placement of labels is inconsistent for the axis
+    returns consistency of scale and consistency of label placements
+    TODO: add return values
+    """
+    axis_data = axis_data.copy()        #we need to make a copy of the dataframe to avoid a SettingWithCopyWarning
+    axis_name = axis_data['type'].iloc[0]
+    axis = 'y' if 'y' in axis_name else 'x'      #we assume all elements have the same type and only check for first element if it belongs to the x or y axis
+    if axis == 'x':
+        axis_data['midpoint'] = axis_data['x'] + axis_data['width']/2
+    elif axis == 'y':
+        axis_data['midpoint'] = axis_data['y'] + axis_data['height']/2
+    else: 
+        raise Exception("Somehow the axis is either a X-axis or a Y-axis")
+    distances_to_next_label = axis_data['midpoint'].diff(periods=-1).dropna()
+
+    # printing only for now, change it later to return useful information
+    consistency_of_label_placements = calculate_conistency(distances_to_next_label, 0.05)
+    if consistency_of_label_placements:
+        print("The ticks across the "+axis_name+" are place consistently!")
+    else:
+        print("The ticks across the "+axis_name+" are place inconsistently!")
+
+    numeric_texts = None
+    try:
+        numeric_texts = axis_data['text'].astype(float)
+        value_difference_to_next_label = numeric_texts.diff(periods=-1).dropna()
+        distance_to_difference_factors = distances_to_next_label / value_difference_to_next_label
+        consistency_of_scale = calculate_conistency(distance_to_difference_factors, 0.05)
+
+        # printing only for now, change it later to return useful information
+        if consistency_of_scale:
+            print("The "+axis_name+" axis follows a linear scale!")
+        else:
+            print("The "+axis_name+" axis does not follow a linear scale!")
+    except ValueError: 
+        print('cannot check axis scaling because not all labels are numeric')
+
+    # later for the returns: we need to find a way to draw the chart in an "unwarped" way, meaning we need the distances between the labels together with middlepoint of the labels and transform the corresponding x/y values to show them in a linear way
+
+    
+def calculate_conistency(range_of_values, threshold):
+    """
+    helper function that checks whether all values in the range have similar values within the threshold
+    """
+    average_value = range_of_values.mean()
+    threshhold_min, threshhold_max = average_value * (1-threshold), average_value * (1+threshold)
+    for value in range_of_values:
+        if not abs(threshhold_min) < abs(value) < abs(threshhold_max):
+            return False
+    return True
 
 
 def comment_aspect_ratio(d, f):
