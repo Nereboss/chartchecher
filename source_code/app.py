@@ -54,6 +54,9 @@ class AnalyzeAuto(Resource):
             # Detect if any axis have inconsistencies
             detect_inconsistent_scales(fn_b)
 
+            # Detect if there are multiple axis
+            detect_multiple_axis(fn_b)
+
             # Detect inverted axis and add the result
             x, y, m = detect_inverted_axis(fn_b)
             if (x != None):

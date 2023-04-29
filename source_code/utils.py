@@ -146,8 +146,83 @@ def check_axis_consistency(axis_data):
 
     # later for the returns: we need to find a way to draw the chart in an "unwarped" way, meaning we need the distances between the labels together with middlepoint of the labels and transform the corresponding x/y values to show them in a linear way
 
+def detect_multiple_axis(box_data):
+    """
+    Function takes in bounding boxes, detects if there are multiple axis and adjusts the types in the csv file to represent these different axis
+    """
+    box_data = pd.read_csv(box_data)
+
+    split_x_axis_labels = split_axis_labels(box_data[box_data['type'].str.contains('^x.*label$')], 'x')
+    if len(split_x_axis_labels) > 1:
+        #prints for now, remove later
+        print('multiple x-axis detected!')
+        for index, x_axis_label in enumerate(split_x_axis_labels):
+            print(x_axis_label['type'].iloc[0] + ': ' + x_axis_label['text'].str.cat(sep='; '))
+    else:
+        print('only one x-axis detected!')
+    split_y_axis_labels = split_axis_labels(box_data[box_data['type'].str.contains('^y.*label$')], 'y')
+    if len(split_y_axis_labels) > 1:
+        #prints for now, remove later
+        print('multiple y-axis detected!')
+        for index, y_axis_label in enumerate(split_y_axis_labels):
+            print(y_axis_label['type'].iloc[0] + ': ' + y_axis_label['text'].str.cat(sep='; '))
+    else:
+        print('only one y-axis detected!')
+
+    #TODO we need to map the different axis titles to the closest axis so that they correspond in the csv file
+
+
+    box_data.set_index('id', inplace=True)
+
+    # update the csv files with the new axis labels (first add x labels, then y labels)
+    for index, x_axis_label in enumerate(split_x_axis_labels):
+        x_axis_label.set_index('id', inplace=True)
+        box_data.update(x_axis_label)
+    for index, y_axis_label in enumerate(split_y_axis_labels):
+        y_axis_label.set_index('id', inplace=True)
+        box_data.update(y_axis_label)
+    print(box_data)
+
+    # update the csv file, for debugging we create a new csv file for now
+    box_data.to_csv('new_box_data.csv')
+
+def split_axis_labels(axis_labels, axis, threshold=0.05):
+    """
+    Function takes in a list of axis labels and which axis it is (can either be 'x' or 'y') and returns a list of dataframes that contain the labels for the individual axis (also updates the 'type' label to represent the different axis)
+    """
+    different_axis_list = []
+    for index, current_label in axis_labels.iterrows():
+        bb_start_point = current_label['x'] if axis == 'y' else current_label['y']
+        bb_end_point = bb_start_point + current_label['width'] if axis == 'y' else bb_start_point + current_label['height']
+        bb_threshold_length = current_label['width'] * threshold if axis == 'y' else current_label['height'] * threshold
+
+        if len(different_axis_list) == 0:       #if the list is empty, we need to add the first element
+            different_axis_list.append({'max_bb_range': (bb_start_point, bb_end_point), 'dataframe': pd.DataFrame([current_label])})
+        else:                                   #after we iterate over the list to check if the current label fits into one of the existing axis or if we need to create a new one
+            for current_axis in different_axis_list:
+                current_threshold = (current_axis['max_bb_range'][1] - current_axis['max_bb_range'][0]) * threshold
+                if not (bb_end_point + bb_threshold_length < current_axis['max_bb_range'][0] - current_threshold or bb_start_point - bb_threshold_length > current_axis['max_bb_range'][1] + current_threshold):      #if the current label is not out of range from the current axis, we can add it to the current axis
+                    current_axis['max_bb_range'] = (min(bb_start_point, current_axis['max_bb_range'][0]), max(bb_end_point, current_axis['max_bb_range'][1]))   # update the range to represent the 'biggest' bounding box
+                    current_axis['dataframe'] = current_axis['dataframe'].append(current_label)
+                    break
+            else:  #if the for loop did not break the current label did not fit into any axis and we need to create a new one
+                different_axis_list.append({'max_bb_range': (bb_start_point, bb_end_point), 'dataframe': pd.DataFrame([current_label])})
+
+    # now we sort the axis by their position in the image from left to right (or top to bottom)
+    different_axis_list.sort(key=lambda x: x['max_bb_range'][0] + x['max_bb_range'][1]/2)
+
+    # now we need to update the type of the labels to represent the different axis
+    for index, current_axis in enumerate(different_axis_list):
+        if index == 0:
+            current_axis['dataframe']['type'] = axis + '-axis-label'
+        else:
+            current_axis['dataframe']['type'] = axis + str(index) + '-axis-label'
+    result = []
+    for current_axis in different_axis_list:
+        result.append(current_axis['dataframe'])
+    return result
     
-def calculate_conistency(range_of_values, threshold):
+def calculate_conistency(range_of_values, threshold=0.05):
     """
     helper function that checks whether all values in the range have similar values within the threshold
     """
