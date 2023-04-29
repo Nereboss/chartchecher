@@ -21,7 +21,7 @@ id,x,y,width,height,text,type
 19,1154.0,308.0,56.0,26.0,160k,y-axis-label
 20,1266.0,308.0,40.0,24.0,8%,y-axis-label
 21,130.0,331.0,25.0,150.0,Subscription %,y-axis-title
-22,176.0,366.0,38.0,24.0,70%,y-axis-label
+22,176.0,366.0,38.0,24.0,7%,y-axis-label
 23,1222.0,317.0,23.0,162.0,Number of Votes,y-axis-title
 24,52.0,384.0,60.0,28.0,$20k,y-axis-label
 25,1154.0,386.0,44.0,24.0,80k,y-axis-label
