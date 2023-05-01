@@ -4,6 +4,7 @@ import re
 import numpy as np
 from scipy.signal import butter, lfilter, freqz
 from sklearn.metrics import r2_score
+from itertools import permutations
 import pandas as pd
 
 
@@ -156,7 +157,7 @@ def detect_multiple_axis(box_data):
     if len(split_x_axis_labels) > 1:
         #prints for now, remove later
         print('multiple x-axis detected!')
-        for index, x_axis_label in enumerate(split_x_axis_labels):
+        for x_axis_label in split_x_axis_labels:
             print(x_axis_label['type'].iloc[0] + ': ' + x_axis_label['text'].str.cat(sep='; '))
     else:
         print('only one x-axis detected!')
@@ -164,27 +165,119 @@ def detect_multiple_axis(box_data):
     if len(split_y_axis_labels) > 1:
         #prints for now, remove later
         print('multiple y-axis detected!')
-        for index, y_axis_label in enumerate(split_y_axis_labels):
+        for y_axis_label in split_y_axis_labels:
             print(y_axis_label['type'].iloc[0] + ': ' + y_axis_label['text'].str.cat(sep='; '))
     else:
         print('only one y-axis detected!')
 
-    #TODO we need to map the different axis titles to the closest axis so that they correspond in the csv file
+    x_axis_titles = box_data[box_data['type'].str.contains('^x.*title$')].copy()
 
+    # if there are multiple axis and titles then we need to map each title to the corresponding axis
+    if len(x_axis_titles) == 1 and len(split_x_axis_labels) == 1:
+        x_axis_titles['type'] = split_x_axis_labels[0]['type'].iloc[0].replace('label', 'title')
+        box_data.update(x_axis_titles)
+    elif len(split_x_axis_labels) > 1: 
+        box_data.update(map_axis_titles_to_axis(x_axis_titles, split_x_axis_labels))
+    y_axis_titles = box_data[box_data['type'].str.contains('^y.*title$')]
+    if len(y_axis_titles) == 1 and len(split_y_axis_labels) == 1:
+        y_axis_titles['type'] = split_y_axis_labels[0]['type'].iloc[0].replace('label', 'title')
+        box_data.update(y_axis_titles)
+    elif len(split_y_axis_labels) > 1:
+        box_data.update(map_axis_titles_to_axis(y_axis_titles, split_y_axis_labels))
 
+    # update the Bounding Box data with the new axis labels (first add x labels, then y labels)
     box_data.set_index('id', inplace=True)
-
-    # update the csv files with the new axis labels (first add x labels, then y labels)
-    for index, x_axis_label in enumerate(split_x_axis_labels):
+    for x_axis_label in split_x_axis_labels:
         x_axis_label.set_index('id', inplace=True)
         box_data.update(x_axis_label)
-    for index, y_axis_label in enumerate(split_y_axis_labels):
+    for y_axis_label in split_y_axis_labels:
         y_axis_label.set_index('id', inplace=True)
         box_data.update(y_axis_label)
-    print(box_data)
 
-    # update the csv file, for debugging we create a new csv file for now
+    # update the csv file here, for debugging we create a new csv file for now
     box_data.to_csv('new_box_data.csv')
+
+def map_axis_titles_to_axis(axis_titles, split_axis_labels):
+    """
+    Function takes in axis titles and axis labels and updates the titles type information to fit the corresponding axis
+    returns the updated axis titles
+    """
+    # list to include the relevant box data for each axis in form of a dictionary
+    axis_box_data_list = []
+    for axis in split_axis_labels:
+        x_min = axis['x'].min()
+        y_min = axis['y'].min()
+        x_max = (axis['x']+axis['width']).max()
+        y_max = (axis['y']+axis['height']).max()
+        # for each axis add a dictionary containing the axis name and all relevant points of the bounding box
+        axis_box_data_list.append({'axis_name': axis['type'].iloc[0].replace('label', ''), 'x_min': x_min, 'y_min': y_min, 'x_max': x_max, 'y_max': y_max})
+
+    # create a new dataframe, which includes the distances from every axis title to every axis
+    titles_to_axis_distances = pd.DataFrame(columns=['axis_title', 'axis_name', 'distance'])
+    for index, title in axis_titles.iterrows():
+        for axis in axis_box_data_list:
+            distance = min_distance((title['x'], title['y'], title['x']+title['width'], title['y']+title['height']), (axis['x_min'], axis['y_min'], axis['x_max'], axis['y_max']))
+            titles_to_axis_distances = titles_to_axis_distances.append({'axis_title': index, 'axis_name': axis['axis_name'], 'distance': distance}, ignore_index=True)
+        
+    # it is possible that one axis label is closer to an axis that it does not belong to compared to the axis it would belong to. Then one axis title would be far away from the nearest still available axis
+    # When we pair the axis titles with the axis, if the overall distance for the pairs is minimized, we ensure than all axis are mapped correctly
+    # we solve this monimization problem by iterating over all permutations, so that every axis title gets 'priority to pick' the closest axis and we go through all possible combinations
+    best_overall_distance = -1
+    best_title_axis_pairs = []
+    for series in permutations(axis_titles['id']):
+        available_options = titles_to_axis_distances.copy()
+        overall_distance = 0
+        title_axis_pairs = []
+        for elem in series:
+            current_title_distances = available_options[available_options['axis_title'] == elem]    # get the distances for only the current title
+            best_distance = current_title_distances[current_title_distances['distance'] == current_title_distances['distance'].min()] # get the best distance for the current title from the still available options
+            available_options = available_options[available_options['axis_name'] != best_distance['axis_name'].iloc[0]] # remove all the distances to the chosen axis from the available options
+            overall_distance += best_distance['distance'].iloc[0]
+            title_axis_pairs.append({'title': elem, 'axis': best_distance['axis_name'].iloc[0]})
+        if best_overall_distance == -1 or overall_distance < best_overall_distance:
+            best_overall_distance = overall_distance
+            best_title_axis_pairs = title_axis_pairs
+
+    # update the axis titles with the new axis information so that the csv file can be updated
+    axis_titles = axis_titles.copy()        #we need to make a copy of the dataframe to avoid a SettingWithCopyWarning
+    for pair in best_title_axis_pairs:
+        axis_titles.loc[pair['title'], 'type'] = pair['axis'] + 'title'
+    return axis_titles
+
+def min_distance(rect1, rect2):
+    """
+    Calculate the minimum distance between the surfaces of two rectangles. 
+    (Needed for mapping the axis titles to the corresponding axis)
+
+    Args:
+    rect1 (tuple): Tuple representing rectangle 1 with the format (x1_left, y1_top, x1_right, y1_bottom)
+    rect2 (tuple): Tuple representing rectangle 2 with the format (x2_left, y2_top, x2_right, y2_bottom)
+
+    Returns:
+    float: Minimum distance between the surfaces of the two rectangles.
+    """
+
+    x1_left, y1_top, x1_right, y1_bottom = rect1
+    x2_left, y2_top, x2_right, y2_bottom = rect2
+
+    if x1_left < x2_left:
+        dx = x2_left - x1_right
+    else:
+        dx = x1_left - x2_right
+
+    if y1_top < y2_top:
+        dy = y2_top - y1_bottom
+    else:
+        dy = y1_top - y2_bottom
+
+    if dx > 0 and dy > 0:
+        return math.sqrt(dx ** 2 + dy ** 2)
+    elif dx > 0:
+        return dx
+    elif dy > 0:
+        return dy
+    else:
+        return 0
 
 def split_axis_labels(axis_labels, axis, threshold=0.05):
     """
