@@ -150,6 +150,7 @@ def check_axis_consistency(axis_data):
 def detect_multiple_axis(box_data):
     """
     Function takes in bounding boxes, detects if there are multiple axis and adjusts the types in the csv file to represent these different axis
+    In case there are more axis than axis titles, this function will add example titles to the start of the csv file
     """
     box_data = pd.read_csv(box_data)
 
@@ -170,20 +171,29 @@ def detect_multiple_axis(box_data):
     else:
         print('only one y-axis detected!')
 
-    x_axis_titles = box_data[box_data['type'].str.contains('^x.*title$')].copy()
 
     # if there are multiple axis and titles then we need to map each title to the corresponding axis
+    x_axis_titles = box_data[box_data['type'].str.contains('^x.*title$')].copy()
     if len(x_axis_titles) == 1 and len(split_x_axis_labels) == 1:
         x_axis_titles['type'] = split_x_axis_labels[0]['type'].iloc[0].replace('label', 'title')
+        x_axis_titles.set_index('id', inplace=True)
         box_data.update(x_axis_titles)
     elif len(split_x_axis_labels) > 1: 
-        box_data.update(map_axis_titles_to_axis(x_axis_titles, split_x_axis_labels))
+        mapped_x_axis = map_axis_titles_to_axis(x_axis_titles, split_x_axis_labels)
+        # we have to concat, delete duplicates and sort again because the update function cannot add new rows
+        box_data = pd.concat([box_data, mapped_x_axis]).drop_duplicates(subset=['id', 'x', 'y', 'width', 'height', 'text'], keep='last').sort_values(by=['id'])
+        box_data = box_data.sort_values(by=['id'])
+        
     y_axis_titles = box_data[box_data['type'].str.contains('^y.*title$')]
     if len(y_axis_titles) == 1 and len(split_y_axis_labels) == 1:
         y_axis_titles['type'] = split_y_axis_labels[0]['type'].iloc[0].replace('label', 'title')
+        y_axis_titles.set_index('id', inplace=True)
         box_data.update(y_axis_titles)
     elif len(split_y_axis_labels) > 1:
-        box_data.update(map_axis_titles_to_axis(y_axis_titles, split_y_axis_labels))
+        mapped_y_axis = map_axis_titles_to_axis(y_axis_titles, split_y_axis_labels)
+        # we have to concat, delete duplicates and sort again because the update function cannot add new rows
+        box_data = pd.concat([box_data, mapped_y_axis]).drop_duplicates(subset=['id', 'x', 'y', 'width', 'height', 'text'], keep='last')
+        box_data = box_data.sort_values(by=['id'])
 
     # update the Bounding Box data with the new axis labels (first add x labels, then y labels)
     box_data.set_index('id', inplace=True)
@@ -195,6 +205,7 @@ def detect_multiple_axis(box_data):
         box_data.update(y_axis_label)
 
     # update the csv file here, for debugging we create a new csv file for now
+    # TODO: remove the creation of a new csv file later and find out how to update the original csv file
     box_data.to_csv('new_box_data.csv')
 
 def map_axis_titles_to_axis(axis_titles, split_axis_labels):
@@ -221,7 +232,7 @@ def map_axis_titles_to_axis(axis_titles, split_axis_labels):
         
     # it is possible that one axis label is closer to an axis that it does not belong to compared to the axis it would belong to. Then one axis title would be far away from the nearest still available axis
     # When we pair the axis titles with the axis, if the overall distance for the pairs is minimized, we ensure than all axis are mapped correctly
-    # we solve this monimization problem by iterating over all permutations, so that every axis title gets 'priority to pick' the closest axis and we go through all possible combinations
+    # we solve this minimization problem by iterating over all permutations, so that every axis title gets 'priority to pick' the closest axis and we go through all possible combinations
     best_overall_distance = -1
     best_title_axis_pairs = []
     for series in permutations(axis_titles['id']):
@@ -229,9 +240,14 @@ def map_axis_titles_to_axis(axis_titles, split_axis_labels):
         overall_distance = 0
         title_axis_pairs = []
         for elem in series:
-            current_title_distances = available_options[available_options['axis_title'] == elem]    # get the distances for only the current title
-            best_distance = current_title_distances[current_title_distances['distance'] == current_title_distances['distance'].min()] # get the best distance for the current title from the still available options
-            available_options = available_options[available_options['axis_name'] != best_distance['axis_name'].iloc[0]] # remove all the distances to the chosen axis from the available options
+            if len(available_options) == 0:
+                break
+            # get the distances for only the current title:
+            current_title_distances = available_options[available_options['axis_title'] == elem]    
+            # get the best distance for the current title from the still available options:
+            best_distance = current_title_distances[current_title_distances['distance'] == current_title_distances['distance'].min()] 
+            # remove all the distances to the chosen axis from the available options:
+            available_options = available_options[available_options['axis_name'] != best_distance['axis_name'].iloc[0]] 
             overall_distance += best_distance['distance'].iloc[0]
             title_axis_pairs.append({'title': elem, 'axis': best_distance['axis_name'].iloc[0]})
         if best_overall_distance == -1 or overall_distance < best_overall_distance:
@@ -242,6 +258,23 @@ def map_axis_titles_to_axis(axis_titles, split_axis_labels):
     axis_titles = axis_titles.copy()        #we need to make a copy of the dataframe to avoid a SettingWithCopyWarning
     for pair in best_title_axis_pairs:
         axis_titles.loc[pair['title'], 'type'] = pair['axis'] + 'title'
+
+    # if there are more titles than axis, then there has to be something wrong with the identification of the axis titles
+    if len(axis_titles) > len(axis_box_data_list):
+        remaining_axis_titles = []
+        for index, title in axis_titles.iterrows():
+            if index not in [pair['title'] for pair in best_title_axis_pairs]:
+                remaining_axis_titles.append(title['text'])
+        print("There seems to be something wrong with the identification of the axis as there are more axis titles than axis. The titles that could not be matched with an axis are:\n", remaining_axis_titles)
+
+    # we can now compare the sizes of the titles and axis lists to see if there are more axis than titles
+    elif len(axis_titles) < len(axis_box_data_list):
+        # there are more axis than titles, we need to add the remaining axis to the axis titles
+        # For the sizes we use the data of the bounding boxes of the axis and set the ids to -1 to indicate that they are not from the original csv file
+        for axis in axis_box_data_list:
+            if axis['axis_name']+'title' not in axis_titles['type'].values:
+                axis_titles = axis_titles.append({'id': -1, 'type': axis['axis_name'] + 'title', 'x': axis['x_min'], 'y': axis['y_min'], 'width': axis['x_max']-axis['x_min'], 'height': axis['y_max']-axis['y_min'], 'text': axis['axis_name'].replace('-', ' ')+ 'example title'}, ignore_index=True)
+    
     return axis_titles
 
 def min_distance(rect1, rect2):
