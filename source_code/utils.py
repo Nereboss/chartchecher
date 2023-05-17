@@ -1,8 +1,10 @@
 import math
+import re
 
 import numpy as np
 from scipy.signal import butter, lfilter, freqz
 from sklearn.metrics import r2_score
+from itertools import permutations
 import pandas as pd
 
 
@@ -44,6 +46,318 @@ def detect_inverted_axis(f):
         return x_o, y_o, message
     else:
         return None, None, None
+
+def detect_changed_y_max(chart_data, box_data):
+    """
+    Function takes in chart and bounding box data and
+    identifies if the Y-axis maximum is at a reasonable value for the chart
+    return: TODO, currently only prints result in console
+    """
+    x_range_list, y_range_list, x_increment, y_increment = summarize_axes(box_data)
+    y_min = float(y_range_list[0])     #y min and max are in str format, - not supported; how do other functions get results from summarize axes?
+    y_max = float(y_range_list[1])
+    y_range = y_max - y_min
+    graph_data = pd.read_csv(chart_data)
+    graph_y_data = graph_data['y'].to_numpy()
+    graph_max = graph_y_data.max()
+    graph_min = graph_y_data.min()
+    inverted = False if y_min < y_max else True
+    if inverted:
+        used_range = graph_min - y_max
+    else:
+        used_range = graph_max - y_min
+    used_range_factor = abs(used_range / y_range)
+    if used_range_factor < 0.67:
+        print("\n", f"The y-axis maximum is not well adjusted for the chart with {(1-round(used_range_factor, 4))*100}% of the space wasted!", "\n")
+
+def detect_missing_labels(chart_data, box_data):
+    """
+    Function takes in bounding box data and detects if there are any labels missing.
+    Missing title, x-axis-title or y-axis-title will lead to those placed being marked in the improved chart
+    while missing x-axis-labels or y-axis labels will make it so we are unable to draw a chart
+    """
+    box_data = pd.read_csv(box_data)
+    possible_types = ['title', 'x-axis-title', 'x-axis-label', 'y-axis-title', 'y-axis-label', 'legend-title', 'legend-label'] # we intentionally left out 'text-label' as that is optional
+    type_values = box_data['type'].values
+    missing = []
+    for type in possible_types:
+        if type not in type_values:
+            missing.append(type)
+    
+    # TODO add missing labels to the csv-file (with -1 for all fields except text and type; that way we can know which fields were missing later)
+    # differenciate between labels that makes it unable to draw a chart (if those exist) and others 
+            
+    #print missing elements to console
+    print("\nThe chart is missing "+" and ".join([", ".join(missing[:-1]),missing[-1]] if len(missing) > 2 else missing)+". This may cause the chart to be taken out of context or make the shown data hard to validate.\n")
+
+def detect_inconsistent_scales(box_data):
+    """
+    Function takes in bounding boxes and detects if one or more of the axis do not follow a linear scale
+    TODO maybe needs to be extended to be able to handle multiple axis (or create helper function that gets BBs for one axis and checks this for them that can be called on all axis)
+    """
+    box_data = pd.read_csv(box_data)
+    
+    # different_axis_frames is a list of the different dataframes of the different axis
+    different_axis_frames = []
+    for type in box_data['type'].unique():
+        if re.match('^[xy][0-9]?-axis-label$', type):       # regex represents x/y-axis-labels as a chart might have multiple of each
+            different_axis_frames.append(box_data[box_data['type'] == type])          
+
+    for different_axis_frame in different_axis_frames:
+        check_axis_consistency(different_axis_frame)
+
+def check_axis_consistency(axis_data):
+    """
+    Takes in bounding boxes from axis lables of one axis and calculates whether the axis scale and/or the placement of labels is inconsistent for the axis
+    returns consistency of scale and consistency of label placements
+    TODO: add return values
+    """
+    axis_data = axis_data.copy()        #we need to make a copy of the dataframe to avoid a SettingWithCopyWarning
+    axis_name = axis_data['type'].iloc[0]
+    axis = 'y' if 'y' in axis_name else 'x'      #we assume all elements have the same type and only check for first element if it belongs to the x or y axis
+    if axis == 'x':
+        axis_data['midpoint'] = axis_data['x'] + axis_data['width']/2
+    elif axis == 'y':
+        axis_data['midpoint'] = axis_data['y'] + axis_data['height']/2
+    else: 
+        raise Exception("Somehow the axis is either a X-axis or a Y-axis")
+    distances_to_next_label = axis_data['midpoint'].diff(periods=-1).dropna()
+
+    # printing only for now, change it later to return useful information
+    consistency_of_label_placements = calculate_conistency(distances_to_next_label, 0.05)
+    if consistency_of_label_placements:
+        print("The ticks across the "+axis_name+" are place consistently!")
+    else:
+        print("The ticks across the "+axis_name+" are place inconsistently!")
+
+    numeric_texts = None
+    try:
+        numeric_texts = axis_data['text'].astype(float)
+        value_difference_to_next_label = numeric_texts.diff(periods=-1).dropna()
+        distance_to_difference_factors = distances_to_next_label / value_difference_to_next_label
+        consistency_of_scale = calculate_conistency(distance_to_difference_factors, 0.05)
+
+        # printing only for now, change it later to return useful information
+        if consistency_of_scale:
+            print("The "+axis_name+" axis follows a linear scale!")
+        else:
+            print("The "+axis_name+" axis does not follow a linear scale!")
+    except ValueError: 
+        print('cannot check axis scaling because not all labels are numeric')
+
+    # later for the returns: we need to find a way to draw the chart in an "unwarped" way, meaning we need the distances between the labels together with middlepoint of the labels and transform the corresponding x/y values to show them in a linear way
+
+def detect_multiple_axis(box_data):
+    """
+    Function takes in bounding boxes, detects if there are multiple axis and adjusts the types in the csv file to represent these different axis
+    In case there are more axis than axis titles, this function will add example titles to the start of the csv file
+    """
+    box_data = pd.read_csv(box_data)
+
+    split_x_axis_labels = split_axis_labels(box_data[box_data['type'].str.contains('^x.*label$')], 'x')
+    if len(split_x_axis_labels) > 1:
+        #prints for now, remove later
+        print('multiple x-axis detected!')
+        for x_axis_label in split_x_axis_labels:
+            print(x_axis_label['type'].iloc[0] + ': ' + x_axis_label['text'].str.cat(sep='; '))
+    else:
+        print('only one x-axis detected!')
+    split_y_axis_labels = split_axis_labels(box_data[box_data['type'].str.contains('^y.*label$')], 'y')
+    if len(split_y_axis_labels) > 1:
+        #prints for now, remove later
+        print('multiple y-axis detected!')
+        for y_axis_label in split_y_axis_labels:
+            print(y_axis_label['type'].iloc[0] + ': ' + y_axis_label['text'].str.cat(sep='; '))
+    else:
+        print('only one y-axis detected!')
+
+
+    # if there are multiple axis and titles then we need to map each title to the corresponding axis
+    x_axis_titles = box_data[box_data['type'].str.contains('^x.*title$')].copy()
+    if len(x_axis_titles) == 1 and len(split_x_axis_labels) == 1:
+        x_axis_titles['type'] = split_x_axis_labels[0]['type'].iloc[0].replace('label', 'title')
+        x_axis_titles.set_index('id', inplace=True)
+        box_data.update(x_axis_titles)
+    elif len(split_x_axis_labels) > 1: 
+        mapped_x_axis = map_axis_titles_to_axis(x_axis_titles, split_x_axis_labels)
+        # we have to concat, delete duplicates and sort again because the update function cannot add new rows
+        box_data = pd.concat([box_data, mapped_x_axis]).drop_duplicates(subset=['id', 'x', 'y', 'width', 'height', 'text'], keep='last').sort_values(by=['id'])
+        box_data = box_data.sort_values(by=['id'])
+        
+    y_axis_titles = box_data[box_data['type'].str.contains('^y.*title$')]
+    if len(y_axis_titles) == 1 and len(split_y_axis_labels) == 1:
+        y_axis_titles['type'] = split_y_axis_labels[0]['type'].iloc[0].replace('label', 'title')
+        y_axis_titles.set_index('id', inplace=True)
+        box_data.update(y_axis_titles)
+    elif len(split_y_axis_labels) > 1:
+        mapped_y_axis = map_axis_titles_to_axis(y_axis_titles, split_y_axis_labels)
+        # we have to concat, delete duplicates and sort again because the update function cannot add new rows
+        box_data = pd.concat([box_data, mapped_y_axis]).drop_duplicates(subset=['id', 'x', 'y', 'width', 'height', 'text'], keep='last')
+        box_data = box_data.sort_values(by=['id'])
+
+    # update the Bounding Box data with the new axis labels (first add x labels, then y labels)
+    box_data.set_index('id', inplace=True)
+    for x_axis_label in split_x_axis_labels:
+        x_axis_label.set_index('id', inplace=True)
+        box_data.update(x_axis_label)
+    for y_axis_label in split_y_axis_labels:
+        y_axis_label.set_index('id', inplace=True)
+        box_data.update(y_axis_label)
+
+    # update the csv file here, for debugging we create a new csv file for now
+    # TODO: remove the creation of a new csv file later and find out how to update the original csv file
+    box_data.to_csv('new_box_data.csv')
+
+def map_axis_titles_to_axis(axis_titles, split_axis_labels):
+    """
+    Function takes in axis titles and axis labels and updates the titles type information to fit the corresponding axis
+    returns the updated axis titles
+    """
+    # list to include the relevant box data for each axis in form of a dictionary
+    axis_box_data_list = []
+    for axis in split_axis_labels:
+        x_min = axis['x'].min()
+        y_min = axis['y'].min()
+        x_max = (axis['x']+axis['width']).max()
+        y_max = (axis['y']+axis['height']).max()
+        # for each axis add a dictionary containing the axis name and all relevant points of the bounding box
+        axis_box_data_list.append({'axis_name': axis['type'].iloc[0].replace('label', ''), 'x_min': x_min, 'y_min': y_min, 'x_max': x_max, 'y_max': y_max})
+
+    # create a new dataframe, which includes the distances from every axis title to every axis
+    titles_to_axis_distances = pd.DataFrame(columns=['axis_title', 'axis_name', 'distance'])
+    for index, title in axis_titles.iterrows():
+        for axis in axis_box_data_list:
+            distance = min_distance((title['x'], title['y'], title['x']+title['width'], title['y']+title['height']), (axis['x_min'], axis['y_min'], axis['x_max'], axis['y_max']))
+            titles_to_axis_distances = titles_to_axis_distances.append({'axis_title': index, 'axis_name': axis['axis_name'], 'distance': distance}, ignore_index=True)
+        
+    # it is possible that one axis label is closer to an axis that it does not belong to compared to the axis it would belong to. Then one axis title would be far away from the nearest still available axis
+    # When we pair the axis titles with the axis, if the overall distance for the pairs is minimized, we ensure than all axis are mapped correctly
+    # we solve this minimization problem by iterating over all permutations, so that every axis title gets 'priority to pick' the closest axis and we go through all possible combinations
+    best_overall_distance = -1
+    best_title_axis_pairs = []
+    for series in permutations(axis_titles['id']):
+        available_options = titles_to_axis_distances.copy()
+        overall_distance = 0
+        title_axis_pairs = []
+        for elem in series:
+            if len(available_options) == 0:
+                break
+            # get the distances for only the current title:
+            current_title_distances = available_options[available_options['axis_title'] == elem]    
+            # get the best distance for the current title from the still available options:
+            best_distance = current_title_distances[current_title_distances['distance'] == current_title_distances['distance'].min()] 
+            # remove all the distances to the chosen axis from the available options:
+            available_options = available_options[available_options['axis_name'] != best_distance['axis_name'].iloc[0]] 
+            overall_distance += best_distance['distance'].iloc[0]
+            title_axis_pairs.append({'title': elem, 'axis': best_distance['axis_name'].iloc[0]})
+        if best_overall_distance == -1 or overall_distance < best_overall_distance:
+            best_overall_distance = overall_distance
+            best_title_axis_pairs = title_axis_pairs
+
+    # update the axis titles with the new axis information so that the csv file can be updated
+    axis_titles = axis_titles.copy()        #we need to make a copy of the dataframe to avoid a SettingWithCopyWarning
+    for pair in best_title_axis_pairs:
+        axis_titles.loc[pair['title'], 'type'] = pair['axis'] + 'title'
+
+    # if there are more titles than axis, then there has to be something wrong with the identification of the axis titles
+    if len(axis_titles) > len(axis_box_data_list):
+        remaining_axis_titles = []
+        for index, title in axis_titles.iterrows():
+            if index not in [pair['title'] for pair in best_title_axis_pairs]:
+                remaining_axis_titles.append(title['text'])
+        print("There seems to be something wrong with the identification of the axis as there are more axis titles than axis. The titles that could not be matched with an axis are:\n", remaining_axis_titles)
+
+    # we can now compare the sizes of the titles and axis lists to see if there are more axis than titles
+    elif len(axis_titles) < len(axis_box_data_list):
+        # there are more axis than titles, we need to add the remaining axis to the axis titles
+        # For the sizes we use the data of the bounding boxes of the axis and set the ids to -1 to indicate that they are not from the original csv file
+        for axis in axis_box_data_list:
+            if axis['axis_name']+'title' not in axis_titles['type'].values:
+                axis_titles = axis_titles.append({'id': -1, 'type': axis['axis_name'] + 'title', 'x': axis['x_min'], 'y': axis['y_min'], 'width': axis['x_max']-axis['x_min'], 'height': axis['y_max']-axis['y_min'], 'text': axis['axis_name'].replace('-', ' ')+ 'example title'}, ignore_index=True)
+    
+    return axis_titles
+
+def min_distance(rect1, rect2):
+    """
+    Calculate the minimum distance between the surfaces of two rectangles. 
+    (Needed for mapping the axis titles to the corresponding axis)
+
+    Args:
+    rect1 (tuple): Tuple representing rectangle 1 with the format (x1_left, y1_top, x1_right, y1_bottom)
+    rect2 (tuple): Tuple representing rectangle 2 with the format (x2_left, y2_top, x2_right, y2_bottom)
+
+    Returns:
+    float: Minimum distance between the surfaces of the two rectangles.
+    """
+
+    x1_left, y1_top, x1_right, y1_bottom = rect1
+    x2_left, y2_top, x2_right, y2_bottom = rect2
+
+    if x1_left < x2_left:
+        dx = x2_left - x1_right
+    else:
+        dx = x1_left - x2_right
+
+    if y1_top < y2_top:
+        dy = y2_top - y1_bottom
+    else:
+        dy = y1_top - y2_bottom
+
+    if dx > 0 and dy > 0:
+        return math.sqrt(dx ** 2 + dy ** 2)
+    elif dx > 0:
+        return dx
+    elif dy > 0:
+        return dy
+    else:
+        return 0
+
+def split_axis_labels(axis_labels, axis, threshold=0.05):
+    """
+    Function takes in a list of axis labels and which axis it is (can either be 'x' or 'y') and returns a list of dataframes that contain the labels for the individual axis (also updates the 'type' label to represent the different axis)
+    """
+    different_axis_list = []
+    for index, current_label in axis_labels.iterrows():
+        bb_start_point = current_label['x'] if axis == 'y' else current_label['y']
+        bb_end_point = bb_start_point + current_label['width'] if axis == 'y' else bb_start_point + current_label['height']
+        bb_threshold_length = current_label['width'] * threshold if axis == 'y' else current_label['height'] * threshold
+
+        if len(different_axis_list) == 0:       #if the list is empty, we need to add the first element
+            different_axis_list.append({'max_bb_range': (bb_start_point, bb_end_point), 'dataframe': pd.DataFrame([current_label])})
+        else:                                   #after we iterate over the list to check if the current label fits into one of the existing axis or if we need to create a new one
+            for current_axis in different_axis_list:
+                current_threshold = (current_axis['max_bb_range'][1] - current_axis['max_bb_range'][0]) * threshold
+                if not (bb_end_point + bb_threshold_length < current_axis['max_bb_range'][0] - current_threshold or bb_start_point - bb_threshold_length > current_axis['max_bb_range'][1] + current_threshold):      #if the current label is not out of range from the current axis, we can add it to the current axis
+                    current_axis['max_bb_range'] = (min(bb_start_point, current_axis['max_bb_range'][0]), max(bb_end_point, current_axis['max_bb_range'][1]))   # update the range to represent the 'biggest' bounding box
+                    current_axis['dataframe'] = current_axis['dataframe'].append(current_label)
+                    break
+            else:  #if the for loop did not break the current label did not fit into any axis and we need to create a new one
+                different_axis_list.append({'max_bb_range': (bb_start_point, bb_end_point), 'dataframe': pd.DataFrame([current_label])})
+
+    # now we sort the axis by their position in the image from left to right (or top to bottom)
+    different_axis_list.sort(key=lambda x: x['max_bb_range'][0] + x['max_bb_range'][1]/2)
+
+    # now we need to update the type of the labels to represent the different axis
+    for index, current_axis in enumerate(different_axis_list):
+        if index == 0:
+            current_axis['dataframe']['type'] = axis + '-axis-label'
+        else:
+            current_axis['dataframe']['type'] = axis + str(index) + '-axis-label'
+    result = []
+    for current_axis in different_axis_list:
+        result.append(current_axis['dataframe'])
+    return result
+    
+def calculate_conistency(range_of_values, threshold=0.05):
+    """
+    helper function that checks whether all values in the range have similar values within the threshold
+    """
+    average_value = range_of_values.mean()
+    threshhold_min, threshhold_max = average_value * (1-threshold), average_value * (1+threshold)
+    for value in range_of_values:
+        if not abs(threshhold_min) < abs(value) < abs(threshhold_max):
+            return False
+    return True
 
 
 def comment_aspect_ratio(d, f):
@@ -372,8 +686,8 @@ def bank_slopes_ms(x, y, cull=False, scale_x=1, scale_y=1):
 
 
 def ms_helper(s, dx, dy, Rx, Ry, cull=False):
-    print(s)
-    print("s for slopes? in line 435")
-    print("note to calculate angles")
+    # print(s)
+    # print("s for slopes? in line 435")
+    # print("note to calculate angles")
     ret = np.median(abs(s)) * Rx / Ry
     return abs(ret)

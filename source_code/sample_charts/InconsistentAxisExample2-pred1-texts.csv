@@ -1,0 +1,28 @@
+id,x,y,width,height,text,type
+0,39,13,74,27,Relative Risk of Death,y-axis-title
+1,183,9,184,14,Proportionally Spaced Line Chart,title
+2,21,251,29,16,<18.5,x-axis-label
+3,55,251,24,29,18.5-20.4,x-axis-label
+4,89,253,28,27,20.5-21.9,x-axis-label
+5,123,251,28,28,22.0-23.4,x-axis-label
+6,155,251,30,28,23.5-24.9,x-axis-label
+7,189,253,30,27,25.0-26.4,x-axis-label
+8,223,252,28,27,26.5-27.9,x-axis-label
+9,261,253,30,27,28.0-29.9,x-axis-label
+10,307,253,28,27,30.0-31.9,x-axis-label
+11,363,253,28,26,32.0-34.9,x-axis-label
+12,451,253,30,26,35.0-39.9,x-axis-label
+13,501,253,38,12,>=40.0,x-axis-label
+14,233,285,98,14,Body Mass Index,x-axis-title
+15,5,9,20,12,2.8,y-axis-label
+16,5,30,19,12,2.6,y-axis-label
+17,6,50,17,12,2.4,y-axis-label
+18,6,71,17,12,2.2,y-axis-label
+19,6,91,17,12,2.0,y-axis-label
+20,7,112,16,12,1.8,y-axis-label
+21,7,132,16,12,1.6,y-axis-label
+22,6,153,17,12,1.4,y-axis-label
+23,6,173,17,12,1.2,y-axis-label
+24,6,194,17,12,1.0,y-axis-label
+25,6,214,17,12,0.8,y-axis-label
+26,6,235,17,12,0.6,y-axis-label

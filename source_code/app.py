@@ -45,6 +45,18 @@ class AnalyzeAuto(Resource):
             coords = []
             messages = []
 
+            # Detect if the Y-Axis maximum was artificially change or isn't optimal
+            detect_changed_y_max(fn_d, fn_b)    # only writes a comment for now
+
+            # Detect if there are any important labels missing
+            detect_missing_labels(fn_d, fn_b)
+
+            # Detect if any axis have inconsistencies
+            detect_inconsistent_scales(fn_b)
+
+            # Detect if there are multiple axis
+            detect_multiple_axis(fn_b)
+
             # Detect inverted axis and add the result
             x, y, m = detect_inverted_axis(fn_b)
             if (x != None):
@@ -72,8 +84,8 @@ class AnalyzeAuto(Resource):
 
         except:
             # clean up files
-            os.remove(fn_d)
-            os.remove(fn_b)
+            # os.remove(fn_d)
+            # os.remove(fn_b)
             raise Exception("Something went wrong. Try again."
                             "Make sure that there are bounding boxes and data.")
 
@@ -167,8 +179,8 @@ class CompleteAnalysis(Resource):
             ar = calculate_aspect(fn_b)
             # data
         except:
-            os.remove(fn_d)
-            os.remove(fn_b)
+            # os.remove(fn_d)
+            # os.remove(fn_b)
             raise Exception("Something went wrong. Try again."
                             "Make sure that there are bounding boxes and data.")
 
@@ -245,8 +257,8 @@ class AutofillType(Resource):
             typeX = typeX[0]
         except:
             # need to DELETE autofill pred 1 texts every time, or else we run into errors
-            os.remove(texts_filename)
-            os.remove(preds_filename)
+            # os.remove(texts_filename)
+            # os.remove(preds_filename)
             raise Exception("Something went wrong. Try again")
 
         # need to DELETE autofill pred 1 texts every time, or else we run into errors
