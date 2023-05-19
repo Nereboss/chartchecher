@@ -3,8 +3,10 @@ let imageURL_auto; // = "file:///D:/Daten/Bachelorarbeit/bachelor_thesis/source_
 // comment this in to always use the sunspots sample chart
 
 //thumbnail sizes
-const THUMBNAIL_WIDTH = 175;
-const THUMBNAIL_HEIGHT = 175;
+// scaled up to fit our new UI but it breaks the old one
+const SCALE = 1;
+const THUMBNAIL_WIDTH = 175*SCALE;  
+const THUMBNAIL_HEIGHT = 175*SCALE;
 const portNumber = 5000;
 
 
@@ -83,223 +85,7 @@ chrome.storage.sync.get(['key'], function (result) {
                 return response.json();
             throw new Error('Network response was not ok.');
         })
-        .then(function (arr) {          //arr gets returned as a json object containing messages, coords, xRange, yRange, aspectRatio, data
-            {
-                console.log(arr, 'arr from complete analysis');
-                const local_xr = arr.xRange;
-                const local_yr = arr.yRange;
-                const local_ar = arr.aspectRatio;
-                var local_data = JSON.stringify(arr.data);
-                local_data = JSON.parse(local_data);
-                local_data.splice(local_data.length - 1); //remove last element
-
-
-                var l_margin = {top: 50, right: 10, bottom: 20, left: 150},
-                    l_width = THUMBNAIL_WIDTH - l_margin.left - l_margin.right,
-                    l_height = THUMBNAIL_HEIGHT - l_margin.top - l_margin.bottom;
-
-                const small_margin = 10;
-
-
-                if (local_ar > 10 / 3) {
-                    //fix x to THUMBNAIL_WIDTH
-                    l_width = THUMBNAIL_WIDTH - small_margin;
-                    l_height = parseInt(l_width / local_ar);
-                } else {
-                    //fix y to THUMBNAIL_HEIGHT
-                    l_height = THUMBNAIL_HEIGHT - l_margin.top - l_margin.bottom;
-                    l_width = parseInt(local_ar * l_height);
-                }
-
-                const modal = document.getElementById('Modal2');
-                const sameImage = document.getElementById('mainChart');
-                const modalImg = document.getElementById('ModalImage');
-                modal.style.display = 'block';
-                modalImg.src = sameImage.src;
-
-                const x = modalImg.width;
-                const y = modalImg.height;
-                const MAX_X = 1150;
-                const MAX_Y = 700;
-                let scalingRatio;
-
-                if (x / y > MAX_X / MAX_Y) {
-                    //fix x to MAX_X
-                    modalImg.width = MAX_X;
-                    scalingRatio = MAX_X / x;
-                    modalImg.height = scalingRatio * y;
-                } else {
-                    //fix y to MAX_Y
-                    modalImg.height = MAX_Y;
-                    scalingRatio = MAX_Y / y;
-                    modalImg.width = scalingRatio * x;
-                }
-
-                // Get the <span> element that closes the modal
-                var span = document.getElementsByClassName('close')[0];
-
-                // When the user clicks on <span> (x), close the modal
-                span.onclick = function () {
-                    modal.style.display = 'none';
-                };
-
-                var modal2 = d3.select('#Modal2');
-                var canvas = d3.select('#gameCanvasModal');
-
-                {
-                    let global_inverted = false;
-                    for (var i = 0; i < arr.messages.length; ++i) {
-                        var msg = arr.messages[i];
-                        if (msg.includes('inverted')) {
-                            global_inverted = true;
-                        } //booleans
-                        var coords = arr.coords[i];
-
-                        var div = modal2.append('div')
-                            .attr('class', 'tooltip')
-                            .style('opacity', 0);
-
-                        const OFFSET = 30;
-                        const VERTICAL_OFFSET = 0;
-
-                        canvas.append('svg')
-                            .attr('z-index', 10000)
-                            .attr('width', '50px')
-                            .attr('height', '50px')
-                            .attr('x', coords[0] * scalingRatio + OFFSET)
-                            .attr('y', coords[1] * scalingRatio + VERTICAL_OFFSET)
-                            .attr('opacity', 0.3)
-                            .attr('viewBox', '0 0 180 180')
-                            .attr('class', 'draggable')
-                            .html(infoBoxGlobal)
-                            .on('mouseover', function () {
-                                this.attributes.opacity.value = 1;
-                            })
-                            .on('mouseout', function () {
-                                this.attributes.opacity.value = 0.3;
-                            })
-
-                            .append('rect')
-                            .attr('width', '200px')
-                            .attr('height', '200px')
-                            .attr('x', 0)
-                            .attr('y', 0)
-                            .attr('opacity', 0.3)
-                            .attr('fill', 'red')
-                            .attr('hiddenText', msg)
-                            .on('click', function () {
-
-
-                                //remove all the tool_tip_on_click before  a new click
-                                var paras = document.getElementsByClassName('tooltip_on_click');
-                                while (paras[0]) {
-                                    paras[0].parentNode.removeChild(paras[0]);
-                                }
-                                paras = document.getElementsByClassName('tooltip_svg');
-                                while (paras[0]) {
-                                    paras[0].parentNode.removeChild(paras[0]);
-                                }
-
-                                const annotation = (this.attributes.hiddenText.value);
-                                const trunc = annotation.includes('truncate'); //booleans
-                                const aspect = annotation.includes('(AR)'); //booleans
-                                const inverted = annotation.includes('inverted'); //booleans
-
-                                var div2 = modal2.append('div')
-                                    .attr('class', 'tooltip_on_click')
-                                    .style('opacity', 0);
-
-
-                                if (trunc) {
-                                    const ORIG_OFFSET = 150;
-                                    drawThumbTrunc(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, ORIG_OFFSET, annotation, global_inverted);
-
-                                    //draw the test UI
-                                    //TODO remove this
-                                    var box = d3.select('#redBox');
-                                    oldViewBox = box.append('div').attr('class', 'row justify-content-center')
-                                    drawThumbTrunc(l_margin, l_width, l_height, local_xr, local_yr, local_data, oldViewBox, ORIG_OFFSET, annotation, global_inverted);
-                                    box.append('hr')
-                                    drawTestUI(l_margin, l_width, l_height, local_xr, local_yr, local_data, box, ORIG_OFFSET, annotation, global_inverted);
-
-                                } else if (inverted) {
-                                    const ORIG_OFFSET = 150;
-                                    drawThumbInverted(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, ORIG_OFFSET, annotation);
-
-
-                                } else if (aspect) {
-                                    const ORIG_OFFSET = 150;
-                                    const str = annotation;
-                                    const aspect1 = (str.split('Actual Aspect Ratio (AR): ')[1].split('Ideal'));
-                                    const a1 = parseFloat(aspect1);
-                                    const aspect2 = str.split('Ideal AR: ')[1];
-                                    const a2 = parseFloat(aspect2);
-                                    drawThumbAR(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, ORIG_OFFSET, a1, a2, annotation, global_inverted);
-
-                                    //set timeout for Aspect Popup
-                                    setTimeout(() => {
-                                        const a = document.getElementById('WhatIsAspectRatio');
-                                        a.addEventListener('click', function () {
-                                            wpd.popup.show('AspectPopup');
-                                            const closer = document.getElementById('CloseAspectPopup');
-                                            closer.addEventListener('click', function () {
-                                                wpd.popup.close('AspectPopup');
-                                            });
-                                        });
-                                    }, 500);
-
-                                } else if (inverted) {
-                                    var svg = div2
-                                        .style('height', '80px')
-                                        .style('z-index', 10000000)
-                                        .html(annotation);
-
-                                } else {
-                                    var svg = div2
-                                        .style('height', '80px')
-                                        .style('z-index', 10000000)
-                                        .html(annotation);
-
-                                    try {
-
-                                        document.getElementById('WilkinsonAdvice').style.zIndex = '10000000';
-                                        document.getElementById('WilkinsonAdvice').addEventListener('click', function () {
-                                        });
-
-                                        setTimeout(() => {
-                                            const wilk = document.getElementById('WilkinsonAdvice');
-                                            wilk.addEventListener('click', function () {
-                                                wpd.popup.show('WilkinsonPopup');
-
-                                                const closer = document.getElementById('CloseStepSize');
-                                                closer.addEventListener('click', function () {
-                                                    wpd.popup.close('WilkinsonPopup');
-                                                });
-                                            });
-                                        }, 500);
-
-                                    } catch (e) {
-                                    }
-                                }
-                                div2.transition()
-                                    .duration(200)
-                                    .style('opacity', .85);
-
-                                div2.style('left', (event.x) - 20 + 'px')
-                                    .style('top', (event.y) - 90 + 'px');
-                            });
-
-                        var g = canvas.append('g')
-                            .attr('x', coords[0] + OFFSET)
-                            .attr('y', coords[1]);
-                        g.append('rect')
-                            .attr('x', coords[0] + OFFSET)
-                            .attr('y', coords[1]);
-                    }
-                }
-            }
-
-        })
+        .then(function (arr) {drawModalUI(arr);})
 
         .catch(function (error) {
             console.log('stl: ', error);
@@ -308,6 +94,236 @@ chrome.storage.sync.get(['key'], function (result) {
 });
 const infoBoxGlobal = '<g width="30px" height="30px" class="infoBoxSVG" fill="#000000">' +
     ' <path d="m80 15c-35.88 0-65 29.12-65 65s29.12 65 65 65 65-29.12 65-65-29.12-65-65-65zm0 10c30.36 0 55 24.64 55 55s-24.64 55-55 55-55-24.64-55-55 24.64-55 55-55z"/> <path d="m57.373 18.231a9.3834 9.1153 0 1 1 -18.767 0 9.3834 9.1153 0 1 1 18.767 0z" transform="matrix(1.1989 0 0 1.2342 21.214 28.75)"/> <path d="m90.665 110.96c-0.069 2.73 1.211 3.5 4.327 3.82l5.008 0.1v5.12h-39.073v-5.12l5.503-0.1c3.291-0.1 4.082-1.38 4.327-3.82v-30.813c0.035-4.879-6.296-4.113-10.757-3.968v-5.074l30.665-1.105"/> </g>';
+
+function drawModalUI(arr) {          //arr gets returned as a json object containing messages, coords, xRange, yRange, aspectRatio, data
+    console.log(arr, 'arr from complete analysis');
+    const local_xr = arr.xRange;
+    const local_yr = arr.yRange;
+    const local_ar = arr.aspectRatio;
+    var local_data = JSON.stringify(arr.data);
+    local_data = JSON.parse(local_data);
+    local_data.splice(local_data.length - 1); //remove last element
+
+
+    var l_margin = {top: 50, right: 10, bottom: 20, left: 150},
+        l_width = THUMBNAIL_WIDTH - l_margin.left - l_margin.right,
+        l_height = THUMBNAIL_HEIGHT - l_margin.top - l_margin.bottom;
+
+    const small_margin = 10;
+
+
+    if (local_ar > 10 / 3) {
+        //fix x to THUMBNAIL_WIDTH
+        l_width = THUMBNAIL_WIDTH - small_margin;
+        l_height = parseInt(l_width / local_ar);
+    } else {
+        //fix y to THUMBNAIL_HEIGHT
+        l_height = THUMBNAIL_HEIGHT - l_margin.top - l_margin.bottom;
+        l_width = parseInt(local_ar * l_height);
+    }
+
+    const modal = document.getElementById('Modal2');
+    const sameImage = document.getElementById('mainChart');
+    const modalImg = document.getElementById('ModalImage');
+    modal.style.display = 'block';
+    modalImg.src = sameImage.src;
+
+    const x = modalImg.width;
+    const y = modalImg.height;
+    const MAX_X = 1150;
+    const MAX_Y = 700;
+    let scalingRatio;
+
+    if (x / y > MAX_X / MAX_Y) {
+        //fix x to MAX_X
+        modalImg.width = MAX_X;
+        scalingRatio = MAX_X / x;
+        modalImg.height = scalingRatio * y;
+    } else {
+        //fix y to MAX_Y
+        modalImg.height = MAX_Y;
+        scalingRatio = MAX_Y / y;
+        modalImg.width = scalingRatio * x;
+    }
+
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName('close')[0];
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function () {
+        modal.style.display = 'none';
+    };
+
+    var modal2 = d3.select('#Modal2');
+    var canvas = d3.select('#gameCanvasModal');
+
+    let global_inverted = false;
+
+    //draw the test UI
+    // //TODO remove this
+    var box = d3.select('#redBox');
+    oldViewBox = box.append('div').attr('class', 'row justify-content-center')
+    // drawThumbTrunc(l_margin, l_width, l_height, local_xr, local_yr, local_data, oldViewBox, 0, [], global_inverted);
+    box.append('hr')
+    // this does not correctly work for charts with inverted y-axis because we are not checking for that yet 
+    // to fix this we first need to adjust the order in which the misleading features are detected
+    drawTestUI(l_margin, l_width, l_height, local_xr, local_yr, local_data, box, 0, arr.messages, global_inverted);
+
+
+
+    for (var i = 0; i < arr.messages.length; ++i) {
+        var msg = arr.messages[i];
+        if (msg.includes('inverted')) {
+            global_inverted = true;
+        } //booleans
+        var coords = arr.coords[i];
+
+        var div = modal2.append('div')
+            .attr('class', 'tooltip')
+            .style('opacity', 0);
+
+        const OFFSET = 30;
+        const VERTICAL_OFFSET = 0;
+
+        canvas.append('svg')
+            .attr('z-index', 10000)
+            .attr('width', '50px')
+            .attr('height', '50px')
+            .attr('x', coords[0] * scalingRatio + OFFSET)
+            .attr('y', coords[1] * scalingRatio + VERTICAL_OFFSET)
+            .attr('opacity', 0.3)
+            .attr('viewBox', '0 0 180 180')
+            .attr('class', 'draggable')
+            .html(infoBoxGlobal)
+            .on('mouseover', function () {
+                this.attributes.opacity.value = 1;
+            })
+            .on('mouseout', function () {
+                this.attributes.opacity.value = 0.3;
+            })
+
+            .append('rect')
+            .attr('width', '200px')
+            .attr('height', '200px')
+            .attr('x', 0)
+            .attr('y', 0)
+            .attr('opacity', 0.3)
+            .attr('fill', 'red')
+            .attr('hiddenText', msg)
+            .on('click', function () {
+
+
+                //remove all the tool_tip_on_click before  a new click
+                var paras = document.getElementsByClassName('tooltip_on_click');
+                while (paras[0]) {
+                    paras[0].parentNode.removeChild(paras[0]);
+                }
+                paras = document.getElementsByClassName('tooltip_svg');
+                while (paras[0]) {
+                    paras[0].parentNode.removeChild(paras[0]);
+                }
+
+                const annotation = (this.attributes.hiddenText.value);
+                console.log("annotation", annotation);
+                console.log("arr message", arr.messages)
+                const trunc = annotation.includes('truncate'); //booleans
+                const aspect = annotation.includes('(AR)'); //booleans
+                const inverted = annotation.includes('inverted'); //booleans
+
+                var div2 = modal2.append('div')
+                    .attr('class', 'tooltip_on_click')
+                    .style('opacity', 0);
+
+
+                if (trunc) {
+                    const ORIG_OFFSET = 150;
+                    drawThumbTrunc(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, ORIG_OFFSET, annotation, global_inverted);
+
+                    // //draw the test UI
+                    //TODO remove this
+                    // var box = d3.select('#redBox');
+                    // oldViewBox = box.append('div').attr('class', 'row justify-content-center')
+                    // drawThumbTrunc(l_margin, l_width, l_height, local_xr, local_yr, local_data, oldViewBox, ORIG_OFFSET, annotation, global_inverted);
+                    // box.append('hr')
+
+                    //we were able to savely remove everything else from the loop except this, try to find out what gets changed in the loop to effect this
+                    drawTestUI(l_margin, l_width, l_height, local_xr, local_yr, local_data, box, ORIG_OFFSET, annotation, global_inverted);
+
+                } else if (inverted) {
+                    const ORIG_OFFSET = 150;
+                    drawThumbInverted(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, ORIG_OFFSET, annotation);
+
+
+                } else if (aspect) {
+                    const ORIG_OFFSET = 150;
+                    const str = annotation;
+                    const aspect1 = (str.split('Actual Aspect Ratio (AR): ')[1].split('Ideal'));
+                    const a1 = parseFloat(aspect1);
+                    const aspect2 = str.split('Ideal AR: ')[1];
+                    const a2 = parseFloat(aspect2);
+                    drawThumbAR(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, ORIG_OFFSET, a1, a2, annotation, global_inverted);
+
+                    //set timeout for Aspect Popup
+                    setTimeout(() => {
+                        const a = document.getElementById('WhatIsAspectRatio');
+                        a.addEventListener('click', function () {
+                            wpd.popup.show('AspectPopup');
+                            const closer = document.getElementById('CloseAspectPopup');
+                            closer.addEventListener('click', function () {
+                                wpd.popup.close('AspectPopup');
+                            });
+                        });
+                    }, 500);
+
+                } else if (inverted) {
+                    var svg = div2
+                        .style('height', '80px')
+                        .style('z-index', 10000000)
+                        .html(annotation);
+
+                } else {
+                    var svg = div2
+                        .style('height', '80px')
+                        .style('z-index', 10000000)
+                        .html(annotation);
+
+                    try {
+
+                        document.getElementById('WilkinsonAdvice').style.zIndex = '10000000';
+                        document.getElementById('WilkinsonAdvice').addEventListener('click', function () {
+                        });
+
+                        setTimeout(() => {
+                            const wilk = document.getElementById('WilkinsonAdvice');
+                            wilk.addEventListener('click', function () {
+                                wpd.popup.show('WilkinsonPopup');
+
+                                const closer = document.getElementById('CloseStepSize');
+                                closer.addEventListener('click', function () {
+                                    wpd.popup.close('WilkinsonPopup');
+                                });
+                            });
+                        }, 500);
+
+                    } catch (e) {
+                    }
+                }
+                div2.transition()
+                    .duration(200)
+                    .style('opacity', .85);
+
+                div2.style('left', (event.x) - 20 + 'px')
+                    .style('top', (event.y) - 90 + 'px');
+            });
+
+        var g = canvas.append('g')
+            .attr('x', coords[0] + OFFSET)
+            .attr('y', coords[1]);
+        g.append('rect')
+            .attr('x', coords[0] + OFFSET)
+            .attr('y', coords[1]);
+    }
+}
 
 function drawThumbAR(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, OFFSET, a1, a2, annotation, inverted) {
 
@@ -484,6 +500,26 @@ function drawThumbAR(l_margin, l_width, l_height, local_xr, local_yr, local_data
 
 //function that draws our whole test UI consisting of a title, the list of detected features, and the control and recommended charts
 function drawTestUI(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, OFFSET, annotation, inverted) {
+
+    // make variables for the detectable misleading features
+    let truncatedY = false;
+    let invertedY = false;
+    let misleadingAR = false;
+    //TODO add more later (missling labels, multiple axis, non-linear axis, etc.)
+
+    //iterate over annotations to set which misleading features have been detected
+    for (let i = 0; i < annotation.length; i++) {
+        if (annotation[i].includes("truncated")) {
+            truncatedY = true;
+        }
+        if (annotation[i].includes("inverted")) {
+            invertedY = true;
+        }
+        if (annotation[i].includes("(AR)")) {
+            misleadingAR = true;
+        }
+    }
+
     // draw an example header
     testUITitleDiv = div2.append('div').attr('class', 'row test-row justify-content-center')
     testUITitleDiv.append('p').text("This is our test function for the control chart:")
@@ -491,7 +527,7 @@ function drawTestUI(l_margin, l_width, l_height, local_xr, local_yr, local_data,
     // draw the list of mislead features
     detectedFeaturesDiv = div2.append('div').attr('class', 'row justify-content-center')
     drawMisleadFeaturesList(detectedFeaturesDiv, annotation);
-    
+
     // make a div for the charts
     chartsDiv = div2.append('div').attr('class', 'row justify-content-center')
     
@@ -503,18 +539,22 @@ function drawTestUI(l_margin, l_width, l_height, local_xr, local_yr, local_data,
     // draw the recommended chart
     recommendedChartDiv = chartsDiv.append('div')
     recommendedChartDiv.append('p').text("Recommended Chart:")
-    drawRecommendedChart(l_margin, l_width, l_height, local_xr, local_yr, local_data, recommendedChartDiv, OFFSET, annotation, inverted);
+    //need to give the function that draws the recommended chart which misleading features have been detected
+    // the control chart is bascially the same just with all misleading features set to false so we can use that for testing
+    drawRecommendedChart(l_width, l_height, local_xr, local_yr, local_data, recommendedChartDiv, inverted);
 }
 
 //function to draw the list of mislead features
 //TODO: we need to provide useful information about each detected feature in this list aswell
-function drawMisleadFeaturesList(div2, annotation) {
-    const split_up = annotation.split('[newline]');
+function drawMisleadFeaturesList(div, annotation) {
+    innerDiv = div.append('p')    // we need an inner element (div or p both work) to make the text wrap as a div of class col ignores <br> tags
+    innerDiv.text("Detected Misleading Features:").append('br');
     
-    for (var i = 0; i < split_up.length; ++i) {
-        if (split_up[i] != "") {
-            detectedFeaturesDiv.append('text')
-            .text("- " + split_up[i]).append('br');
+    for (var i = 0; i < annotation.length; ++i) {
+        if (annotation[i] != null) {
+            innerDiv.append('text')
+            .text("- " + annotation[i]);
+            innerDiv.append('br');
         }
     }
 }
@@ -524,7 +564,7 @@ function drawMisleadFeaturesList(div2, annotation) {
 function drawControlChart(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, OFFSET, annotation, inverted) {
 
     const SPACING = 11;
-    const split_up = annotation.split('[newline]');
+    // const split_up = annotation.split('[newline]');
     const LIMIT_WIDTH = 30;
 
     var xScale = d3.scaleLinear()   // xScale is width of graphic
@@ -551,13 +591,16 @@ function drawControlChart(l_margin, l_width, l_height, local_xr, local_yr, local
     });
 
     const EXPAND_WIDTH = 50;
+    const EXPAND_HEIGHT = 50;
     var svg = div2
         .append('svg')
         .attr('width', l_width + EXPAND_WIDTH)
+        .attr('height', l_height + EXPAND_HEIGHT)
         .append('g')
         .attr('align', 'center')
 
-    const SHIFT_DOWN = split_up.length * SPACING;
+    // const SHIFT_DOWN = split_up.length * SPACING;
+    const SHIFT_DOWN = 11;
     const SHIFT_RIGHT = 40;
 
     // x-axis
@@ -582,33 +625,37 @@ function drawControlChart(l_margin, l_width, l_height, local_xr, local_yr, local
         .attr('d', line); // 11. Calls the line generator
 }
 
-function drawRecommendedChart(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, OFFSET, annotation, inverted) {
+function drawRecommendedChart(l_width, l_height, local_xr, local_yr, local_data, div2, inverted) {
+    //function based in drawTrueChart
 
     const SPACING = 11;
-    const split_up = annotation.split('[newline]');
-    let yScale2;
+    // const split_up = annotation.split('[newline]');
+    let yScale;
     const LIMIT_WIDTH = 30;
 
-    var xScale2 = d3.scaleLinear()
+    // using d3 to construct a linear scale for the x- and y-axis 
+    // (domain is the range of values in the data, range is the range of values in the chart)
+    var xScale = d3.scaleLinear()
         .domain([local_xr[0], local_xr[1]])
         .range([0, l_width - LIMIT_WIDTH]);
 
     if (inverted) {
-        yScale2 = d3.scaleLinear()
+        yScale = d3.scaleLinear()
             .domain([local_yr[0], 0]) //zero baseline
             .range([l_height, 0]);
     } else {
-        yScale2 = d3.scaleLinear()
+        yScale = d3.scaleLinear()
             .domain([0, local_yr[1]]) //zero baseline
             .range([l_height, 0]);
     }
 
-    var line2 = d3.line()
+
+    var line = d3.line()
         .x(function (d, i) {
-            return xScale2(d.x);
+            return xScale(d.x);
         })
         .y(function (d) {
-            return yScale2(d.y);
+            return yScale(d.y);
         });
 
     var dataset = local_data.map(function (d) {
@@ -619,13 +666,16 @@ function drawRecommendedChart(l_margin, l_width, l_height, local_xr, local_yr, l
     });
 
     const EXPAND_WIDTH = 50;
+    const EXPAND_HEIGHT = 50;
     var svg = div2
         .append('svg')
         .attr('width', l_width + EXPAND_WIDTH)
+        .attr('height', l_height + EXPAND_HEIGHT)
         .append('g')
         .attr('align', 'center')
 
-    const SHIFT_DOWN = split_up.length * SPACING;
+    // const SHIFT_DOWN = split_up.length * SPACING;
+    const SHIFT_DOWN = 11;
     const SHIFT_RIGHT = 40;
 
     // x-axis
@@ -633,21 +683,21 @@ function drawRecommendedChart(l_margin, l_width, l_height, local_xr, local_yr, l
         .attr('class', 'xaxisblack')
         .attr('color', 'black')
         .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (l_height + SHIFT_DOWN) + ')')
-        .call(d3.axisBottom(xScale2).ticks(1)); // Create an axis component with d3.axisBottom
+        .call(d3.axisBottom(xScale).ticks(1)); // Create an axis component with d3.axisBottom
 
     // y-axis
     svg.append('g')
         .style('font', '11px Segoe UI')
         .style('stroke', '#67a9cf')
         .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
-        .call(d3.axisLeft(yScale2).ticks(3));
+        .call(d3.axisLeft(yScale).ticks(3));
 
     // //append the datapath2
     svg.append('path')
         .datum(dataset) // 10. Binds data to the line
         .attr('class', 'line') // Assign a class for styling
         .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
-        .attr('d', line2); // 11. Calls the line generator
+        .attr('d', line); // 11. Calls the line generator
 
 }
 
