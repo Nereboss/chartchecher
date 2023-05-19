@@ -331,22 +331,29 @@ function drawModalUI(arr) {          //arr gets returned as a json object contai
 function drawTestUI(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, OFFSET, annotation, inverted) {
 
     // make variables for the detectable misleading features
-    let truncatedY = false;
-    let invertedY = false;
-    let misleadingAR = false;
-    //TODO add more later (missling labels, multiple axis, non-linear axis, etc.)
-
+    let detectedFeatures = {
+        "truncatedY": false,
+        "invertedY": false,
+        "misleadingAR": false,
+        "missingLabels": false,
+        "multipleAxis": false,
+        "nonLinearAxis": false
+    }
+    
     //iterate over annotations to set which misleading features have been detected
+    //TODO add more later (missling labels, multiple axis, non-linear axis, etc.)
     for (let i = 0; i < annotation.length; i++) {
-        if (annotation[i].includes("truncated")) {
-            truncatedY = true;
-        }
-        if (annotation[i].includes("inverted")) {
-            invertedY = true;
-        }
-        if (annotation[i].includes("(AR)")) {
-            misleadingAR = true;
-        }
+        if (annotation[i] != null) {
+            if (annotation[i].includes("truncated")) {
+                detectedFeatures.truncatedY = true;
+            }
+            if (annotation[i].includes("inverted")) {
+                detectedFeatures.invertedY = true;
+            }
+            if (annotation[i].includes("(AR)")) {
+                detectedFeatures.misleadingAR = true;
+            }
+        }   
     }
 
     // draw an example header
@@ -371,6 +378,10 @@ function drawTestUI(l_margin, l_width, l_height, local_xr, local_yr, local_data,
     //need to give the function that draws the recommended chart which misleading features have been detected
     // the control chart is bascially the same just with all misleading features set to false so we can use that for testing
     drawRecommendedChart(l_width, l_height, local_xr, local_yr, local_data, recommendedChartDiv, inverted);
+
+    //test generic function to draw all the charts, this later replaces the others
+    div2.append('hr')
+    drawAnyChart(l_width, l_height, local_xr, local_yr, local_data, div2, detectedFeatures);
 }
 
 //function to draw the list of mislead features
@@ -386,6 +397,84 @@ function drawMisleadFeaturesList(div, annotation) {
             innerDiv.append('br');
         }
     }
+}
+
+
+/**
+ * function that we use to draw all the chart images in the UI
+ * TODO: expand this function step by step to eventually include the removal of all misleading features
+ * if all detected tactics are false, it will draw the input-image (control chart)
+ * @param {*} l_width 
+ * @param {*} l_height 
+ * @param {Array} local_xr 
+ * @param {Array} local_yr 
+ * @param {*} local_data 
+ * @param {html_element} parentDiv 
+ * @param {json} detectedFeatures contains all the detectable misleading features, every entry is either true or false whether it was detected or not
+ */
+function drawAnyChart(l_width, l_height, local_xr, local_yr, local_data, parentDiv, detectedFeatures) {
+
+    const SPACING = 11;
+    // const split_up = annotation.split('[newline]');
+    const LIMIT_WIDTH = 30;
+
+    var xScale = d3.scaleLinear()   // xScale is width of graphic
+        .domain([local_xr[0], local_xr[1]])
+        .range([0, l_width - LIMIT_WIDTH]);
+
+    var yScale = d3.scaleLinear()   // yScale is height of graphic
+        .domain([local_yr[0], local_yr[1]])
+        .range([l_height, 0]);
+
+    var line = d3.line()
+        .x(function (d, i) {
+            return xScale(d.x);
+        }) // set the x values for the line generator
+        .y(function (d) {
+            return yScale(d.y);
+        });
+
+    var dataset = local_data.map(function (d) {
+        return {
+            'x': parseFloat(d.x),
+            'y': parseFloat(d.y)
+        };
+    });
+
+    const EXPAND_WIDTH = 50;
+    const EXPAND_HEIGHT = 50;
+    var svg = parentDiv
+        .append('svg')
+        .attr('width', l_width + EXPAND_WIDTH)
+        .attr('height', l_height + EXPAND_HEIGHT)
+        .append('g')
+        .attr('align', 'center')
+
+    // const SHIFT_DOWN = split_up.length * SPACING;
+    const SHIFT_DOWN = 11;
+    const SHIFT_RIGHT = 40;
+
+    // x-axis
+    svg.append('g')
+        .attr('class', 'xaxisblack')
+        .attr('color', 'black')
+        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (l_height + SHIFT_DOWN) + ')')
+        .call(d3.axisBottom(xScale).ticks(1)); // Create an axis component with d3.axisBottom
+
+    // y-axis
+    svg.append('g')
+        .style('font', '11px Segoe UI')
+        .style('stroke', '#ef8a62')
+        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
+        .call(d3.axisLeft(yScale).ticks(3));
+
+    //append the datapath
+    svg.append('path')
+        .datum(dataset) // 10. Binds data to the line
+        .attr('class', 'line') // Assign a class for styling
+        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
+        .attr('d', line); // 11. Calls the line generator
+
 }
 
 //function to draw the control chart
