@@ -417,21 +417,36 @@ function drawAnyChart(l_width, l_height, local_xr, local_yr, local_data, parentD
     const SPACING = 11;
     // const split_up = annotation.split('[newline]');
     const LIMIT_WIDTH = 30;
-
-    var xScale = d3.scaleLinear()   // xScale is width of graphic
+    
+    // using d3 to construct a linear scale for the x- and y-axis 
+    // (domain is the range of values in the data, range is the range of values in the chart)
+    var xScale = d3.scaleLinear()   
         .domain([local_xr[0], local_xr[1]])
         .range([0, l_width - LIMIT_WIDTH]);
 
-    var yScale = d3.scaleLinear()   // yScale is height of graphic
-        .domain([local_yr[0], local_yr[1]])
-        .range([l_height, 0]);
+    var yAxis;              // yScale is height of graphic
+    var yBottomValue = local_yr[0];       //the value at the bottom of the y-axis
+    var yTopValue = local_yr[1];          //the value at the very top of the y-axis
+    if (detectedFeatures.truncatedY) {
+        yBottomValue = 0;        // when the y-axis is truncated set the bottom value to zero instead if the truncated value
+    }
+    if (detectedFeatures.invertedY) {
+        let temp = yBottomValue;
+        yBottomValue = yTopValue;       // when the y-axis is inverted switch top and buttom values to invert the axis again
+        yTopValue = temp;
+    }
+    yAxis = d3.scaleLinear()
+            .domain([yBottomValue, yTopValue])
+            .range([l_height, 0]);      //height is first because it will be drawn "top to bottom"
+
+    
 
     var line = d3.line()
         .x(function (d, i) {
             return xScale(d.x);
         }) // set the x values for the line generator
         .y(function (d) {
-            return yScale(d.y);
+            return yAxis(d.y);
         });
 
     var dataset = local_data.map(function (d) {
@@ -459,14 +474,14 @@ function drawAnyChart(l_width, l_height, local_xr, local_yr, local_data, parentD
         .attr('class', 'xaxisblack')
         .attr('color', 'black')
         .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (l_height + SHIFT_DOWN) + ')')
-        .call(d3.axisBottom(xScale).ticks(1)); // Create an axis component with d3.axisBottom
+        .call(d3.axisBottom(xScale).ticks(3)); // Create an axis component with d3.axisBottom
 
     // y-axis
     svg.append('g')
         .style('font', '11px Segoe UI')
         .style('stroke', '#ef8a62')
         .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
-        .call(d3.axisLeft(yScale).ticks(3));
+        .call(d3.axisLeft(yAxis).ticks(3));
 
     //append the datapath
     svg.append('path')
@@ -526,7 +541,7 @@ function drawControlChart(l_margin, l_width, l_height, local_xr, local_yr, local
         .attr('class', 'xaxisblack')
         .attr('color', 'black')
         .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (l_height + SHIFT_DOWN) + ')')
-        .call(d3.axisBottom(xScale).ticks(1)); // Create an axis component with d3.axisBottom
+        .call(d3.axisBottom(xScale).ticks(3)); // Create an axis component with d3.axisBottom
 
     // y-axis
     svg.append('g')
@@ -601,7 +616,7 @@ function drawRecommendedChart(l_width, l_height, local_xr, local_yr, local_data,
         .attr('class', 'xaxisblack')
         .attr('color', 'black')
         .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (l_height + SHIFT_DOWN) + ')')
-        .call(d3.axisBottom(xScale).ticks(1)); // Create an axis component with d3.axisBottom
+        .call(d3.axisBottom(xScale).ticks(3)); // Create an axis component with d3.axisBottom
 
     // y-axis
     svg.append('g')
