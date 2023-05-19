@@ -1,5 +1,6 @@
 let Gscale_auto; //scaling the main image
-let imageURL_auto;
+let imageURL_auto; // = "file:///D:/Daten/Bachelorarbeit/bachelor_thesis/source_code/sample_charts/sunspots_smooth.png";
+// comment this in to always use the sunspots sample chart
 
 //thumbnail sizes
 const THUMBNAIL_WIDTH = 175;
@@ -29,6 +30,9 @@ function toDataURL(src, callback, outputFormat) {
     }
 }
 
+// comment this in to only use the sunspots sample chart 
+// TODO: remove
+// chrome.storage.sync.set({key: imageURL_auto}, function () {});
 
 chrome.storage.sync.get(['key'], function (result) {
     //set the image
@@ -209,6 +213,14 @@ chrome.storage.sync.get(['key'], function (result) {
                                 if (trunc) {
                                     const ORIG_OFFSET = 150;
                                     drawThumbTrunc(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, ORIG_OFFSET, annotation, global_inverted);
+
+                                    //draw the test UI
+                                    //TODO remove this
+                                    var box = d3.select('#redBox');
+                                    oldViewBox = box.append('div').attr('class', 'row justify-content-center')
+                                    drawThumbTrunc(l_margin, l_width, l_height, local_xr, local_yr, local_data, oldViewBox, ORIG_OFFSET, annotation, global_inverted);
+                                    box.append('hr')
+                                    drawTestUI(l_margin, l_width, l_height, local_xr, local_yr, local_data, box, ORIG_OFFSET, annotation, global_inverted);
 
                                 } else if (inverted) {
                                     const ORIG_OFFSET = 150;
@@ -467,6 +479,175 @@ function drawThumbAR(l_margin, l_width, l_height, local_xr, local_yr, local_data
         .attr('d', line2); // 11. Calls the line generator
 
     //add link
+
+}
+
+//function that draws our whole test UI consisting of a title, the list of detected features, and the control and recommended charts
+function drawTestUI(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, OFFSET, annotation, inverted) {
+    // draw an example header
+    testUITitleDiv = div2.append('div').attr('class', 'row test-row justify-content-center')
+    testUITitleDiv.append('p').text("This is our test function for the control chart:")
+
+    // draw the list of mislead features
+    detectedFeaturesDiv = div2.append('div').attr('class', 'row justify-content-center')
+    drawMisleadFeaturesList(detectedFeaturesDiv, annotation);
+    
+    // make a div for the charts
+    chartsDiv = div2.append('div').attr('class', 'row justify-content-center')
+    
+    // draw the control chart
+    controlChartDiv = chartsDiv.append('div')
+    controlChartDiv.append('p').text("Control Chart:")
+    drawControlChart(l_margin, l_width, l_height, local_xr, local_yr, local_data, controlChartDiv, OFFSET, annotation, inverted);
+
+    // draw the recommended chart
+    recommendedChartDiv = chartsDiv.append('div')
+    recommendedChartDiv.append('p').text("Recommended Chart:")
+    drawRecommendedChart(l_margin, l_width, l_height, local_xr, local_yr, local_data, recommendedChartDiv, OFFSET, annotation, inverted);
+}
+
+//function to draw the list of mislead features
+//TODO: we need to provide useful information about each detected feature in this list aswell
+function drawMisleadFeaturesList(div2, annotation) {
+    const split_up = annotation.split('[newline]');
+    
+    for (var i = 0; i < split_up.length; ++i) {
+        if (split_up[i] != "") {
+            detectedFeaturesDiv.append('text')
+            .text("- " + split_up[i]).append('br');
+        }
+    }
+}
+
+//function to draw the control chart
+//TODO: instead of just giving the x and y ranges, we need to give the number of ticks as well
+function drawControlChart(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, OFFSET, annotation, inverted) {
+
+    const SPACING = 11;
+    const split_up = annotation.split('[newline]');
+    const LIMIT_WIDTH = 30;
+
+    var xScale = d3.scaleLinear()   // xScale is width of graphic
+        .domain([local_xr[0], local_xr[1]])
+        .range([0, l_width - LIMIT_WIDTH]);
+
+    var yScale = d3.scaleLinear()   // yScale is height of graphic
+        .domain([local_yr[0], local_yr[1]])
+        .range([l_height, 0]);
+
+    var line = d3.line()
+        .x(function (d, i) {
+            return xScale(d.x);
+        }) // set the x values for the line generator
+        .y(function (d) {
+            return yScale(d.y);
+        });
+
+    var dataset = local_data.map(function (d) {
+        return {
+            'x': parseFloat(d.x),
+            'y': parseFloat(d.y)
+        };
+    });
+
+    const EXPAND_WIDTH = 50;
+    var svg = div2
+        .append('svg')
+        .attr('width', l_width + EXPAND_WIDTH)
+        .append('g')
+        .attr('align', 'center')
+
+    const SHIFT_DOWN = split_up.length * SPACING;
+    const SHIFT_RIGHT = 40;
+
+    // x-axis
+    svg.append('g')
+        .attr('class', 'xaxisblack')
+        .attr('color', 'black')
+        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (l_height + SHIFT_DOWN) + ')')
+        .call(d3.axisBottom(xScale).ticks(1)); // Create an axis component with d3.axisBottom
+
+    // y-axis
+    svg.append('g')
+        .style('font', '11px Segoe UI')
+        .style('stroke', '#ef8a62')
+        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
+        .call(d3.axisLeft(yScale).ticks(3));
+
+    //append the datapath
+    svg.append('path')
+        .datum(dataset) // 10. Binds data to the line
+        .attr('class', 'line') // Assign a class for styling
+        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
+        .attr('d', line); // 11. Calls the line generator
+}
+
+function drawRecommendedChart(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, OFFSET, annotation, inverted) {
+
+    const SPACING = 11;
+    const split_up = annotation.split('[newline]');
+    let yScale2;
+    const LIMIT_WIDTH = 30;
+
+    var xScale2 = d3.scaleLinear()
+        .domain([local_xr[0], local_xr[1]])
+        .range([0, l_width - LIMIT_WIDTH]);
+
+    if (inverted) {
+        yScale2 = d3.scaleLinear()
+            .domain([local_yr[0], 0]) //zero baseline
+            .range([l_height, 0]);
+    } else {
+        yScale2 = d3.scaleLinear()
+            .domain([0, local_yr[1]]) //zero baseline
+            .range([l_height, 0]);
+    }
+
+    var line2 = d3.line()
+        .x(function (d, i) {
+            return xScale2(d.x);
+        })
+        .y(function (d) {
+            return yScale2(d.y);
+        });
+
+    var dataset = local_data.map(function (d) {
+        return {
+            'x': parseFloat(d.x),
+            'y': parseFloat(d.y)
+        };
+    });
+
+    const EXPAND_WIDTH = 50;
+    var svg = div2
+        .append('svg')
+        .attr('width', l_width + EXPAND_WIDTH)
+        .append('g')
+        .attr('align', 'center')
+
+    const SHIFT_DOWN = split_up.length * SPACING;
+    const SHIFT_RIGHT = 40;
+
+    // x-axis
+    svg.append('g')
+        .attr('class', 'xaxisblack')
+        .attr('color', 'black')
+        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (l_height + SHIFT_DOWN) + ')')
+        .call(d3.axisBottom(xScale2).ticks(1)); // Create an axis component with d3.axisBottom
+
+    // y-axis
+    svg.append('g')
+        .style('font', '11px Segoe UI')
+        .style('stroke', '#67a9cf')
+        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
+        .call(d3.axisLeft(yScale2).ticks(3));
+
+    // //append the datapath2
+    svg.append('path')
+        .datum(dataset) // 10. Binds data to the line
+        .attr('class', 'line') // Assign a class for styling
+        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
+        .attr('d', line2); // 11. Calls the line generator
 
 }
 
