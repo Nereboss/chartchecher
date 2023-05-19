@@ -325,178 +325,7 @@ function drawModalUI(arr) {          //arr gets returned as a json object contai
     }
 }
 
-function drawThumbAR(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, OFFSET, a1, a2, annotation, inverted) {
 
-    const max_width = l_width;
-    const max_height = l_height;
-
-    let WIDTH1, WIDTH2, HEIGHT1, HEIGHT2;
-    WIDTH1 = l_width, WIDTH2 = l_width;
-    HEIGHT1 = l_height , HEIGHT2 = l_height;
-
-
-    //adjust width1
-    if (a1 > max_width / max_height) {
-        //fix x(width) to max_width
-        WIDTH1 = max_width;
-        HEIGHT1 = WIDTH1 / a1;
-    } else {
-        //fix y(height) to max_height
-        HEIGHT1 = max_height;
-        WIDTH1 = HEIGHT1 * a1;
-    }
-
-
-    var dataset = local_data.map(function (d) {
-        return {
-            'x': parseFloat(d.x),
-            'y': parseFloat(d.y)
-        };
-    });
-
-
-    var xScale = d3.scaleLinear()
-        .domain([local_xr[0], local_xr[1]])
-        .range([0, WIDTH1]);
-
-    var yScale = d3.scaleLinear()
-        .domain([local_yr[0], local_yr[1]])
-        .range([HEIGHT1, 0]);
-
-
-    if (a2 > max_width / max_height) {
-        //fix x(width) to max_width
-        WIDTH2 = max_width;
-        HEIGHT2 = WIDTH2 / a2;
-    } else {
-        //fix y(height) to max_height
-        HEIGHT2 = max_height;
-        WIDTH2 = HEIGHT2 * a2;
-    }
-
-    var xScale2 = d3.scaleLinear()
-        .domain([local_xr[0], local_xr[1]])
-        .range([0, WIDTH2]);
-
-    var yScale2 = d3.scaleLinear()
-        .domain([local_yr[0], local_yr[1]])
-        .range([HEIGHT2, 0]);
-
-
-    var line = d3.line()
-        .x(function (d, i) {
-            return xScale(d.x);
-        }) // set the x values for the line generator
-        .y(function (d) {
-            return yScale(d.y);
-        });
-
-    var line2 = d3.line()
-        .x(function (d, i) {
-            return xScale2(d.x);
-        }) // set the x values for the line generator
-        .y(function (d) {
-            return yScale2(d.y);
-        });
-
-
-    const EXPAND_WIDTH = 70;
-    const EXPAND_HEIGHT = 300;
-    var svg = div2.append('svg')
-        .attr('width', l_width + l_margin.left + l_margin.right + EXPAND_WIDTH)
-        .attr('height', l_height + l_margin.top + l_margin.bottom + EXPAND_HEIGHT)
-        .append('g')
-        .attr('transform', 'translate(' + (l_margin.left - OFFSET+25) + ',' + (l_margin.top) + ')');
-
-
-    const split_up = annotation.split('. ');
-
-    const SPACING = 11;
-    for (var i = 0; i < split_up.length; ++i) {
-        svg.append('text')
-            .attr('width', 425)
-            .attr('x', 180)
-            .attr('y', -35 + i * SPACING)
-            .attr('text-anchor', 'middle')
-            .attr('fill', 'black')
-            .attr('z-index', 10000000000)
-            .text(split_up[i]);
-    }
-
-
-    //add title
-    svg.append('text')
-        .attr('x', 50)
-        .attr('y', 18)
-        .attr('text-anchor', 'middle')
-        .attr('fill', 'black')
-        .attr('z-index', 10000000000)
-        .text('Original');
-
-    //add second title
-    svg.append('text')
-        .attr('x', 250)
-        .attr('y', 18)
-        .attr('text-anchor', 'middle')
-        .attr('fill', 'black')
-        .attr('z-index', 10000000000)
-        .text('Ideal Aspect Ratio');
-
-    const SHIFT_DOWN = 30;
-    const SHIFT_RIGHT = 10;
-
-
-    //xaxis
-    svg.append('g')
-        .attr('class', 'xaxisblack')
-        .attr('color', 'black')
-        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (l_height + SHIFT_DOWN) + ')')
-        .call(d3.axisBottom(xScale).ticks(0)); // Create an axis component with d3.axisBottom
-
-    //second xaxis
-    svg.append('g')
-        .attr('class', 'xaxisblack')
-        .attr('color', 'black')
-        .attr('transform', 'translate(200,' + (l_height + SHIFT_DOWN/(a2/a1)) + ')')
-        .call(d3.axisBottom(xScale).ticks(0)); // Create an axis component with d3.axisBottom
-    // .attr("transform", "translate(" + (l_margin.left - OFFSET) + "," + (l_margin.top) + ")");
-
-
-    //yaxis
-    svg.append('g')
-        .style('font', '11px Segoe UI')
-
-        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
-        .call(d3.axisLeft(yScale).ticks(1));
-
-    //second yaxis
-    svg.append('g')
-        .style('font', '11px Segoe UI')
-
-        .attr('transform', 'translate(200,' + SHIFT_DOWN + ')')
-        .call(d3.axisLeft(yScale2).ticks(1));
-
-
-    //append the datapath
-    svg.append('path')
-        .datum(dataset) // 10. Binds data to the line
-        .attr('class', 'line') // Assign a class for styling
-        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
-        .attr('d', line); // 11. Calls the line generator
-
-
-    //append the datapath2
-    // for the datapath2, make sure the extent of the data is there.
-    // extent for y
-    svg.append('path')
-        .datum(dataset) // 10. Binds data to the line
-        .attr('class', 'line') // Assign a class for styling
-        .attr('transform', 'translate(200,' + SHIFT_DOWN + ')')
-        .attr('d', line2); // 11. Calls the line generator
-
-    //add link
-
-}
 
 //function that draws our whole test UI consisting of a title, the list of detected features, and the control and recommended charts
 function drawTestUI(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, OFFSET, annotation, inverted) {
@@ -698,6 +527,179 @@ function drawRecommendedChart(l_width, l_height, local_xr, local_yr, local_data,
         .attr('class', 'line') // Assign a class for styling
         .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
         .attr('d', line); // 11. Calls the line generator
+
+}
+
+function drawThumbAR(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, OFFSET, a1, a2, annotation, inverted) {
+
+    const max_width = l_width;
+    const max_height = l_height;
+
+    let WIDTH1, WIDTH2, HEIGHT1, HEIGHT2;
+    WIDTH1 = l_width, WIDTH2 = l_width;
+    HEIGHT1 = l_height , HEIGHT2 = l_height;
+
+
+    //adjust width1
+    if (a1 > max_width / max_height) {
+        //fix x(width) to max_width
+        WIDTH1 = max_width;
+        HEIGHT1 = WIDTH1 / a1;
+    } else {
+        //fix y(height) to max_height
+        HEIGHT1 = max_height;
+        WIDTH1 = HEIGHT1 * a1;
+    }
+
+
+    var dataset = local_data.map(function (d) {
+        return {
+            'x': parseFloat(d.x),
+            'y': parseFloat(d.y)
+        };
+    });
+
+
+    var xScale = d3.scaleLinear()
+        .domain([local_xr[0], local_xr[1]])
+        .range([0, WIDTH1]);
+
+    var yScale = d3.scaleLinear()
+        .domain([local_yr[0], local_yr[1]])
+        .range([HEIGHT1, 0]);
+
+
+    if (a2 > max_width / max_height) {
+        //fix x(width) to max_width
+        WIDTH2 = max_width;
+        HEIGHT2 = WIDTH2 / a2;
+    } else {
+        //fix y(height) to max_height
+        HEIGHT2 = max_height;
+        WIDTH2 = HEIGHT2 * a2;
+    }
+
+    var xScale2 = d3.scaleLinear()
+        .domain([local_xr[0], local_xr[1]])
+        .range([0, WIDTH2]);
+
+    var yScale2 = d3.scaleLinear()
+        .domain([local_yr[0], local_yr[1]])
+        .range([HEIGHT2, 0]);
+
+
+    var line = d3.line()
+        .x(function (d, i) {
+            return xScale(d.x);
+        }) // set the x values for the line generator
+        .y(function (d) {
+            return yScale(d.y);
+        });
+
+    var line2 = d3.line()
+        .x(function (d, i) {
+            return xScale2(d.x);
+        }) // set the x values for the line generator
+        .y(function (d) {
+            return yScale2(d.y);
+        });
+
+
+    const EXPAND_WIDTH = 70;
+    const EXPAND_HEIGHT = 300;
+    var svg = div2.append('svg')
+        .attr('width', l_width + l_margin.left + l_margin.right + EXPAND_WIDTH)
+        .attr('height', l_height + l_margin.top + l_margin.bottom + EXPAND_HEIGHT)
+        .append('g')
+        .attr('transform', 'translate(' + (l_margin.left - OFFSET+25) + ',' + (l_margin.top) + ')');
+
+
+    const split_up = annotation.split('. ');
+
+    const SPACING = 11;
+    for (var i = 0; i < split_up.length; ++i) {
+        svg.append('text')
+            .attr('width', 425)
+            .attr('x', 180)
+            .attr('y', -35 + i * SPACING)
+            .attr('text-anchor', 'middle')
+            .attr('fill', 'black')
+            .attr('z-index', 10000000000)
+            .text(split_up[i]);
+    }
+
+
+    //add title
+    svg.append('text')
+        .attr('x', 50)
+        .attr('y', 18)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'black')
+        .attr('z-index', 10000000000)
+        .text('Original');
+
+    //add second title
+    svg.append('text')
+        .attr('x', 250)
+        .attr('y', 18)
+        .attr('text-anchor', 'middle')
+        .attr('fill', 'black')
+        .attr('z-index', 10000000000)
+        .text('Ideal Aspect Ratio');
+
+    const SHIFT_DOWN = 30;
+    const SHIFT_RIGHT = 10;
+
+
+    //xaxis
+    svg.append('g')
+        .attr('class', 'xaxisblack')
+        .attr('color', 'black')
+        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (l_height + SHIFT_DOWN) + ')')
+        .call(d3.axisBottom(xScale).ticks(0)); // Create an axis component with d3.axisBottom
+
+    //second xaxis
+    svg.append('g')
+        .attr('class', 'xaxisblack')
+        .attr('color', 'black')
+        .attr('transform', 'translate(200,' + (l_height + SHIFT_DOWN/(a2/a1)) + ')')
+        .call(d3.axisBottom(xScale).ticks(0)); // Create an axis component with d3.axisBottom
+    // .attr("transform", "translate(" + (l_margin.left - OFFSET) + "," + (l_margin.top) + ")");
+
+
+    //yaxis
+    svg.append('g')
+        .style('font', '11px Segoe UI')
+
+        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
+        .call(d3.axisLeft(yScale).ticks(1));
+
+    //second yaxis
+    svg.append('g')
+        .style('font', '11px Segoe UI')
+
+        .attr('transform', 'translate(200,' + SHIFT_DOWN + ')')
+        .call(d3.axisLeft(yScale2).ticks(1));
+
+
+    //append the datapath
+    svg.append('path')
+        .datum(dataset) // 10. Binds data to the line
+        .attr('class', 'line') // Assign a class for styling
+        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
+        .attr('d', line); // 11. Calls the line generator
+
+
+    //append the datapath2
+    // for the datapath2, make sure the extent of the data is there.
+    // extent for y
+    svg.append('path')
+        .datum(dataset) // 10. Binds data to the line
+        .attr('class', 'line') // Assign a class for styling
+        .attr('transform', 'translate(200,' + SHIFT_DOWN + ')')
+        .attr('d', line2); // 11. Calls the line generator
+
+    //add link
 
 }
 
