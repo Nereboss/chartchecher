@@ -9,6 +9,20 @@ const THUMBNAIL_WIDTH = 175*SCALE;
 const THUMBNAIL_HEIGHT = 175*SCALE;
 const portNumber = 5000;
 
+//make the data needed to draw the chart global variables to be able to easily redraw the charts on an update
+var chartWidth;
+var chartHeight;
+var chartXRange;
+var chartYRange;
+var chartGraphData;
+var detectedFeatures = {        //object represents all detectable misleading features
+    "truncatedY": false,
+    "invertedY": false,
+    "misleadingAR": false,
+    "missingLabels": false,
+    "multipleAxis": false,
+    "nonLinearAxis": false
+}
 
 //function converts to base64
 //dupplicated code frag
@@ -104,22 +118,27 @@ function drawModalUI(arr) {          //arr gets returned as a json object contai
     local_data = JSON.parse(local_data);
     local_data.splice(local_data.length - 1); //remove last element
 
+    var l_margin = {top: 50, right: 10, bottom: 20, left: 150};
 
-    var l_margin = {top: 50, right: 10, bottom: 20, left: 150},
-        l_width = THUMBNAIL_WIDTH - l_margin.left - l_margin.right,
-        l_height = THUMBNAIL_HEIGHT - l_margin.top - l_margin.bottom;
+    chartWidth = THUMBNAIL_WIDTH - l_margin.left - l_margin.right;
+    chartHeight = THUMBNAIL_HEIGHT - l_margin.top - l_margin.bottom;
+    chartXRange = arr.xRange;
+    chartYRange = arr.yRange;
+    chartGraphData = JSON.stringify(arr.data);
+    chartGraphData = JSON.parse(chartGraphData);
+    chartGraphData.splice(chartGraphData.length - 1); //remove last element
 
     const small_margin = 10;
 
 
     if (local_ar > 10 / 3) {
         //fix x to THUMBNAIL_WIDTH
-        l_width = THUMBNAIL_WIDTH - small_margin;
-        l_height = parseInt(l_width / local_ar);
+        chartWidth = THUMBNAIL_WIDTH - small_margin;
+        chartHeight = parseInt(chartWidth / local_ar);
     } else {
         //fix y to THUMBNAIL_HEIGHT
-        l_height = THUMBNAIL_HEIGHT - l_margin.top - l_margin.bottom;
-        l_width = parseInt(local_ar * l_height);
+        chartHeight = THUMBNAIL_HEIGHT - l_margin.top - l_margin.bottom;
+        chartWidth = parseInt(local_ar * chartHeight);
     }
 
     const modal = document.getElementById('Modal2');
@@ -167,7 +186,7 @@ function drawModalUI(arr) {          //arr gets returned as a json object contai
     box.append('hr')
     // this does not correctly work for charts with inverted y-axis because we are not checking for that yet 
     // to fix this we first need to adjust the order in which the misleading features are detected
-    drawTestUI(l_margin, l_width, l_height, local_xr, local_yr, local_data, box, 0, arr.messages, global_inverted);
+    drawTestUI(chartWidth, chartHeight, chartXRange, chartYRange, chartGraphData, box, arr.messages, global_inverted);
 
 
 
@@ -237,7 +256,7 @@ function drawModalUI(arr) {          //arr gets returned as a json object contai
 
                 if (trunc) {
                     const ORIG_OFFSET = 150;
-                    drawThumbTrunc(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, ORIG_OFFSET, annotation, global_inverted);
+                    drawThumbTrunc(l_margin, chartWidth, chartHeight, local_xr, local_yr, local_data, div2, ORIG_OFFSET, annotation, global_inverted);
 
                     // //draw the test UI
                     //TODO remove this
@@ -247,11 +266,11 @@ function drawModalUI(arr) {          //arr gets returned as a json object contai
                     // box.append('hr')
 
                     //we were able to savely remove everything else from the loop except this, try to find out what gets changed in the loop to effect this
-                    drawTestUI(l_margin, l_width, l_height, local_xr, local_yr, local_data, box, ORIG_OFFSET, annotation, global_inverted);
+                    drawTestUI(chartWidth, chartHeight, local_xr, local_yr, local_data, box, annotation, global_inverted);
 
                 } else if (inverted) {
                     const ORIG_OFFSET = 150;
-                    drawThumbInverted(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, ORIG_OFFSET, annotation);
+                    drawThumbInverted(l_margin, chartWidth, chartHeight, local_xr, local_yr, local_data, div2, ORIG_OFFSET, annotation);
 
 
                 } else if (aspect) {
@@ -261,7 +280,7 @@ function drawModalUI(arr) {          //arr gets returned as a json object contai
                     const a1 = parseFloat(aspect1);
                     const aspect2 = str.split('Ideal AR: ')[1];
                     const a2 = parseFloat(aspect2);
-                    drawThumbAR(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, ORIG_OFFSET, a1, a2, annotation, global_inverted);
+                    drawThumbAR(l_margin, chartWidth, chartHeight, local_xr, local_yr, local_data, div2, ORIG_OFFSET, a1, a2, annotation, global_inverted);
 
                     //set timeout for Aspect Popup
                     setTimeout(() => {
@@ -328,17 +347,7 @@ function drawModalUI(arr) {          //arr gets returned as a json object contai
 
 
 //function that draws our whole test UI consisting of a title, the list of detected features, and the control and recommended charts
-function drawTestUI(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, OFFSET, annotation, inverted) {
-
-    // make variables for the detectable misleading features
-    let detectedFeatures = {
-        "truncatedY": false,
-        "invertedY": false,
-        "misleadingAR": false,
-        "missingLabels": false,
-        "multipleAxis": false,
-        "nonLinearAxis": false
-    }
+function drawTestUI(l_width, l_height, local_xr, local_yr, local_data, parentDiv, annotation, inverted) {
     
     //iterate over annotations to set which misleading features have been detected
     //TODO add more later (missling labels, multiple axis, non-linear axis, etc.)
@@ -357,46 +366,73 @@ function drawTestUI(l_margin, l_width, l_height, local_xr, local_yr, local_data,
     }
 
     // draw an example header
-    testUITitleDiv = div2.append('div').attr('class', 'row test-row justify-content-center')
+    testUITitleDiv = parentDiv.append('div').attr('class', 'row test-row justify-content-center')
     testUITitleDiv.append('p').text("This is our test function for the control chart:")
 
     // draw the list of mislead features
-    detectedFeaturesDiv = div2.append('div').attr('class', 'row justify-content-center')
-    drawMisleadFeaturesList(detectedFeaturesDiv, annotation);
+    let detectedFeaturesDiv = parentDiv.append('div').attr('class', 'row justify-content-center')
+    drawMisleadFeaturesList(detectedFeaturesDiv);
 
     // make a div for the charts
-    chartsDiv = div2.append('div').attr('class', 'row justify-content-center')
+    let chartsDiv = parentDiv.append('div').attr('class', 'row justify-content-center')
     
     // draw the control chart
-    controlChartDiv = chartsDiv.append('div')
+    let controlChartDiv = chartsDiv.append('div')
     controlChartDiv.append('p').text("Control Chart:")
-    drawControlChart(l_margin, l_width, l_height, local_xr, local_yr, local_data, controlChartDiv, OFFSET, annotation, inverted);
+    drawControlChart(l_width, l_height, local_xr, local_yr, local_data, controlChartDiv, annotation, inverted);
 
     // draw the recommended chart
-    recommendedChartDiv = chartsDiv.append('div')
+    let recommendedChartDiv = chartsDiv.append('div')
     recommendedChartDiv.append('p').text("Recommended Chart:")
     //need to give the function that draws the recommended chart which misleading features have been detected
     // the control chart is bascially the same just with all misleading features set to false so we can use that for testing
     drawRecommendedChart(l_width, l_height, local_xr, local_yr, local_data, recommendedChartDiv, inverted);
 
     //test generic function to draw all the charts, this later replaces the others
-    div2.append('hr')
-    drawAnyChart(l_width, l_height, local_xr, local_yr, local_data, div2, detectedFeatures);
+    parentDiv.append('hr')
+    let testChartDiv = parentDiv.append('div').attr('id', 'testChartDiv')
+    drawAnyChart(testChartDiv);
 }
 
 //function to draw the list of mislead features
 //TODO: we need to provide useful information about each detected feature in this list aswell
-function drawMisleadFeaturesList(div, annotation) {
+function drawMisleadFeaturesList(div) {
     innerDiv = div.append('p')    // we need an inner element (div or p both work) to make the text wrap as a div of class col ignores <br> tags
     innerDiv.text("Detected Misleading Features:").append('br');
-    
-    for (var i = 0; i < annotation.length; ++i) {
-        if (annotation[i] != null) {
+
+    for (const [feature, isDetected] of Object.entries(detectedFeatures)) {
+        console.log(`${feature}: ${isDetected}`)
+        if (isDetected) {
             innerDiv.append('text')
-            .text("- " + annotation[i]);
-            innerDiv.append('br');
+                .text("- " + feature)
+                .append('button')
+                .attr('type', 'button')
+                .attr('id', feature)
+                .attr('class', 'btn btn-primary btn-sm')
+                .text(isDetected)
+                .on('click', function () {toggleFeatureButton(feature)});
+                innerDiv.append('br');
         }
     }
+}
+
+/**
+ * updates the recommended chart to represent the given feature, also updates the global variable for that feature
+ * @param {string} feature 
+ */
+function toggleFeatureButton(feature) {
+    detectedFeatures[feature] = !detectedFeatures[feature];
+
+    let featureButton = document.getElementById(feature);
+    featureButton.firstChild.data = detectedFeatures[feature];      //sets the button text
+
+    let oldChartSVG = document.getElementById('recommendedSVG');
+    if (oldChartSVG != null) {
+        oldChartSVG.remove();          //remove the old recommended chart
+    }
+
+    let parentDiv = d3.select('#testChartDiv')
+    drawAnyChart(parentDiv);          //draw the recommended chart again now that the global variable has been updated
 }
 
 
@@ -404,15 +440,15 @@ function drawMisleadFeaturesList(div, annotation) {
  * function that we use to draw all the chart images in the UI
  * TODO: expand this function step by step to eventually include the removal of all misleading features
  * if all detected tactics are false, it will draw the input-image (control chart)
- * @param {*} l_width 
- * @param {*} l_height 
- * @param {Array} local_xr 
- * @param {Array} local_yr 
- * @param {*} local_data 
+ * @param {*} chartWidth 
+ * @param {*} chartHeight 
+ * @param {Array} chartXRange 
+ * @param {Array} chartYRange 
+ * @param {*} chartGraphData 
  * @param {html_element} parentDiv 
  * @param {json} detectedFeatures contains all the detectable misleading features, every entry is either true or false whether it was detected or not
  */
-function drawAnyChart(l_width, l_height, local_xr, local_yr, local_data, parentDiv, detectedFeatures) {
+function drawAnyChart(parentDiv) {
 
     const SPACING = 11;
     // const split_up = annotation.split('[newline]');
@@ -420,13 +456,13 @@ function drawAnyChart(l_width, l_height, local_xr, local_yr, local_data, parentD
     
     // using d3 to construct a linear scale for the x- and y-axis 
     // (domain is the range of values in the data, range is the range of values in the chart)
-    var xScale = d3.scaleLinear()   
-        .domain([local_xr[0], local_xr[1]])
-        .range([0, l_width - LIMIT_WIDTH]);
+    let xScale = d3.scaleLinear()   
+        .domain([chartXRange[0], chartXRange[1]])
+        .range([0, chartWidth - LIMIT_WIDTH]);
 
-    var yAxis;              // yScale is height of graphic
-    var yBottomValue = local_yr[0];       //the value at the bottom of the y-axis
-    var yTopValue = local_yr[1];          //the value at the very top of the y-axis
+    let yAxis;              // yScale is height of graphic
+    let yBottomValue = chartYRange[0];       //the value at the bottom of the y-axis
+    let yTopValue = chartYRange[1];          //the value at the very top of the y-axis
     if (detectedFeatures.truncatedY) {
         yBottomValue = 0;        // when the y-axis is truncated set the bottom value to zero instead if the truncated value
     }
@@ -437,11 +473,11 @@ function drawAnyChart(l_width, l_height, local_xr, local_yr, local_data, parentD
     }
     yAxis = d3.scaleLinear()
             .domain([yBottomValue, yTopValue])
-            .range([l_height, 0]);      //height is first because it will be drawn "top to bottom"
+            .range([chartHeight, 0]);      //height is first because it will be drawn "top to bottom"
 
     
 
-    var line = d3.line()
+    let line = d3.line()
         .x(function (d, i) {
             return xScale(d.x);
         }) // set the x values for the line generator
@@ -449,7 +485,7 @@ function drawAnyChart(l_width, l_height, local_xr, local_yr, local_data, parentD
             return yAxis(d.y);
         });
 
-    var dataset = local_data.map(function (d) {
+    let dataset = chartGraphData.map(function (d) {
         return {
             'x': parseFloat(d.x),
             'y': parseFloat(d.y)
@@ -458,10 +494,11 @@ function drawAnyChart(l_width, l_height, local_xr, local_yr, local_data, parentD
 
     const EXPAND_WIDTH = 50;
     const EXPAND_HEIGHT = 50;
-    var svg = parentDiv
+    let svg = parentDiv
         .append('svg')
-        .attr('width', l_width + EXPAND_WIDTH)
-        .attr('height', l_height + EXPAND_HEIGHT)
+        .attr('width', chartWidth + EXPAND_WIDTH)
+        .attr('height', chartHeight + EXPAND_HEIGHT)
+        .attr('id', 'recommendedSVG')
         .append('g')
         .attr('align', 'center')
 
@@ -473,7 +510,7 @@ function drawAnyChart(l_width, l_height, local_xr, local_yr, local_data, parentD
     svg.append('g')
         .attr('class', 'xaxisblack')
         .attr('color', 'black')
-        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (l_height + SHIFT_DOWN) + ')')
+        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (chartHeight + SHIFT_DOWN) + ')')
         .call(d3.axisBottom(xScale).ticks(3)); // Create an axis component with d3.axisBottom
 
     // y-axis
@@ -494,7 +531,7 @@ function drawAnyChart(l_width, l_height, local_xr, local_yr, local_data, parentD
 
 //function to draw the control chart
 //TODO: instead of just giving the x and y ranges, we need to give the number of ticks as well
-function drawControlChart(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, OFFSET, annotation, inverted) {
+function drawControlChart(l_width, l_height, local_xr, local_yr, local_data, div2, annotation, inverted) {
 
     const SPACING = 11;
     // const split_up = annotation.split('[newline]');
