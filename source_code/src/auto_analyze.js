@@ -15,13 +15,13 @@ var chartHeight;
 var chartXRange;
 var chartYRange;
 var chartGraphData;
-var detectedFeatures = {        //object represents all detectable misleading features
-    "truncatedY": false,
-    "invertedY": false,
-    "misleadingAR": false,
-    "missingLabels": false,
-    "multipleAxis": false,
-    "nonLinearAxis": false
+var detectedFeatures = {        //object represents all detectable misleading features; default is false but elements are arrays so that features can store necessary data for drawing of the charts
+    "truncatedY": [false],
+    "invertedY": [false],
+    "misleadingAR": [false],          //we need to store the ideal aspect ratio to draw the chart correctly (when this is zero, the aspect ratio is not misleading)
+    "missingLabels": [false],
+    "multipleAxis": [false],
+    "nonLinearAxis": [false]
 }
 
 //function converts to base64
@@ -354,13 +354,23 @@ function drawTestUI(l_width, l_height, local_xr, local_yr, local_data, parentDiv
     for (let i = 0; i < annotation.length; i++) {
         if (annotation[i] != null) {
             if (annotation[i].includes("truncated")) {
-                detectedFeatures.truncatedY = true;
+                detectedFeatures.truncatedY[0] = true;
             }
             if (annotation[i].includes("inverted")) {
-                detectedFeatures.invertedY = true;
+                detectedFeatures.invertedY[0] = true;
             }
             if (annotation[i].includes("(AR)")) {
-                detectedFeatures.misleadingAR = true;
+                detectedFeatures.misleadingAR[0] = true;
+                //change this later when the python files already returns the needed numbers
+                //detectedFeatures.misleadingAR[2] = parseFloat(annotation[i].split("Ideal AR: ")[1]);
+
+                //this is old code borrowed from the original work; replace it later
+                const aspect1 = (annotation[i].split('Actual Aspect Ratio (AR): ')[1].split('Ideal'));
+                const a1 = parseFloat(aspect1);
+                const aspect2 = annotation[i].split('Ideal AR: ')[1];
+                const a2 = parseFloat(aspect2);
+                detectedFeatures.misleadingAR[1] = a1;
+                detectedFeatures.misleadingAR[2] = a2;
             }
         }   
     }
@@ -383,7 +393,7 @@ function drawTestUI(l_width, l_height, local_xr, local_yr, local_data, parentDiv
 
     // draw the recommended chart
     let recommendedChartDiv = chartsDiv.append('div')
-    recommendedChartDiv.append('p').text("Recommended Chart:")
+    recommendedChartDiv.append('p').text("Truncated Chart:")
     //need to give the function that draws the recommended chart which misleading features have been detected
     // the control chart is bascially the same just with all misleading features set to false so we can use that for testing
     drawRecommendedChart(l_width, l_height, local_xr, local_yr, local_data, recommendedChartDiv, inverted);
@@ -402,14 +412,14 @@ function drawMisleadFeaturesList(div) {
 
     for (const [feature, isDetected] of Object.entries(detectedFeatures)) {
         console.log(`${feature}: ${isDetected}`)
-        if (isDetected) {
+        if (isDetected[0]) {
             innerDiv.append('text')
                 .text("- " + feature)
                 .append('button')
                 .attr('type', 'button')
                 .attr('id', feature)
                 .attr('class', 'btn btn-primary btn-sm')
-                .text(isDetected)
+                .text(isDetected[0])
                 .on('click', function () {toggleFeatureButton(feature)});
                 innerDiv.append('br');
         }
@@ -421,10 +431,10 @@ function drawMisleadFeaturesList(div) {
  * @param {string} feature 
  */
 function toggleFeatureButton(feature) {
-    detectedFeatures[feature] = !detectedFeatures[feature];
+    detectedFeatures[feature][0] = !detectedFeatures[feature][0];
 
     let featureButton = document.getElementById(feature);
-    featureButton.firstChild.data = detectedFeatures[feature];      //sets the button text
+    featureButton.firstChild.data = detectedFeatures[feature][0];      //sets the button text
 
     let oldChartSVG = document.getElementById('recommendedSVG');
     if (oldChartSVG != null) {
@@ -453,27 +463,44 @@ function drawAnyChart(parentDiv) {
     const SPACING = 11;
     // const split_up = annotation.split('[newline]');
     const LIMIT_WIDTH = 30;
+
+    //the dimension of the drawn chart (in pixels)
+    let xAxisSize = chartWidth;
+    let yAxisSize = chartHeight;
+
+    // when the original aspect ratio is misleading we need to draw the chart using the ideal aspect ratio
+    if (detectedFeatures.misleadingAR[0]) {
+        if(detectedFeatures.misleadingAR[2] > chartWidth / chartHeight) {
+            yAxisSize = xAxisSize / detectedFeatures.misleadingAR[2];       //when the ideal AR is larger than the original AR we need to make the y-axis smaller
+        }
+        else {
+            xAxisSize = yAxisSize * detectedFeatures.misleadingAR[2];       //when the ideal AR is smaller than the original AR we need to make the x-axis smaller
+        }
+    }
     
     // using d3 to construct a linear scale for the x- and y-axis 
     // (domain is the range of values in the data, range is the range of values in the chart)
     let xScale = d3.scaleLinear()   
         .domain([chartXRange[0], chartXRange[1]])
-        .range([0, chartWidth - LIMIT_WIDTH]);
+        .range([0, xAxisSize]);
 
     let yAxis;              // yScale is height of graphic
     let yBottomValue = chartYRange[0];       //the value at the bottom of the y-axis
     let yTopValue = chartYRange[1];          //the value at the very top of the y-axis
-    if (detectedFeatures.truncatedY) {
-        yBottomValue = 0;        // when the y-axis is truncated set the bottom value to zero instead if the truncated value
+
+    // when the y-axis is truncated set the bottom value to zero instead if the truncated value
+    if (detectedFeatures.truncatedY[0]) {
+        yBottomValue = 0;
     }
-    if (detectedFeatures.invertedY) {
+    // when the y-axis is inverted switch top and buttom values to invert the axis again
+    if (detectedFeatures.invertedY[0]) {
         let temp = yBottomValue;
-        yBottomValue = yTopValue;       // when the y-axis is inverted switch top and buttom values to invert the axis again
+        yBottomValue = yTopValue;
         yTopValue = temp;
     }
     yAxis = d3.scaleLinear()
             .domain([yBottomValue, yTopValue])
-            .range([chartHeight, 0]);      //height is first because it will be drawn "top to bottom"
+            .range([yAxisSize, 0]);      //height is first because it will be drawn "top to bottom"
 
     
 
@@ -492,12 +519,12 @@ function drawAnyChart(parentDiv) {
         };
     });
 
-    const EXPAND_WIDTH = 50;
+    const EXPAND_WIDTH = 80;
     const EXPAND_HEIGHT = 50;
     let svg = parentDiv
         .append('svg')
-        .attr('width', chartWidth + EXPAND_WIDTH)
-        .attr('height', chartHeight + EXPAND_HEIGHT)
+        .attr('width', xAxisSize + EXPAND_WIDTH)
+        .attr('height', yAxisSize + EXPAND_HEIGHT)
         .attr('id', 'recommendedSVG')
         .append('g')
         .attr('align', 'center')
@@ -510,7 +537,7 @@ function drawAnyChart(parentDiv) {
     svg.append('g')
         .attr('class', 'xaxisblack')
         .attr('color', 'black')
-        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (chartHeight + SHIFT_DOWN) + ')')
+        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (yAxisSize + SHIFT_DOWN) + ')')
         .call(d3.axisBottom(xScale).ticks(3)); // Create an axis component with d3.axisBottom
 
     // y-axis
