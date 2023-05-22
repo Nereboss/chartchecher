@@ -349,11 +349,12 @@ function drawModalUI(arr) {          //arr gets returned as a json object contai
 //function that draws our whole test UI consisting of a title, the list of detected features, and the control and recommended charts
 function drawTestUI(l_width, l_height, local_xr, local_yr, local_data, parentDiv, annotation, inverted) {
     
+//this part should not be needed later when we change the input from the python file to directly return the needed data instead of the annotations
     //iterate over annotations to set which misleading features have been detected
     //TODO add more later (missling labels, multiple axis, non-linear axis, etc.)
     for (let i = 0; i < annotation.length; i++) {
         if (annotation[i] != null) {
-            if (annotation[i].includes("truncated")) {
+            if (annotation[i].includes("truncated")  && !annotation[i].includes("not truncated")) {
                 detectedFeatures.truncatedY[0] = true;
             }
             if (annotation[i].includes("inverted")) {
