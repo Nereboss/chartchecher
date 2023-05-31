@@ -364,6 +364,7 @@ def comment_aspect_ratio(d, f):
     """
     Function takes in x,y data and the actual chart to determine whether the aspect ratio is ok
     Draws the info box on the right most x-axis label
+    Also responsible for drawing the entire charts
     """
     df = pd.read_csv(d)
     x = df['x'].to_numpy()
@@ -557,8 +558,10 @@ def identify_origin(filename, use='truncate'):
 
 
 def summarize_axes(filename, full=False):
-    """Takes a csv file in the format of Poco and Heer InfoVis 2017 and returns
-    a summary of the axes (axis ranges)"""
+    """
+    Takes a csv file in the format of Poco and Heer InfoVis 2017 and returns
+    a summary of the axes (axis ranges)
+    """
     df = pd.read_csv(filename)
     df = df[['text', 'type', 'x', 'y']]  # drop all others, only need 'text' and 'type'
     y_labels = []
@@ -597,7 +600,7 @@ def summarize_axes(filename, full=False):
     x_increment = parse_num(x_labels[1]) - parse_num(x_labels[0])
     y_increment = parse_num(y_labels[1]) - parse_num(y_labels[0])
 
-    print("Summary: The x-axis is bounded by ", x_range,
+    print("Summary:\nThe x-axis is bounded by ", x_range,
           "\nThe y-axis is bounded by", y_range,
           "\nThe x-axis increments by", x_increment,
           "\nThe y-axis increments by", y_increment)
@@ -661,6 +664,7 @@ def calculate_aspect(filename):
 
 # bank45
 def calc_slopes(x, y, cull=False, scale_x=1, scale_y=1):
+    """Calculate slopes of a line given x and y coordinates"""
     dx = abs(np.diff(x)) * scale_x
     dy = np.diff(y) * scale_y
     s = dy / dx
@@ -680,12 +684,14 @@ def calc_slopes(x, y, cull=False, scale_x=1, scale_y=1):
 
 
 def bank_slopes_ms(x, y, cull=False, scale_x=1, scale_y=1):
+    """Calculate the median slope of a line given x and y coordinates"""
     s, dx, dy, Rx, Ry = calc_slopes(x, y, scale_x=scale_x, scale_y=scale_y)
     xyrat = ms_helper(s, dx, dy, Rx, Ry)
     return xyrat
 
 
 def ms_helper(s, dx, dy, Rx, Ry, cull=False):
+    """Calculates the median slope of a line"""
     # print(s)
     # print("s for slopes? in line 435")
     # print("note to calculate angles")
