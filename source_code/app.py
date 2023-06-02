@@ -78,7 +78,7 @@ class AnalyzeAuto(Resource):
             coords.append(list(c))
 
 
-            x_range, y_range, x_increment, y_increment = summarize_axes(fn_b)
+            x_tick_labels, y_tick_labels, x_tick_pos, y_tick_pos = summarize_axes(fn_b, full=True)
 
             ar = calculate_aspect(fn_b)
 
@@ -99,13 +99,30 @@ class AnalyzeAuto(Resource):
             o['y'] = i[1]
             formatted_data.append(o)
 
+        # tick labels and their positions are in separate arrays, need to combine them into one object per tick
+        formatted_x_ticks = []
+        for value, pos in zip(x_tick_labels, x_tick_pos):
+            o = {}
+            o['value'] = float(value)
+            o['pos'] = float(pos[0])
+            formatted_x_ticks.append(o)
+
+        formatted_y_ticks = []
+        for value, pos in zip(y_tick_labels, y_tick_pos):
+            o = {}
+            o['value'] = float(value)
+            o['pos'] = float(pos[1])
+            formatted_y_ticks.append(o)
+
+        formatted_data = fix_non_linear_scales(formatted_data, formatted_x_ticks, 'x')
+
         send_to_frontend = {
             'messages': messages,
             'coords': coords,
-            'xRange': x_range,
-            'yRange': y_range,
+            'xTicks': formatted_x_ticks,
+            'yTicks': formatted_y_ticks,
             'aspectRatio': ar,
-            'data': formatted_data,
+            'data': formatted_data
         }
 
         # clean up files

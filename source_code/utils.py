@@ -350,7 +350,8 @@ def split_axis_labels(axis_labels, axis, threshold=0.05):
     
 def calculate_conistency(range_of_values, threshold=0.05):
     """
-    helper function that checks whether all values in the range have similar values within the threshold
+    helper function that checks whether all values in the given range have similar values within the threshold
+    range_of_values: dataframe of values that should be checked
     """
     average_value = range_of_values.mean()
     threshhold_min, threshhold_max = average_value * (1-threshold), average_value * (1+threshold)
@@ -561,44 +562,45 @@ def summarize_axes(filename, full=False):
     """
     Takes a csv file in the format of Poco and Heer InfoVis 2017 and returns
     a summary of the axes (axis ranges)
+    Full=true returns the contents of all x and y axis labels together with their x and y coordinates
     """
     df = pd.read_csv(filename)
     df = df[['text', 'type', 'x', 'y']]  # drop all others, only need 'text' and 'type'
-    y_labels = []
-    y_pos = []
-    x_labels = []
-    x_pos = []
+    y_tick_labels = []
+    y_tick_pos = []
+    x_tick_labels = []
+    x_tick_pos = []
     x_order_tracker = []
     y_order_tracker = []
     for text, type_, x_c, y_c in zip(df['text'], df['type'], df['x'], df['y']):
         if (type_ == 'y-axis-label'):
-            y_labels.append(text)
+            y_tick_labels.append(text)
             y_order_tracker.append(y_c)
 
-            y_pos.append([x_c, y_c])
+            y_tick_pos.append([x_c, y_c])
         elif (type_ == 'x-axis-label'):
-            x_labels.append(text)
+            x_tick_labels.append(text)
             x_order_tracker.append(x_c)
-            x_pos.append([x_c, y_c])
+            x_tick_pos.append([x_c, y_c])
         else:
             continue
 
     reorder_y = np.asarray(y_order_tracker).argsort()
-    y_labels = np.asarray(y_labels)[reorder_y]
-    y_pos = np.asarray(y_pos)[reorder_y]
-    y_labels = y_labels.tolist()
-    y_labels.reverse()
+    y_tick_labels = np.asarray(y_tick_labels)[reorder_y]
+    y_tick_pos = np.asarray(y_tick_pos)[reorder_y]
+    y_tick_labels = y_tick_labels.tolist()
+    y_tick_labels.reverse()
 
     reorder = np.asarray(x_order_tracker).argsort()
-    x_labels = np.asarray(x_labels)[reorder]
-    x_labels = x_labels.tolist()
-    x_pos = np.asarray(x_pos)[reorder]
+    x_tick_labels = np.asarray(x_tick_labels)[reorder]
+    x_tick_labels = x_tick_labels.tolist()
+    x_tick_pos = np.asarray(x_tick_pos)[reorder]
 
-    x_range = [x_labels[0], x_labels[-1]]
-    y_range = [y_labels[0], y_labels[-1]]
+    x_range = [x_tick_labels[0], x_tick_labels[-1]]
+    y_range = [y_tick_labels[0], y_tick_labels[-1]]
 
-    x_increment = parse_num(x_labels[1]) - parse_num(x_labels[0])
-    y_increment = parse_num(y_labels[1]) - parse_num(y_labels[0])
+    x_increment = parse_num(x_tick_labels[1]) - parse_num(x_tick_labels[0])
+    y_increment = parse_num(y_tick_labels[1]) - parse_num(y_tick_labels[0])
 
     print("Summary:\nThe x-axis is bounded by ", x_range,
           "\nThe y-axis is bounded by", y_range,
@@ -607,7 +609,7 @@ def summarize_axes(filename, full=False):
     if full == False:
         return x_range, y_range, x_increment, y_increment
     else:
-        return x_labels, y_labels, x_pos, y_pos
+        return x_tick_labels, y_tick_labels, x_tick_pos, y_tick_pos
 
 
 def calculate_aspect_helper(p1, p2):
@@ -697,3 +699,73 @@ def ms_helper(s, dx, dy, Rx, Ry, cull=False):
     # print("note to calculate angles")
     ret = np.median(abs(s)) * Rx / Ry
     return abs(ret)
+
+
+def fix_non_linear_scales(graph_data, axis_ticks, axis_type):
+    """
+    We assume the csv files that save the graph values are created assuming a linear scale.
+    When a non-linear scale is detected, this function will transform the values to fit the scale.
+    We assume the values at the start of the scale is correctly aligned with the values of the graph.
+    graph_data is a list of dictionaries, each dictionary has a key "x" and "y" with the corresponding values
+    axis_ticks is a list of dictionaries, each dictionary has a key "value" and "pos" with the corresponding values
+    axis_type is either "x" or "y"
+    """
+
+    scale_still_linear = True                   # we assume the scale starts linear
+    list_of_values = []
+    list_of_positions = []
+    value_per_tick_factor_linear = None         # this is the factor that is used to calculate the value per pixel when the scale is linear
+    first_non_linear_point = 0                  # this is the index in the graph data of the first point that is not on a linear scale
+
+    for start, end in zip(axis_ticks[:-1], axis_ticks[1:]):
+        interval = {'value_diff': end['value'] - start['value'], 'pos_diff': end['pos'] - start['pos']}
+        if scale_still_linear:                              # if the scale is still linear, we can calculate the average value per pixel
+            list_of_values.append(interval['value_diff'])
+            list_of_positions.append(interval['pos_diff'])
+            if not calculate_conistency(pd.DataFrame(list_of_values, columns=['items'])['items']) and not calculate_conistency(pd.DataFrame(list_of_positions, columns=['items'])['items']): # when either the values or the positions are not consistent, we know the scale for this tick is not linear
+                print('this is the first non-linear tick')
+                scale_still_linear = False
+                value_per_tick_factor_linear = (sum(list_of_values)/len(list_of_values)) / (sum(list_of_positions)/len(list_of_positions)) # factor describes how much many value points there are per pixel on average in the linear part of the scale
+                # we need to find the first point which is in the non-linear part of the scale so that we know from which point on we need to adjust the chart values
+                for point in graph_data:
+                    if point[axis_type] > start['value']:     
+                        first_non_linear_point = graph_data.index(point)
+                        print("first non-linear point", first_non_linear_point, graph_data[first_non_linear_point], '\n')
+
+                        break   # we can break out of this inner for loop because we only need the first point in the non-linear part of the scale
+                #break   # find out what this break does
+            else:
+                print('scale is still linear')
+        if not scale_still_linear:                            # we do not use else here because that would skip the first non-linear tick where we adjust scale_still_linear   
+            value_per_tick_factor_local = interval['value_diff'] / interval['pos_diff']
+            #if the scale is not linear, we need to adjust the values of the graph
+            for point in graph_data[first_non_linear_point:]:
+                if point[axis_type] > start['value']:
+                    point[axis_type] = (point[axis_type] - start['value']) * value_per_tick_factor_local/value_per_tick_factor_linear + start['value']
+            # need to adjust the first non linear point after each iteration
+            print("scale is not linear")
+        print("start", start)
+        print("end", end)
+        print("distance", interval)
+        print("value/tick factor ground truth", value_per_tick_factor_linear)
+        print("local value/tick factor", value_per_tick_factor_local)
+        print("factor that we need to adjust the values with", value_per_tick_factor_local/value_per_tick_factor_linear, '\n')
+
+    return graph_data
+
+
+    # this portion can "map" the graph points to which axis tick they belong to (only works for linear scales)
+    # last_point_in_interval = 0
+    # for start, end in zip(axis_ticks[:-1], axis_ticks[1:]):
+    #     interval = {'value_diff': end['value'] - start['value'], 'pos_diff': end['pos'] - start['pos']}
+    #     points_in_interval = []
+    #     for point in graph_data[last_point_in_interval+1:]:
+    #         if point[axis_type] < end['value']:
+    #             points_in_interval.append(point)
+    #             last_point_in_interval = graph_data.index(point)
+
+    #     print("start", start)
+    #     print("end", end)
+    #     print("distance", interval)
+    #     print("points in interval", points_in_interval, '\n')
+    #     print("pos/distances factor", (end['pos'] - start['pos']) / (end['value'] - start['value']), '\n')

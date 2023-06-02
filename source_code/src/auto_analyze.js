@@ -4,7 +4,7 @@ let imageURL_auto; // = "file:///D:/Daten/Bachelorarbeit/bachelor_thesis/source_
 
 //thumbnail sizes
 // scaled up to fit our new UI but it breaks the old one
-const SCALE = 1;
+const SCALE = 1.5;
 const THUMBNAIL_WIDTH = 175*SCALE;  
 const THUMBNAIL_HEIGHT = 175*SCALE;
 const portNumber = 5000;
@@ -12,8 +12,8 @@ const portNumber = 5000;
 //make the data needed to draw the chart global variables to be able to easily redraw the charts on an update
 var chartWidth;
 var chartHeight;
-var chartXRange;
-var chartYRange;
+var chartXTicks;        //array of tick marks along the x axis first and last element are the min and max values
+var chartYTicks;        //array of tick marks along the y axis first and last element are the min and max values
 var chartGraphData;
 var detectedFeatures = {        //object represents all detectable misleading features; default is false but elements are arrays so that features can store necessary data for drawing of the charts
     "truncatedY": [false],
@@ -122,8 +122,8 @@ function drawModalUI(arr) {          //arr gets returned as a json object contai
 
     chartWidth = THUMBNAIL_WIDTH - l_margin.left - l_margin.right;
     chartHeight = THUMBNAIL_HEIGHT - l_margin.top - l_margin.bottom;
-    chartXRange = arr.xRange;
-    chartYRange = arr.yRange;
+    chartXTicks = arr.xTicks;
+    chartYTicks = arr.yTicks;
     chartGraphData = JSON.stringify(arr.data);
     chartGraphData = JSON.parse(chartGraphData);
     chartGraphData.splice(chartGraphData.length - 1); //remove last element
@@ -186,7 +186,7 @@ function drawModalUI(arr) {          //arr gets returned as a json object contai
     box.append('hr')
     // this does not correctly work for charts with inverted y-axis because we are not checking for that yet 
     // to fix this we first need to adjust the order in which the misleading features are detected
-    drawTestUI(chartWidth, chartHeight, chartXRange, chartYRange, chartGraphData, box, arr.messages, global_inverted);
+    drawTestUI(chartWidth, chartHeight, chartXTicks, chartYTicks, chartGraphData, box, arr.messages, global_inverted);
 
 
 
@@ -390,7 +390,7 @@ function drawTestUI(l_width, l_height, local_xr, local_yr, local_data, parentDiv
     // draw the control chart
     let controlChartDiv = chartsDiv.append('div')
     controlChartDiv.append('p').text("Control Chart:")
-    drawControlChart(l_width, l_height, local_xr, local_yr, local_data, controlChartDiv, annotation, inverted);
+    drawControlChart(controlChartDiv);
 
     // draw the recommended chart
     let recommendedChartDiv = chartsDiv.append('div')
@@ -482,12 +482,12 @@ function drawAnyChart(parentDiv) {
     // using d3 to construct a linear scale for the x- and y-axis 
     // (domain is the range of values in the data, range is the range of values in the chart)
     let xScale = d3.scaleLinear()   
-        .domain([chartXRange[0], chartXRange[1]])
+        .domain([chartXTicks[0].value, chartXTicks[chartXTicks.length-1].value])
         .range([0, xAxisSize]);
 
     let yAxis;              // yScale is height of graphic
-    let yBottomValue = chartYRange[0];       //the value at the bottom of the y-axis
-    let yTopValue = chartYRange[1];          //the value at the very top of the y-axis
+    let yBottomValue = chartYTicks[0].value;       //the value at the bottom of the y-axis
+    let yTopValue = chartYTicks[chartYTicks.length-1].value;          //the value at the very top of the y-axis
 
     // when the y-axis is truncated set the bottom value to zero instead if the truncated value
     if (detectedFeatures.truncatedY[0]) {
@@ -559,19 +559,19 @@ function drawAnyChart(parentDiv) {
 
 //function to draw the control chart
 //TODO: instead of just giving the x and y ranges, we need to give the number of ticks as well
-function drawControlChart(l_width, l_height, local_xr, local_yr, local_data, div2, annotation, inverted) {
+function drawControlChart(div2) {
 
     const SPACING = 11;
     // const split_up = annotation.split('[newline]');
     const LIMIT_WIDTH = 30;
 
     var xScale = d3.scaleLinear()   // xScale is width of graphic
-        .domain([local_xr[0], local_xr[1]])
-        .range([0, l_width - LIMIT_WIDTH]);
+        .domain([chartXTicks[0].value, chartXTicks[chartXTicks.length-1].value])
+        .range([0, chartWidth-100]);
 
     var yScale = d3.scaleLinear()   // yScale is height of graphic
-        .domain([local_yr[0], local_yr[1]])
-        .range([l_height, 0]);
+        .domain([chartYTicks[0].value, chartYTicks[chartYTicks.length-1].value])
+        .range([chartHeight, 0]);
 
     var line = d3.line()
         .x(function (d, i) {
@@ -581,7 +581,7 @@ function drawControlChart(l_width, l_height, local_xr, local_yr, local_data, div
             return yScale(d.y);
         });
 
-    var dataset = local_data.map(function (d) {
+    var dataset = chartGraphData.map(function (d) {
         return {
             'x': parseFloat(d.x),
             'y': parseFloat(d.y)
@@ -592,8 +592,8 @@ function drawControlChart(l_width, l_height, local_xr, local_yr, local_data, div
     const EXPAND_HEIGHT = 50;
     var svg = div2
         .append('svg')
-        .attr('width', l_width + EXPAND_WIDTH)
-        .attr('height', l_height + EXPAND_HEIGHT)
+        .attr('width', chartWidth + EXPAND_WIDTH)
+        .attr('height', chartHeight + EXPAND_HEIGHT)
         .append('g')
         .attr('align', 'center')
 
@@ -605,7 +605,7 @@ function drawControlChart(l_width, l_height, local_xr, local_yr, local_data, div
     svg.append('g')
         .attr('class', 'xaxisblack')
         .attr('color', 'black')
-        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (l_height + SHIFT_DOWN) + ')')
+        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (chartHeight + SHIFT_DOWN) + ')')
         .call(d3.axisBottom(xScale).ticks(3)); // Create an axis component with d3.axisBottom
 
     // y-axis
