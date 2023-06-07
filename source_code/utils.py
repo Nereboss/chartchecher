@@ -94,6 +94,7 @@ def detect_inconsistent_scales(box_data):
     """
     Function takes in bounding boxes and detects if one or more of the axis do not follow a linear scale
     TODO maybe needs to be extended to be able to handle multiple axis (or create helper function that gets BBs for one axis and checks this for them that can be called on all axis)
+    returns a list of detected inconsistencies or an empty list if none were found
     """
     box_data = pd.read_csv(box_data)
     
@@ -103,15 +104,21 @@ def detect_inconsistent_scales(box_data):
         if re.match('^[xy][0-9]?-axis-label$', type):       # regex represents x/y-axis-labels as a chart might have multiple of each
             different_axis_frames.append(box_data[box_data['type'] == type])          
 
+    detected_inconsistencies = []
+
     for different_axis_frame in different_axis_frames:
-        check_axis_consistency(different_axis_frame)
+        m = check_axis_consistency(different_axis_frame)
+        for inconsistency in m:
+            detected_inconsistencies.append(inconsistency)
+
+    return detected_inconsistencies
 
 def check_axis_consistency(axis_data):
     """
     Takes in bounding boxes from axis lables of one axis and calculates whether the axis scale and/or the placement of labels is inconsistent for the axis
-    returns consistency of scale and consistency of label placements
-    TODO: add return values
+    returns a list of detected inconsistencies in axis scales and/or label placements
     """
+    messages = []
     axis_data = axis_data.copy()        #we need to make a copy of the dataframe to avoid a SettingWithCopyWarning
     axis_name = axis_data['type'].iloc[0]
     axis = 'y' if 'y' in axis_name else 'x'      #we assume all elements have the same type and only check for first element if it belongs to the x or y axis
@@ -129,6 +136,7 @@ def check_axis_consistency(axis_data):
         print("The ticks across the "+axis_name+" are place consistently!")
     else:
         print("The ticks across the "+axis_name+" are place inconsistently!")
+        messages.append("inconsistent tick placement along the "+axis_name+ " detected")
 
     numeric_texts = None
     try:
@@ -142,10 +150,12 @@ def check_axis_consistency(axis_data):
             print("The "+axis_name+" axis follows a linear scale!")
         else:
             print("The "+axis_name+" axis does not follow a linear scale!")
+            messages.append("non-linear scale along the "+axis_name+ " detected")
     except ValueError: 
         print('cannot check axis scaling because not all labels are numeric')
 
     # later for the returns: we need to find a way to draw the chart in an "unwarped" way, meaning we need the distances between the labels together with middlepoint of the labels and transform the corresponding x/y values to show them in a linear way
+    return messages
 
 def detect_multiple_axis(box_data):
     """
@@ -715,7 +725,6 @@ def fix_non_linear_scales(graph_data, axis_ticks, axis_type):
     list_of_values = []
     list_of_positions = []
     value_per_tick_factor_linear = None         # this is the factor that is used to calculate the value per pixel when the scale is linear
-    first_non_linear_point = 0                  # this is the index in the graph data of the first point that is not on a linear scale
 
     for start, end in zip(axis_ticks[:-1], axis_ticks[1:]):
         interval = {'value_diff': end['value'] - start['value'], 'pos_diff': end['pos'] - start['pos']}
@@ -723,49 +732,17 @@ def fix_non_linear_scales(graph_data, axis_ticks, axis_type):
             list_of_values.append(interval['value_diff'])
             list_of_positions.append(interval['pos_diff'])
             if not calculate_conistency(pd.DataFrame(list_of_values, columns=['items'])['items']) and not calculate_conistency(pd.DataFrame(list_of_positions, columns=['items'])['items']): # when either the values or the positions are not consistent, we know the scale for this tick is not linear
-                print('this is the first non-linear tick')
                 scale_still_linear = False
                 value_per_tick_factor_linear = (sum(list_of_values)/len(list_of_values)) / (sum(list_of_positions)/len(list_of_positions)) # factor describes how much many value points there are per pixel on average in the linear part of the scale
-                # we need to find the first point which is in the non-linear part of the scale so that we know from which point on we need to adjust the chart values
-                for point in graph_data:
-                    if point[axis_type] > start['value']:     
-                        first_non_linear_point = graph_data.index(point)
-                        print("first non-linear point", first_non_linear_point, graph_data[first_non_linear_point], '\n')
-
-                        break   # we can break out of this inner for loop because we only need the first point in the non-linear part of the scale
-                #break   # find out what this break does
-            else:
-                print('scale is still linear')
         if not scale_still_linear:                            # we do not use else here because that would skip the first non-linear tick where we adjust scale_still_linear   
             value_per_tick_factor_local = interval['value_diff'] / interval['pos_diff']
-            #if the scale is not linear, we need to adjust the values of the graph
-            for point in graph_data[first_non_linear_point:]:
-                if point[axis_type] > start['value']:
-                    point[axis_type] = (point[axis_type] - start['value']) * value_per_tick_factor_local/value_per_tick_factor_linear + start['value']
-            # need to adjust the first non linear point after each iteration
-            print("scale is not linear")
-        print("start", start)
-        print("end", end)
-        print("distance", interval)
-        print("value/tick factor ground truth", value_per_tick_factor_linear)
-        print("local value/tick factor", value_per_tick_factor_local)
-        print("factor that we need to adjust the values with", value_per_tick_factor_local/value_per_tick_factor_linear, '\n')
-
+            #if the scale is no longer linear, we need to adjust the values of the graph, but only after the start value of the current tick
+            start_value = start['value']
+            end_value = end['value']
+            local_change_factor = value_per_tick_factor_local/value_per_tick_factor_linear # maybe just devide by the accumulated factor or the one from the previous tick?
+            print("start and end values: ", start_value, "|", end_value)
+            print("change factor: ", local_change_factor)
+            for point in graph_data:
+                if point[axis_type] > start_value: # and point[axis_type] <= end_value:
+                    point[axis_type] = (point[axis_type] - start_value) * local_change_factor + start_value
     return graph_data
-
-
-    # this portion can "map" the graph points to which axis tick they belong to (only works for linear scales)
-    # last_point_in_interval = 0
-    # for start, end in zip(axis_ticks[:-1], axis_ticks[1:]):
-    #     interval = {'value_diff': end['value'] - start['value'], 'pos_diff': end['pos'] - start['pos']}
-    #     points_in_interval = []
-    #     for point in graph_data[last_point_in_interval+1:]:
-    #         if point[axis_type] < end['value']:
-    #             points_in_interval.append(point)
-    #             last_point_in_interval = graph_data.index(point)
-
-    #     print("start", start)
-    #     print("end", end)
-    #     print("distance", interval)
-    #     print("points in interval", points_in_interval, '\n')
-    #     print("pos/distances factor", (end['pos'] - start['pos']) / (end['value'] - start['value']), '\n')

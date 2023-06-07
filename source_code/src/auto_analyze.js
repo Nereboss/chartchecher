@@ -21,7 +21,10 @@ var detectedFeatures = {        //object represents all detectable misleading fe
     "misleadingAR": [false],          //we need to store the ideal aspect ratio to draw the chart correctly (when this is zero, the aspect ratio is not misleading)
     "missingLabels": [false],
     "multipleAxis": [false],
-    "nonLinearAxis": [false]
+    "nonLinearX": [false],
+    "nonLinearY": [false],
+    "inconsistentTicksX": [false],
+    "inconsistentTicksY": [false]
 }
 
 //function converts to base64
@@ -373,6 +376,22 @@ function drawTestUI(l_width, l_height, local_xr, local_yr, local_data, parentDiv
                 detectedFeatures.misleadingAR[1] = a1;
                 detectedFeatures.misleadingAR[2] = a2;
             }
+            if (annotation[i].includes("non-linear")) {
+                if (annotation[i].includes("x-axis")) {
+                    detectedFeatures.nonLinearX[0] = true;
+                }
+                if (annotation[i].includes("y-axis")) {
+                    detectedFeatures.nonLinearY[0] = true;
+                }
+            }
+            if (annotation[i].includes("inconsistent tick")) {
+                if (annotation[i].includes("x-axis")) {
+                    detectedFeatures.inconsistentTicksX[0] = true;
+                }
+                if (annotation[i].includes("y-axis")) {
+                    detectedFeatures.inconsistentTicksY[0] = true;
+                }
+            }
         }   
     }
 
@@ -565,9 +584,19 @@ function drawControlChart(div2) {
     // const split_up = annotation.split('[newline]');
     const LIMIT_WIDTH = 30;
 
+    //functions to get the domain and range out of the x and y objects
+    xTicksDomain = chartXTicks.map(function (d) {return d.value;});
+    xOffset = chartXTicks[0].pos;
+    xFactor = chartXTicks[chartXTicks.length-1].pos / chartWidth;
+    xTicksRange = chartXTicks.map(function (d) {return (d.pos - xOffset) / xFactor;});
+    yTicksDomain = chartYTicks.map(function (d) {return d.value;});
+    yTicksRange = chartYTicks.map(function (d) {return d.pos;});
+
     var xScale = d3.scaleLinear()   // xScale is width of graphic
-        .domain([chartXTicks[0].value, chartXTicks[chartXTicks.length-1].value])
-        .range([0, chartWidth-100]);
+        .domain(xTicksDomain)
+        .range(xTicksRange);
+        // .domain([chartXTicks[chartXTicks.length-3].value, chartXTicks[chartXTicks.length-2].value])
+        // .range([0, chartWidth]);
 
     var yScale = d3.scaleLinear()   // yScale is height of graphic
         .domain([chartYTicks[0].value, chartYTicks[chartYTicks.length-1].value])
@@ -606,7 +635,8 @@ function drawControlChart(div2) {
         .attr('class', 'xaxisblack')
         .attr('color', 'black')
         .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (chartHeight + SHIFT_DOWN) + ')')
-        .call(d3.axisBottom(xScale).ticks(3)); // Create an axis component with d3.axisBottom
+                                                                            //TODO: change the tick formatting, so that it shows decimals only when necessary
+        .call(d3.axisBottom(xScale).tickValues(xTicksDomain).tickFormat(d3.format(".3f"))); // Create an axis component with d3.axisBottom
 
     // y-axis
     svg.append('g')

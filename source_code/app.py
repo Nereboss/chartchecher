@@ -52,7 +52,9 @@ class AnalyzeAuto(Resource):
             detect_missing_labels(fn_d, fn_b)
 
             # Detect if any axis have inconsistencies
-            detect_inconsistent_scales(fn_b)
+            m = detect_inconsistent_scales(fn_b)
+            for e in m:
+                messages.append(e)
 
             # Detect if there are multiple axis
             detect_multiple_axis(fn_b)
