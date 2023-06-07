@@ -724,7 +724,7 @@ def fix_non_linear_scales(graph_data, axis_ticks, axis_type):
     scale_still_linear = True                   # we assume the scale starts linear
     list_of_values = []
     list_of_positions = []
-    value_per_tick_factor_linear = None         # this is the factor that is used to calculate the value per pixel when the scale is linear
+    value_per_tick_factor_previous = 1       # this is the factor that is used to store the value per pixel from the previous tick
 
     for start, end in zip(axis_ticks[:-1], axis_ticks[1:]):
         interval = {'value_diff': end['value'] - start['value'], 'pos_diff': end['pos'] - start['pos']}
@@ -733,16 +733,13 @@ def fix_non_linear_scales(graph_data, axis_ticks, axis_type):
             list_of_positions.append(interval['pos_diff'])
             if not calculate_conistency(pd.DataFrame(list_of_values, columns=['items'])['items']) and not calculate_conistency(pd.DataFrame(list_of_positions, columns=['items'])['items']): # when either the values or the positions are not consistent, we know the scale for this tick is not linear
                 scale_still_linear = False
-                value_per_tick_factor_linear = (sum(list_of_values)/len(list_of_values)) / (sum(list_of_positions)/len(list_of_positions)) # factor describes how much many value points there are per pixel on average in the linear part of the scale
+                value_per_tick_factor_previous = (sum(list_of_values)/len(list_of_values)) / (sum(list_of_positions)/len(list_of_positions)) # factor describes how much many value points there are per pixel on average in the linear part of the scale
         if not scale_still_linear:                            # we do not use else here because that would skip the first non-linear tick where we adjust scale_still_linear   
             value_per_tick_factor_local = interval['value_diff'] / interval['pos_diff']
-            #if the scale is no longer linear, we need to adjust the values of the graph, but only after the start value of the current tick
-            start_value = start['value']
-            end_value = end['value']
-            local_change_factor = value_per_tick_factor_local/value_per_tick_factor_linear # maybe just devide by the accumulated factor or the one from the previous tick?
-            print("start and end values: ", start_value, "|", end_value)
-            print("change factor: ", local_change_factor)
+            tick_start_value = start['value']
+            local_change_factor = value_per_tick_factor_local/value_per_tick_factor_previous
             for point in graph_data:
-                if point[axis_type] > start_value: # and point[axis_type] <= end_value:
-                    point[axis_type] = (point[axis_type] - start_value) * local_change_factor + start_value
+                if point[axis_type] > tick_start_value:      # All points after the tick start value are on a non-linear scale and will be adjusted
+                    point[axis_type] = (point[axis_type] - tick_start_value) * local_change_factor + tick_start_value
+            value_per_tick_factor_previous = value_per_tick_factor_local
     return graph_data
