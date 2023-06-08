@@ -409,7 +409,8 @@ function drawTestUI(l_width, l_height, local_xr, local_yr, local_data, parentDiv
     // draw the control chart
     let controlChartDiv = chartsDiv.append('div')
     controlChartDiv.append('p').text("Control Chart:")
-    drawControlChart(controlChartDiv);
+    // drawControlChart(controlChartDiv);
+    drawChart(controlChartDiv, true);
 
     // draw the recommended chart
     let recommendedChartDiv = chartsDiv.append('div')
@@ -421,7 +422,7 @@ function drawTestUI(l_width, l_height, local_xr, local_yr, local_data, parentDiv
     //test generic function to draw all the charts, this later replaces the others
     parentDiv.append('hr')
     let testChartDiv = parentDiv.append('div').attr('id', 'testChartDiv')
-    drawAnyChart(testChartDiv);
+    drawChart(testChartDiv);
 }
 
 //function to draw the list of mislead features
@@ -462,7 +463,7 @@ function toggleFeatureButton(feature) {
     }
 
     let parentDiv = d3.select('#testChartDiv')
-    drawAnyChart(parentDiv);          //draw the recommended chart again now that the global variable has been updated
+    drawChart(parentDiv);          //draw the recommended chart again now that the global variable has been updated
 }
 
 
@@ -471,8 +472,9 @@ function toggleFeatureButton(feature) {
  * TODO: expand this function step by step to eventually include the removal of all misleading features
  * if all detected tactics are false, it will draw the input-image (control chart)
  * @param {html_element} parentDiv the div in which the chart will be drawn
+ * @param {boolean} controlChart whether or not to draw the control chart
  */
-function drawAnyChart(parentDiv) {
+function drawChart(parentDiv, controlChart = false) {
 
     //-----------------set aspect ratio-----------------
 
@@ -481,7 +483,7 @@ function drawAnyChart(parentDiv) {
     let yAxisSize = chartHeight;
 
     // when the original aspect ratio is misleading we need to draw the chart using the ideal aspect ratio
-    if (detectedFeatures.misleadingAR[0]) {
+    if (!controlChart && detectedFeatures.misleadingAR[0]) {
         if(detectedFeatures.misleadingAR[2] > chartWidth / chartHeight) {
             yAxisSize = xAxisSize / detectedFeatures.misleadingAR[2];       //when the ideal AR is larger than the original AR we need to make the y-axis smaller
         }
@@ -499,7 +501,7 @@ function drawAnyChart(parentDiv) {
     let drawnTickValuesX = xTicksDomain;     //needs to be saved to draw the ticks later because xTicksDomain can be overwritten
     let xTicksRange = chartXTicks.map(function (d) {return (d.pos - xOffset) / xFactor;});
 
-    if (detectedFeatures.nonLinearX[0]) {       //when the x-axis is non-linear we need to use the first and last value to create a linear scale
+    if (!controlChart && detectedFeatures.nonLinearX[0]) {       //when the x-axis is non-linear we need to use the first and last value to create a linear scale
         xTicksDomain = [chartXTicks[0].value, chartXTicks[chartXTicks.length-1].value];
         xTicksRange = [0, xAxisSize];
     }
@@ -521,19 +523,19 @@ function drawAnyChart(parentDiv) {
     let yTicksRange = chartYTicks.map(function (d) {return (d.pos - yOffset) / yFactor;});
 
     //when the y-axis is truncated we need to "shift" the existing scale to start at zero
-    if(detectedFeatures.truncatedY[0]) {
+    if(!controlChart && detectedFeatures.truncatedY[0]) {
         let maxValue = yTicksDomain[yTicksDomain.length-1];
         let compressFactor = 1-(yTicksDomain[0]/maxValue);
         yTicksDomain = yTicksDomain.map(function (d) {return (d-maxValue)/compressFactor + maxValue;});
     }
 
     //when the y-axis is inverted we need to reverse the order of the ticks
-    if(detectedFeatures.invertedY[0]) {
-        chartYTicks = chartYTicks.reverse();
+    if(!controlChart && detectedFeatures.invertedY[0]) {
+        yTicksDomain = yTicksDomain.reverse();
     }
 
-    if (detectedFeatures.nonLinearY[0]) {       //when the y-axis is non-linear we need to use the first and last value to create a linear scale
-        yTicksDomain = [chartYTicks[0].value, chartYTicks[chartYTicks.length-1].value];     //maybe chage chartYTicks to yTicksDomain
+    if (!controlChart && detectedFeatures.nonLinearY[0]) {       //when the y-axis is non-linear we need to use the first and last value to create a linear scale
+        yTicksDomain = [yTicksDomain[0].value, yTicksDomain[yTicksDomain.length-1].value];
         yTicksRange = [yAxisSize, 0];
     }
     let yScale = d3.scaleLinear()
@@ -558,13 +560,20 @@ function drawAnyChart(parentDiv) {
         };
     });
 
+    let elementID;
+    if(controlChart) {
+        elementID = 'controlSVG';
+    } else {
+        elementID = 'recommendedSVG';
+    }
+
     const EXPAND_WIDTH = 80;
     const EXPAND_HEIGHT = 50;
     let svg = parentDiv
         .append('svg')
         .attr('width', xAxisSize + EXPAND_WIDTH)
         .attr('height', yAxisSize + EXPAND_HEIGHT)
-        .attr('id', 'recommendedSVG')
+        .attr('id', elementID)
         .append('g')
         .attr('align', 'center')
 
@@ -574,14 +583,14 @@ function drawAnyChart(parentDiv) {
     //-----------------set axis ticks-----------------
 
     let bottomAxis;
-    if(detectedFeatures.inconsistentTicksX[0]) {    //when the x-axis is inconsistent we let d3 decide which ticks to draw
+    if(!controlChart && detectedFeatures.inconsistentTicksX[0]) {    //when the x-axis is inconsistent we let d3 decide which ticks to draw
         bottomAxis = d3.axisBottom(xScale).ticks(chartXTicks.length);
     } else {                                        //otherwise we draw the ticks from the oginal image
         bottomAxis = d3.axisBottom(xScale).tickValues(drawnTickValuesX).tickFormat(x => `${x}`) // weird tick format is necessary to not round the tick and keep the original from the image
     }
 
     let leftAxis;
-    if(detectedFeatures.inconsistentTicksY[0] || detectedFeatures.truncatedY[0]) {  //when the y-axis is truncated and shown in a improved way, the axis ticks will be inconsistent which is why we improve the ticks there too
+    if(!controlChart && (detectedFeatures.inconsistentTicksY[0] || detectedFeatures.truncatedY[0])) {  //when the y-axis is truncated and shown in a improved way, the axis ticks will be inconsistent which is why we improve the ticks there too
         leftAxis = d3.axisLeft(yScale).ticks(chartYTicks.length);
     } else {
         leftAxis = d3.axisLeft(yScale).tickValues(drawnTickValuesY).tickFormat(x => `${x}`)
@@ -614,83 +623,83 @@ function drawAnyChart(parentDiv) {
 
 //function to draw the control chart
 //TODO: instead of just giving the x and y ranges, we need to give the number of ticks as well
-function drawControlChart(div2) {
+// function drawControlChart(div2) {
 
-    const SPACING = 11;
-    // const split_up = annotation.split('[newline]');
-    const LIMIT_WIDTH = 30;
+//     const SPACING = 11;
+//     // const split_up = annotation.split('[newline]');
+//     const LIMIT_WIDTH = 30;
 
-    //functions to get the domain and range out of the x and y objects
-    let xOffset = chartXTicks[0].pos;
-    let xFactor = (chartXTicks[chartXTicks.length-1].pos - xOffset) / chartWidth;
-    let xTicksDomain = chartXTicks.map(function (d) {return d.value;});
-    let xTicksRange = chartXTicks.map(function (d) {return (d.pos - xOffset) / xFactor;});
-    let yOffset = chartYTicks[0].pos;
-    let yFactor = (chartYTicks[chartYTicks.length-1].pos - yOffset) / chartHeight;
-    let yTicksDomain = chartYTicks.map(function (d) {return d.value;});
-    let yTicksRange = chartYTicks.map(function (d) {return (d.pos - yOffset) / yFactor;});
+//     //functions to get the domain and range out of the x and y objects
+//     let xOffset = chartXTicks[0].pos;
+//     let xFactor = (chartXTicks[chartXTicks.length-1].pos - xOffset) / chartWidth;
+//     let xTicksDomain = chartXTicks.map(function (d) {return d.value;});
+//     let xTicksRange = chartXTicks.map(function (d) {return (d.pos - xOffset) / xFactor;});
+//     let yOffset = chartYTicks[0].pos;
+//     let yFactor = (chartYTicks[chartYTicks.length-1].pos - yOffset) / chartHeight;
+//     let yTicksDomain = chartYTicks.map(function (d) {return d.value;});
+//     let yTicksRange = chartYTicks.map(function (d) {return (d.pos - yOffset) / yFactor;});
 
-    var xScale = d3.scaleLinear()   // xScale is width of graphic
-        .domain(xTicksDomain)
-        .range(xTicksRange);
-        // .domain([chartXTicks[chartXTicks.length-3].value, chartXTicks[chartXTicks.length-2].value])
-        // .range([0, chartWidth]);
+//     var xScale = d3.scaleLinear()   // xScale is width of graphic
+//         .domain(xTicksDomain)
+//         .range(xTicksRange);
+//         // .domain([chartXTicks[chartXTicks.length-3].value, chartXTicks[chartXTicks.length-2].value])
+//         // .range([0, chartWidth]);
 
-    var yScale = d3.scaleLinear()   // yScale is height of graphic
-        .domain(yTicksDomain)
-        .range(yTicksRange.reverse());    //needs to be reversed because the order is taken top to bottom
-        // .domain([chartYTicks[0].value, chartYTicks[chartYTicks.length-1].value])
-        // .range([chartHeight, 0]);
+//     var yScale = d3.scaleLinear()   // yScale is height of graphic
+//         .domain(yTicksDomain)
+//         .range(yTicksRange.reverse());    //needs to be reversed because the order is taken top to bottom
+//         // .domain([chartYTicks[0].value, chartYTicks[chartYTicks.length-1].value])
+//         // .range([chartHeight, 0]);
 
-    var line = d3.line()
-        .x(function (d) {
-            return xScale(d.x);
-        }) // set the x values for the line generator
-        .y(function (d) {
-            return yScale(d.y);
-        });
+//     var line = d3.line()
+//         .x(function (d) {
+//             return xScale(d.x);
+//         }) // set the x values for the line generator
+//         .y(function (d) {
+//             return yScale(d.y);
+//         });
 
-    var dataset = chartGraphData.map(function (d) {
-        return {
-            'x': parseFloat(d.x),
-            'y': parseFloat(d.y)
-        };
-    });
+//     var dataset = chartGraphData.map(function (d) {
+//         return {
+//             'x': parseFloat(d.x),
+//             'y': parseFloat(d.y)
+//         };
+//     });
 
-    const EXPAND_WIDTH = 50;
-    const EXPAND_HEIGHT = 50;
-    var svg = div2
-        .append('svg')
-        .attr('width', chartWidth + EXPAND_WIDTH)
-        .attr('height', chartHeight + EXPAND_HEIGHT)
-        .append('g')
-        .attr('align', 'center')
+//     const EXPAND_WIDTH = 50;
+//     const EXPAND_HEIGHT = 50;
+//     var svg = div2
+//         .append('svg')
+//         .attr('width', chartWidth + EXPAND_WIDTH)
+//         .attr('height', chartHeight + EXPAND_HEIGHT)
+//         .append('g')
+//         .attr('align', 'center')
 
-    // const SHIFT_DOWN = split_up.length * SPACING;
-    const SHIFT_DOWN = 11;
-    const SHIFT_RIGHT = 40;
+//     // const SHIFT_DOWN = split_up.length * SPACING;
+//     const SHIFT_DOWN = 11;
+//     const SHIFT_RIGHT = 40;
 
-    // x-axis
-    svg.append('g')
-        .attr('class', 'xaxisblack')
-        .attr('color', 'black')
-        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (chartHeight + SHIFT_DOWN) + ')')
-        .call(d3.axisBottom(xScale).tickValues(xTicksDomain).tickFormat(x => `${x}`)); // Create an axis component with d3.axisBottom 
+//     // x-axis
+//     svg.append('g')
+//         .attr('class', 'xaxisblack')
+//         .attr('color', 'black')
+//         .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (chartHeight + SHIFT_DOWN) + ')')
+//         .call(d3.axisBottom(xScale).tickValues(xTicksDomain).tickFormat(x => `${x}`)); // Create an axis component with d3.axisBottom 
 
-    // y-axis
-    svg.append('g')
-        .style('font', '11px Segoe UI')
-        .style('stroke', '#ef8a62')
-        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
-        .call(d3.axisLeft(yScale).tickValues(yTicksDomain).tickFormat(x => `${x}`));
+//     // y-axis
+//     svg.append('g')
+//         .style('font', '11px Segoe UI')
+//         .style('stroke', '#ef8a62')
+//         .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
+//         .call(d3.axisLeft(yScale).tickValues(yTicksDomain).tickFormat(x => `${x}`));
 
-    //append the datapath
-    svg.append('path')
-        .datum(dataset) // 10. Binds data to the line
-        .attr('class', 'line') // Assign a class for styling
-        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
-        .attr('d', line); // 11. Calls the line generator
-}
+//     //append the datapath
+//     svg.append('path')
+//         .datum(dataset) // 10. Binds data to the line
+//         .attr('class', 'line') // Assign a class for styling
+//         .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
+//         .attr('d', line); // 11. Calls the line generator
+// }
 
 function drawRecommendedChart(l_width, l_height, local_xr, local_yr, local_data, div2, inverted) {
     //function based in drawTrueChart
