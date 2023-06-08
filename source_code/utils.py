@@ -128,6 +128,7 @@ def check_axis_consistency(axis_data):
         axis_data['midpoint'] = axis_data['y'] + axis_data['height']/2
     else: 
         raise Exception("Somehow the axis is either a X-axis or a Y-axis")
+    axis_data = axis_data.sort_values(by=['midpoint'])      #sort the dataframe by the midpoint of the bounding boxes to ensure they are in the correct order
     distances_to_next_label = axis_data['midpoint'].diff(periods=-1).dropna()
 
     # printing only for now, change it later to return useful information

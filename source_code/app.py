@@ -116,7 +116,7 @@ class AnalyzeAuto(Resource):
             o['pos'] = float(pos[1])
             formatted_y_ticks.append(o)
 
-        formatted_data = fix_non_linear_scales(formatted_data, formatted_x_ticks, 'x')
+        formatted_data = fix_non_linear_scales(formatted_data, formatted_x_ticks, 'x')  #TODO: call formatted data for an axis when it is not linear
 
         send_to_frontend = {
             'messages': messages,
