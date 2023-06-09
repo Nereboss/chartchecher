@@ -21,19 +21,26 @@ function contextClick(info, tab){
 //opens the new window for analysis (either automatic or manual)
 function imageSearch(service, query){
   var myServices = localStorage.services.split(',');
-      if (service == 'auto') {
-        chrome.storage.sync.set({key: query}, function () {
-        });
-        const url = '/views/auto_analyze.html';
-        var win = window.open(url, 'newAnalysis');
-        win.focus();
+    if (service == 'auto') {
+      chrome.storage.sync.set({key: query}, function () {
+      });
+      const url = '/views/auto_analyze.html';
+      var win = window.open(url, 'newAnalysis');
+      win.focus();
     }
-      else if (service == 'manual') {
-        chrome.storage.sync.set({key: query}, function () {
-        });
-        const url = '/views/analyze.html';
-        var win = window.open(url, 'newAnalysis');
-        win.focus();
+    else if (service == 'manual') {
+      chrome.storage.sync.set({key: query}, function () {
+      });
+      const url = '/views/analyze.html';
+      var win = window.open(url, 'newAnalysis');
+      win.focus();
+    }
+    else if (service=='google') { //TODO: this is only temporary, when work is done use auto analyze instead
+      chrome.storage.sync.set({key: query}, function () {
+      });
+      const url = '/views/new_main.html';
+      var win = window.open(url, 'newAnalysis');
+      win.focus();
     }
 
   // if (service=="all"){

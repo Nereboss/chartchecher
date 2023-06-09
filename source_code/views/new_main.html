@@ -6,11 +6,11 @@
   <link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>
 
   <link href='../stylesheets/analyze.css' rel='stylesheet'>
+  <link href='../stylesheets/driver.min.css' rel='stylesheet'>
   <script src='../src/driver.min.js'></script>
   <script src='../src/jquery-3.5.1.min.js'></script>
-  <link href='../stylesheets/driver.min.css' rel='stylesheet'>
   <script src='../src/d3.v4.js'></script>
-  <script src='../src/wpd.js'></script>
+  <script src='../src/wpd.js'></script> <!-- TODO: check if this is needed--> 
 
 
   <!--  BOOTSTRAP-->
@@ -93,38 +93,7 @@
                             <h3 style="font-weight: bold;">Detected Misleading Features</h3>
                         </div>
                         <div class="card-body">
-                            <ul class="list-group" id="misl-feats-list-group">        <!--This is to test the list view, the list will be empty and we will create the items with JS later -->
-
-                                <!--one such item (everything in li-tag) will be generated in JS-->
-                                <li class="list-group-item">            
-                                    <div class="row align-items-center">
-                                        <div class="col-10">
-                                            <div style="font-weight: bold;">Feature 1</div>
-                                            Test description of the misleading feature that was detected
-                                        </div>
-                                        <div class="col-2">
-                                            <div class="d-flex justify-content-end">
-                                                <button type="button" class="btn btn-outline-primary">Show/Hide</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </li>
-
-                                <!--this can be removed when we develop the js code-->
-                                <li class="list-group-item">
-                                    <div class="row align-items-center">
-                                        <div class="col-10">
-                                            <div style="font-weight: bold;">Feature 2</div>
-                                            Anotherone
-                                        </div>
-                                        <div class="col-2">
-                                            <div class="d-flex justify-content-end">
-                                                <button type="button" class="btn btn-outline-primary">Show/Hide</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </li>
-
+                            <ul class="list-group" id="misleading-features-list-group">        <!--This is to test the list view, the list will be empty and we will create the items with JS later -->
                             </ul>
                         </div>
                     </div>
@@ -137,13 +106,13 @@
             <div class="row justify-content-center">
                 <div class="col">
                     <div class="p-1">
-                        <button type="button" class="btn btn-primary">Toggle Original/Control Chart</button>
+                        <button type="button" class="btn btn-primary" id="toggle-button">Toggle Original/Control Chart</button>
                     </div>
                 </div>
                 <div class="col justify-content-center align-items-center">
                     <div class="d-flex justify-content-end align-items-center">
                         <div class="p-1">
-                            <button type="button" class="btn btn-primary">Show All Detectable Features</button>
+                            <button type="button" class="btn btn-primary" id="show-all-button">Show All Detectable Features</button>
                         </div>
                     </div>
                 </div>
@@ -153,5 +122,6 @@
 
         </div>
     </div>
+    <script src="../src/new_main.js"></script>
 </body>
 </html>

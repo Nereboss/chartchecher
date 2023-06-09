@@ -449,7 +449,7 @@ function drawMisleadFeaturesList(div) {
 
 /**
  * updates the recommended chart to represent the given feature, also updates the global variable for that feature
- * @param {string} feature 
+ * @param {string} feature the html id of the feature button that was clicked
  */
 function toggleFeatureButton(feature) {
     detectedFeatures[feature][0] = !detectedFeatures[feature][0];
