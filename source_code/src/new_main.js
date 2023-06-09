@@ -56,24 +56,23 @@ for (feature in misleadingFeaturesTexts) {
  * @param {string} featureDescription the description of the feature that will be displayed
  */
 function appendMisleadingFeature(parentDiv, featureID, featureName, featureDescription) {
-                                            //TODO can add a style with a max width here based on the images so a large description doesnt stretch the UI too much
-    let textHTML = `<div class="col-9">
-                        <div style="font-weight: bold;">${featureName}</div>
-                        ${featureDescription}
-                    </div>`
-
-    element = parentDiv
-        .append('li').attr('class', 'list-group-item')
-        .insert('div').attr('class', 'row align-items-center')
-        .html(textHTML)
-    element.append('div').attr('class', 'col-3')
-        .insert('div').attr('class', 'd-flex justify-content-end')
-        .insert('button')
-            .attr('type', 'button')
-            .attr('class', 'btn btn-primary')
-            .attr('id', featureID)
-            .text('hide')
-            .on('click', function() {misleadingFeatureButtonClicked(featureID)})
+    //TODO can add a style with a max width here based on the images so a large description doesnt stretch the UI too much
+    //add the feature as a list item using the following HTML code
+    parentDiv.append('li')
+                .attr('class', 'list-group-item')
+                .html(`<div class="row align-items-center">
+                            <div class="col-9">
+                                <div style="font-weight: bold;">${featureName}</div>
+                                ${featureDescription}
+                            </div>
+                            <div class="col-3">
+                                <div class="d-flex justify-content-end">
+                                    <button type="button" class="btn btn-outline-primary" id="${featureID}">hide</button>
+                                </div>
+                            </div>
+                        </div>`)
+    const button = document.getElementById(featureID)
+    button.addEventListener('click', function() {misleadingFeatureButtonClicked(featureID)})
 }
 
 function misleadingFeatureButtonClicked(id) {
