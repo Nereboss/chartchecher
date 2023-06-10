@@ -1,4 +1,8 @@
+const portNumber = 5000;
+
 // -----------------------------global variables---------------------------------
+
+let imageURL_auto; 
 
 let misleadingFeaturesTexts = {
     'featureOne': ['Feature 1', 'Test description of the misleading feature that was detected'],  //put some test text here
@@ -40,6 +44,43 @@ function showAllButtonClicked() {
 
 // -----------------------------test main---------------------------------
 
+chrome.storage.sync.get(['key'], function (result) {
+    //set the image
+    imageURL_auto = result.key;  //https://localhost/***/chart.png
+    // console.log(imageURL_auto, result.key);
+    const filename = imageURL_auto.split('/').reverse()[0];  //chart.png
+    const base_filename = filename.split('.')[0]; //chart
+
+    const endpoint = 'http://localhost:'        //endpoint is the AnalyzeAuto class in app.py
+        + portNumber.toString()
+        + '/api/analyzeauto';               //refers to the AnalyzeAuto class in app.py
+
+    fetch(endpoint, {
+        method: 'POST',                 //calls the post method
+        headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Cache-Control': 'no-cache',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+        body: JSON.stringify({
+                'base_filename': base_filename
+            })
+    })
+    .catch(function (error) {
+        console.log('Error in Freq POST: ', error);
+    })
+    .then(function (response) {
+        if (response.ok)
+            return response.json();
+        throw new Error('Network response was not ok.');
+    })
+    .then(function (arr) {console.log("did the backend connection work?", arr);})   //call function to draw the UI here
+    .catch(function (error) {
+        console.log('stl: ', error);
+    });
+});
+
 let misleadingFeaturesDiv = d3.select('#misleading-features-list-group')
 for (feature in misleadingFeaturesTexts) {
     appendMisleadingFeature(misleadingFeaturesDiv, feature, misleadingFeaturesTexts[feature][0], misleadingFeaturesTexts[feature][1])
@@ -67,7 +108,7 @@ function appendMisleadingFeature(parentDiv, featureID, featureName, featureDescr
                             </div>
                             <div class="col-3">
                                 <div class="d-flex justify-content-end">
-                                    <button type="button" class="btn btn-outline-primary" id="${featureID}">hide</button>
+                                    <button type="button" class="btn btn-outline-primary" id="${featureID}">Hide</button>
                                 </div>
                             </div>
                         </div>`)
@@ -77,14 +118,14 @@ function appendMisleadingFeature(parentDiv, featureID, featureName, featureDescr
 
 function misleadingFeatureButtonClicked(id) {
     const button = d3.select('#'+id)
-    if (button.text() == 'show') {
-        button.text('hide')
+    if (button.text() == 'Show') {
+        button.text('Hide')
         button.attr('class', 'btn btn-primary')
-    } else if (button.text() == 'hide') {
-        button.text('show')
+    } else if (button.text() == 'Hide') {
+        button.text('Show')
         button.attr('class', 'btn btn-outline-primary')
     } else {
-        console.log('Error: button text is not show or hide')
+        console.log('Error: button text is not Show or Hide')
     }
     console.log(`${id} button clicked; toggle the feature here`) //TODO toggle the feature here
 }
