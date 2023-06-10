@@ -59,19 +59,26 @@
             <!--Start Image Comparsion-->
             <div class="row test-row justify-content-center align-items-center" id="image-compare" style="position: relative;">
                 <div class="col-6">
-                    <div class="card" id="original-chart">
+                    <div class="card">
                         <div class="card-header" style="text-align: center">
                             <h3 style="font-weight: bold;">Original Chart</h3>
                         </div>
-                        <svg id="chart" width="500" height="400">Original chart goes here</svg>
+                        <div class="card-body">
+                            <div style='background-color: green'>
+                                <img style="z-index: 0; display: block;" width="500px" class="img-fluid" id="original-chart" src=""> <!--TODO: make the image centered in the card-->
+                                <svg id="is-this-needed" width="600" height="400">Original chart goes here</svg>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-6">
-                    <div class="card" id="recommended-chart">
+                    <div class="card">
                         <div class="card-header" style="text-align: center">
                             <h3 style="font-weight: bold;">Recommended Chart</h3>
                         </div>
-                        <svg id="chart" width="500" height="400">Improved chart goes here</svg>
+                        <div class="card-body">
+                            <svg id="recommended-chart" width="500" height="400">Recommended chart goes here</svg>
+                        </div>
                     </div>
                 </div>
                 <div style="position: absolute;">

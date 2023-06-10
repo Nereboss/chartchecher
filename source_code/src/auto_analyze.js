@@ -423,6 +423,26 @@ function drawTestUI(l_width, l_height, local_xr, local_yr, local_data, parentDiv
     parentDiv.append('hr')
     let testChartDiv = parentDiv.append('div').attr('id', 'testChartDiv')
     drawChart(testChartDiv);
+
+    //test to draw the copied image into the UI
+    parentDiv.append('hr')
+    parentDiv.append('p').text("This is the copied image:")
+    parentDiv.append('div').attr('style', 'height: 500px; width: 500px; border: 1px solid black;')
+        .insert('img')
+        .attr('id', 'copiedImage')
+        .attr('class', 'img-fluid')
+        // .attr('width', '100%')
+        // .attr('height', 'auto')
+        // .attr('object-fit', 'contain')
+        // .attr('style', 'z-index: 1; height: 100%; width: 100%; object-fit: contain')
+    
+    const img = document.getElementById('copiedImage');
+    toDataURL(imageURL_auto,
+        function (dataUrl) {
+            img.src = dataUrl;
+            console.log('RESULT:', dataUrl)
+        }
+    );
 }
 
 //function to draw the list of mislead features

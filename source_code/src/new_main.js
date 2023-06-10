@@ -1,14 +1,36 @@
 const portNumber = 5000;
 
-// -----------------------------global variables---------------------------------
-
-let imageURL_auto; 
-
-let misleadingFeaturesTexts = {
+const misleadingFeaturesTexts = {
     'featureOne': ['Feature 1', 'Test description of the misleading feature that was detected'],  //put some test text here
     'featureTwo': ['Feature 2', 'Anotherone']       //maybe this description needs to be editable because we want to dynamically allow for information to be added (or maybe add placeholder text and use replace)
     //TODO: add the real features here
 }
+
+// -----------------------------global variables---------------------------------
+
+let imageURL_auto; 
+
+//make the data needed to draw the chart global variables to be able to easily redraw the charts on an update
+//data needed to draw the chart axis
+var chartWidth;
+var chartHeight;
+var chartXTicks;        //array of tick marks along the x axis first and last element are the min and max values
+var chartYTicks;        //array of tick marks along the y axis first and last element are the min and max values
+
+//data needed to draw the graphs
+var chartGraphData;
+var detectedFeatures = {        //object represents all detectable misleading features; default is false but elements are arrays so that features can store necessary data for drawing of the charts
+    "truncatedY": [false],
+    "invertedY": [false],
+    "misleadingAR": [false],          //we need to store the ideal aspect ratio to draw the chart correctly (when this is zero, the aspect ratio is not misleading)
+    "missingLabels": [false],
+    "multipleAxis": [false],
+    "nonLinearX": [false],
+    "nonLinearY": [false],
+    "inconsistentTicksX": [false],
+    "inconsistentTicksY": [false]
+}
+
 
 
 //-----------------------------event listeners---------------------------------
@@ -35,6 +57,12 @@ function helpButtonClicked() {
 
 function toggleButtonClicked() {
     console.log('toggle button clicked')
+    var image = document.getElementById("original-chart");
+    if (image.style.display === "none") {
+        image.style.display = "block";
+    } else {
+        image.style.display = "none";
+    }
 }
 
 function showAllButtonClicked() {
@@ -75,7 +103,7 @@ chrome.storage.sync.get(['key'], function (result) {
             return response.json();
         throw new Error('Network response was not ok.');
     })
-    .then(function (arr) {console.log("did the backend connection work?", arr);})   //call function to draw the UI here
+    .then(function (arr) {drawUI(arr)})   //call function to draw the UI here
     .catch(function (error) {
         console.log('stl: ', error);
     });
@@ -86,8 +114,39 @@ for (feature in misleadingFeaturesTexts) {
     appendMisleadingFeature(misleadingFeaturesDiv, feature, misleadingFeaturesTexts[feature][0], misleadingFeaturesTexts[feature][1])
 }
 
+/**
+ * main function that draws the UI
+ * @param {*} backendData the data returned from the backend
+ */
+function drawUI(backendData) {
 
-//-----------------------------functions---------------------------------
+    //process backend data into global variables
+    //draw the original image into the UI
+    drawOriginalImage();
+    //draw the control chart into the UI
+    //draw the improved chart into the UI
+    //draw the misleading features into the UI
+}
+
+function processBackendData(backendData) {
+
+}
+
+/**
+ * function draws the original image into the UI
+ */
+function drawOriginalImage() {
+    const img = document.getElementById('original-chart');
+    toDataURL(imageURL_auto,
+        function (dataUrl) {
+            img.src = dataUrl;
+            console.log('RESULT:', dataUrl)
+        }
+    );
+}
+
+
+//-----------------------------drawing functions---------------------------------
 
 /**
  * function draws a misleading feature in the misleading features list
@@ -116,6 +175,10 @@ function appendMisleadingFeature(parentDiv, featureID, featureName, featureDescr
     button.addEventListener('click', function() {misleadingFeatureButtonClicked(featureID)})
 }
 
+/**
+ * function toggles the misleading feature in the recommended chart when the button is clicked
+ * @param {HTMLElement} id the ID of the button that was clicked
+ */
 function misleadingFeatureButtonClicked(id) {
     const button = d3.select('#'+id)
     if (button.text() == 'Show') {
@@ -128,4 +191,32 @@ function misleadingFeatureButtonClicked(id) {
         console.log('Error: button text is not Show or Hide')
     }
     console.log(`${id} button clicked; toggle the feature here`) //TODO toggle the feature here
+}
+
+//-----------------------------helper functions---------------------------------
+
+/**
+ * function converts an image URL to a data URL (also converts it to base64)
+ * @param {*} src 
+ * @param {*} callback 
+ * @param {*} outputFormat 
+ */
+function toDataURL(src, callback, outputFormat) {
+    let image = new Image();
+    image.crossOrigin = 'Anonymous';
+    image.onload = function () {
+        let canvas = document.createElement('canvas');
+        let ctx = canvas.getContext('2d');
+        let dataURL;
+        canvas.height = this.naturalHeight;
+        canvas.width = this.naturalWidth;
+        ctx.drawImage(this, 0, 0);
+        dataURL = canvas.toDataURL(outputFormat);
+        callback(dataURL);
+    };
+    image.src = src;
+    if (image.complete || image.complete === undefined) {
+        image.src = 'data:image/gif;base64, R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+        image.src = src;
+    }
 }
