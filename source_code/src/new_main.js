@@ -11,9 +11,9 @@ const misleadingFeaturesTexts = {
     'truncatedY': ['Truncated Y-Axis', 
                 'The Y-Axis is truncated. The bottom most value is INSERT1 instead of a more traditional 0. This can be misleading as it displays the differences between those values as larger than they actually are.'],
     'invertedY': ['Inverted Y-Axis', 
-                'The Y-Axis is inverted.'],
+                'The Y-Axis is inverted. This can be misleading as it makes upwards trends appear like they are downwards trends and vice versa.'],
     'misleadingAR': ['Misleading Aspect Ratio', 
-                'The aspect ratio of the chart is misleading.'],
+                'The aspect ratio of the chart is misleading. This can make trends appear more extreme than they actually are.'],
     'missingLabels': ['Missing Labels', 
                 'The chart is missing the following labels: INSERTALL. This can be misleading as it makes it harder to understand the context of the chart.'],
     'multipleAxis': ['Multiple Axis', 
@@ -201,11 +201,11 @@ function drawChart(parentDiv, controlChart = false) {
 
     // when the original aspect ratio is misleading we need to draw the chart using the ideal aspect ratio
     if (!controlChart && detectedFeatures.misleadingAR[0]) {
-        if(detectedFeatures.misleadingAR[2] > chartWidth / chartHeight) {
-            yAxisSize = xAxisSize / detectedFeatures.misleadingAR[2];       //when the ideal AR is larger than the original AR we need to make the y-axis smaller
+        if(detectedFeatures.misleadingAR[1] > chartWidth / chartHeight) {
+            yAxisSize = xAxisSize / detectedFeatures.misleadingAR[1];       //when the ideal AR is larger than the original AR we need to make the y-axis smaller
         }
         else {
-            xAxisSize = yAxisSize * detectedFeatures.misleadingAR[2];       //when the ideal AR is smaller than the original AR we need to make the x-axis smaller
+            xAxisSize = yAxisSize * detectedFeatures.misleadingAR[1];       //when the ideal AR is smaller than the original AR we need to make the x-axis smaller
         }
     }
 
