@@ -25,7 +25,7 @@ def detect_truncation(f):
     baseline = float(y_range[0])
     if (baseline != 0):
         message = "The y-axis is truncated!"
-        return x_o, y_o, message, [True]
+        return x_o, y_o, message, [True, baseline]
     else:
         message = "The y-axis is not truncated and starts at 0 [newline]"
         return x_o, y_o, message, [False]

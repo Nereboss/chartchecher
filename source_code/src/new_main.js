@@ -5,9 +5,28 @@ const CHARTSIZE = 175*SCALE;
 const margin = {top: 50, right: 10, bottom: 20, left: 150};
 
 const misleadingFeaturesTexts = {
-    'featureOne': ['Feature 1', 'Test description of the misleading feature that was detected'],  //put some test text here
-    'featureTwo': ['Feature 2', 'Anotherone']       //maybe this description needs to be editable because we want to dynamically allow for information to be added (or maybe add placeholder text and use replace)
-    //TODO: add the real features here
+    // some information about the misleading features changes dynamically with the chart
+    // the places where such information is inserted are marked with INSERT1, INSERT2, etc.
+    // the places where all missing labels are inserted are marked with INSERTALL
+    'truncatedY': ['Truncated Y-Axis', 
+                'The Y-Axis is truncated. The bottom most value is INSERT1 instead of a more traditional 0. This can be misleading as it displays the differences between those values as larger than they actually are.'],
+    'invertedY': ['Inverted Y-Axis', 
+                'The Y-Axis is inverted.'],
+    'misleadingAR': ['Misleading Aspect Ratio', 
+                'The aspect ratio of the chart is misleading.'],
+    'missingLabels': ['Missing Labels', 
+                'The chart is missing the following labels: INSERTALL. This can be misleading as it makes it harder to understand the context of the chart.'],
+    'multipleAxis': ['Multiple Axis', 
+                'The chart has multiple axis.'],
+    'nonLinearX': ['Non-Linear X-Axis', 
+                'The X-Axis does not follow a linear scale.'],
+    'nonLinearY': ['Non-Linear Y-Axis', 
+                'The Y-Axis does not follow a linear scale.'],
+    'inconsistentTicksX': ['Inconsistent Ticks on X-Axis', 
+                'The X-Axis has inconsistent ticks.'],
+    'inconsistentTicksY': ['Inconsistent Ticks on Y-Axis', 
+                'The Y-Axis has inconsistent ticks.']
+    //TODO: improve descriptions 
 }
 
 // -----------------------------global variables---------------------------------
@@ -145,7 +164,7 @@ function processBackendData(backendData) {
         chartHeight = CHARTSIZE;
         chartWidth = parseInt(chartAR * chartHeight);
     }
-    chartGraphData = JSON.stringify(arr.data);
+    chartGraphData = JSON.stringify(backendData['data']);
     chartGraphData = JSON.parse(chartGraphData);
     chartGraphData.splice(chartGraphData.length - 1); //remove last element
     detectedFeatures = backendData['detectedFeatures'];
@@ -159,15 +178,37 @@ function drawOriginalImage() {
     toDataURL(imageURL_auto,
         function (dataUrl) {
             img.src = dataUrl;
-            console.log('RESULT:', dataUrl)
         }
     );
 }
 
+/**
+ * function draws the detected misleading features into the list in the UI
+ */
 function drawMisleadFeaturesList() {
+    inserter = (feature) => {
+        res = misleadingFeaturesTexts[feature][1]
+        if (res.includes('INSERTALL')) {
+            //replace INSERTALL with a list of insert-values and split off the last element with an 'and' instead of a comma
+            res = res.replace('INSERTALL', detectedFeatures[feature].slice(1, detectedFeatures[feature].length - 1).join(', ') + ' and ' + detectedFeatures[feature][detectedFeatures[feature].length - 1]);
+        } else {
+            for (let i = 1; i < detectedFeatures[feature].length; i++) {
+                console.log('INSERT'+i)
+                res = res.replace('INSERT'+i, detectedFeatures[feature][i]);
+            }
+        }
+        //remove any remaining INSERT strings (necessary for enumeration of inserts without set length)
+        res = res.replace(/INSERT\d+/i, '');
+        res = res.replace(/INSERTALL/i, '');
+        return res;
+    }
+
     let misleadingFeaturesDiv = d3.select('#misleading-features-list-group')
+    //for every feature we check if the backend detected it and if so we add it to the list
     for (feature in misleadingFeaturesTexts) {
-        appendMisleadingFeature(misleadingFeaturesDiv, feature, misleadingFeaturesTexts[feature][0], misleadingFeaturesTexts[feature][1])
+        if (detectedFeatures[feature][0]) {
+            appendMisleadingFeature(misleadingFeaturesDiv, feature, misleadingFeaturesTexts[feature][0], inserter(feature)
+        )}
     }
 }
 
@@ -193,7 +234,7 @@ function appendMisleadingFeature(parentDiv, featureID, featureName, featureDescr
                             </div>
                             <div class="col-3">
                                 <div class="d-flex justify-content-end">
-                                    <button type="button" class="btn btn-outline-primary" id="${featureID}">Hide</button>
+                                    <button type="button" class="btn btn-primary" id="${featureID}">Hide</button>
                                 </div>
                             </div>
                         </div>`)
