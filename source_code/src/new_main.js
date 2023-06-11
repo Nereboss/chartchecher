@@ -17,15 +17,15 @@ const misleadingFeaturesTexts = {
     'missingLabels': ['Missing Labels', 
                 'The chart is missing the following labels: INSERTALL. This can be misleading as it makes it harder to understand the context of the chart.'],
     'multipleAxis': ['Multiple Axis', 
-                'The chart has multiple axis.'],
+                'The chart has multiple axis. This can be misleading, as it distorts the magnitude of the data and makes trends appear different than they actually are.'],
     'nonLinearX': ['Non-Linear X-Axis', 
                 'The X-Axis does not follow a linear scale.'],
     'nonLinearY': ['Non-Linear Y-Axis', 
                 'The Y-Axis does not follow a linear scale.'],
     'inconsistentTicksX': ['Inconsistent Ticks on X-Axis', 
-                'The X-Axis has inconsistent ticks.'],
+                'The tick markers along the X-Axis are place in inconsistent intervals. This can make it harder to judge the values on the graph.'],
     'inconsistentTicksY': ['Inconsistent Ticks on Y-Axis', 
-                'The Y-Axis has inconsistent ticks.']
+                'The tick markers along the Y-Axis are place in inconsistent intervals. This can make it harder to judge the values on the graph']
     //TODO: improve descriptions 
 }
 
@@ -80,7 +80,7 @@ function helpButtonClicked() {
 
 function toggleButtonClicked() {
     console.log('toggle button clicked')
-    var image = document.getElementById("original-chart");
+    var image = document.getElementById("original-image");
     if (image.style.display === "none") {
         image.style.display = "block";
     } else {
@@ -146,7 +146,9 @@ function drawUI(backendData) {
     //draw the original image into the UI
     drawOriginalImage();
     //draw the control chart into the UI
+    drawChart(d3.select('#original-chart'), true)
     //draw the improved chart into the UI
+    drawChart(d3.select('#recommended-chart'));
     //draw the misleading features into the UI
     drawMisleadFeaturesList();
 }
@@ -174,12 +176,166 @@ function processBackendData(backendData) {
  * function draws the original image into the UI
  */
 function drawOriginalImage() {
-    const img = document.getElementById('original-chart');
+    const img = document.getElementById('original-image');
     toDataURL(imageURL_auto,
         function (dataUrl) {
             img.src = dataUrl;
         }
     );
+}
+
+/**
+ * function that we use to draw all the chart images in the UI
+ * TODO: expand this function step by step to eventually include the removal of all misleading features
+ * if all detected tactics are false, it will draw the input-image (control chart)
+ * @param {html_element} parentDiv the div in which the chart will be drawn
+ * @param {boolean} controlChart whether or not to draw the control chart
+ */
+function drawChart(parentDiv, controlChart = false) {
+
+    //-----------------set aspect ratio-----------------
+
+    //the dimension of the drawn chart (in pixels)
+    let xAxisSize = chartWidth;
+    let yAxisSize = chartHeight;
+
+    // when the original aspect ratio is misleading we need to draw the chart using the ideal aspect ratio
+    if (!controlChart && detectedFeatures.misleadingAR[0]) {
+        if(detectedFeatures.misleadingAR[2] > chartWidth / chartHeight) {
+            yAxisSize = xAxisSize / detectedFeatures.misleadingAR[2];       //when the ideal AR is larger than the original AR we need to make the y-axis smaller
+        }
+        else {
+            xAxisSize = yAxisSize * detectedFeatures.misleadingAR[2];       //when the ideal AR is smaller than the original AR we need to make the x-axis smaller
+        }
+    }
+
+    //-----------------set x-axis scale-----------------
+
+    //functions to get the domain and range out of the xTicks object (needed to correctly represent the ticks of the original image)
+    let xOffset = chartXTicks[0].pos;
+    let xFactor = (chartXTicks[chartXTicks.length-1].pos - xOffset) / xAxisSize;
+    let xTicksDomain = chartXTicks.map(function (d) {return d.value;});
+    let drawnTickValuesX = xTicksDomain;     //needs to be saved to draw the ticks later because xTicksDomain can be overwritten
+    let xTicksRange = chartXTicks.map(function (d) {return (d.pos - xOffset) / xFactor;});
+
+    if (!controlChart && detectedFeatures.nonLinearX[0]) {       //when the x-axis is non-linear we need to use the first and last value to create a linear scale
+        xTicksDomain = [chartXTicks[0].value, chartXTicks[chartXTicks.length-1].value];
+        xTicksRange = [0, xAxisSize];
+    }
+    
+    // using d3 to construct a linear scale for the x- and y-axis 
+    // (domain is the range of values in the data, range is the range of values in the drawn chart)
+    let xScale = d3.scaleLinear()  
+        .domain(xTicksDomain)
+        .range(xTicksRange);
+
+
+    //-----------------set y-axis scale-----------------
+
+    //functions to get the domain and range out of the yTicks object (needed to correctly represent the ticks of the original image)
+    let yOffset = chartYTicks[0].pos;
+    let yFactor = (chartYTicks[chartYTicks.length-1].pos - yOffset) / yAxisSize;
+    let yTicksDomain = chartYTicks.map(function (d) {return d.value;});
+    let drawnTickValuesY = yTicksDomain;     //needs to be saved to draw the ticks later in case yTicksDomain is overwritten
+    let yTicksRange = chartYTicks.map(function (d) {return (d.pos - yOffset) / yFactor;});
+
+    //when the y-axis is truncated we need to "shift" the existing scale to start at zero
+    if(!controlChart && detectedFeatures.truncatedY[0]) {
+        let maxValue = yTicksDomain[yTicksDomain.length-1];
+        let compressFactor = 1-(yTicksDomain[0]/maxValue);
+        yTicksDomain = yTicksDomain.map(function (d) {return (d-maxValue)/compressFactor + maxValue;});
+    }
+
+    //when the y-axis is inverted we need to reverse the order of the ticks
+    if(!controlChart && detectedFeatures.invertedY[0]) {
+        yTicksDomain = yTicksDomain.reverse();
+    }
+
+    if (!controlChart && detectedFeatures.nonLinearY[0]) {       //when the y-axis is non-linear we need to use the first and last value to create a linear scale
+        yTicksDomain = [yTicksDomain[0].value, yTicksDomain[yTicksDomain.length-1].value];
+        yTicksRange = [yAxisSize, 0];
+    }
+    let yScale = d3.scaleLinear()
+            .domain(yTicksDomain)
+            .range(yTicksRange.reverse());    //reverse as the largest value needs to be first because the chart will be drawn "top to bottom"
+
+    
+    //-----------------prepare line dataset-----------------
+
+    let line = d3.line()
+        .x(function (d) {
+            return xScale(d.x);
+        }) // set the x values for the line generator
+        .y(function (d) {
+            return yScale(d.y);
+        });
+
+    let dataset = chartGraphData.map(function (d) {
+        return {
+            'x': parseFloat(d.x),
+            'y': parseFloat(d.y)
+        };
+    });
+
+    let elementID;
+    if(controlChart) {
+        elementID = 'controlSVG';
+    } else {
+        elementID = 'recommendedSVG';
+    }
+
+    const EXPAND_WIDTH = 80;
+    const EXPAND_HEIGHT = 50;
+    let svg = parentDiv
+        .append('svg')
+        .attr('width', xAxisSize + EXPAND_WIDTH)
+        .attr('height', yAxisSize + EXPAND_HEIGHT)
+        .attr('id', elementID)
+        .append('g')
+        .attr('align', 'center')
+
+    const SHIFT_DOWN = 11;
+    const SHIFT_RIGHT = 40;
+
+    //-----------------set axis ticks-----------------
+
+    let bottomAxis;
+    if(!controlChart && detectedFeatures.inconsistentTicksX[0]) {    //when the x-axis is inconsistent we let d3 decide which ticks to draw
+        bottomAxis = d3.axisBottom(xScale).ticks(chartXTicks.length);
+    } else {                                        //otherwise we draw the ticks from the oginal image
+        bottomAxis = d3.axisBottom(xScale).tickValues(drawnTickValuesX).tickFormat(x => `${x}`) // weird tick format is necessary to not round the tick and keep the original from the image
+    }
+
+    let leftAxis;
+    if(!controlChart && (detectedFeatures.inconsistentTicksY[0] || detectedFeatures.truncatedY[0])) {  //when the y-axis is truncated and shown in a improved way, the axis ticks will be inconsistent which is why we improve the ticks there too
+        leftAxis = d3.axisLeft(yScale).ticks(chartYTicks.length);
+    } else {
+        leftAxis = d3.axisLeft(yScale).tickValues(drawnTickValuesY).tickFormat(x => `${x}`)
+    }
+
+    //-----------------draw the chart-----------------
+
+    // x-axis
+    svg.append('g')
+        .attr('class', 'xaxisblack')
+        .attr('color', 'black')
+        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (yAxisSize + SHIFT_DOWN) + ')')
+        .call(bottomAxis);
+
+    // y-axis
+    svg.append('g')
+        .style('font', '11px Segoe UI')
+        .style('stroke', '#ef8a62')
+        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
+        .call(leftAxis);
+
+    //append the datapath
+    svg.append('path')
+        .datum(dataset) // 10. Binds data to the line
+        .attr('class', 'line') // Assign a class for styling
+        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
+        .attr('d', line); // 11. Calls the line generator
+
 }
 
 /**
@@ -258,6 +414,17 @@ function misleadingFeatureButtonClicked(id) {
         console.log('Error: button text is not Show or Hide')
     }
     console.log(`${id} button clicked; toggle the feature here`) //TODO toggle the feature here
+
+    //toggle the variable in the detectedFeatures object
+    detectedFeatures[id][0] = !detectedFeatures[id][0];
+    let oldChartSVG = document.getElementById('recommendedSVG');
+    if (oldChartSVG != null) {
+        oldChartSVG.remove();          //remove the old recommended chart so we can redraw it
+    }
+    //redraw the recommended chart
+    let parentDiv = d3.select('#recommended-chart')
+    drawChart(parentDiv)
+
 }
 
 //-----------------------------helper functions---------------------------------
