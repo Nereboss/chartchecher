@@ -1,5 +1,9 @@
 const portNumber = 5000;
 
+const SCALE = 1.5;
+const CHARTSIZE = 175*SCALE;  
+const margin = {top: 50, right: 10, bottom: 20, left: 150};
+
 const misleadingFeaturesTexts = {
     'featureOne': ['Feature 1', 'Test description of the misleading feature that was detected'],  //put some test text here
     'featureTwo': ['Feature 2', 'Anotherone']       //maybe this description needs to be editable because we want to dynamically allow for information to be added (or maybe add placeholder text and use replace)
@@ -10,10 +14,10 @@ const misleadingFeaturesTexts = {
 
 let imageURL_auto; 
 
-//make the data needed to draw the chart global variables to be able to easily redraw the charts on an update
 //data needed to draw the chart axis
 var chartWidth;
 var chartHeight;
+var chartAR;            //aspect ratio of the chart in the original image
 var chartXTicks;        //array of tick marks along the x axis first and last element are the min and max values
 var chartYTicks;        //array of tick marks along the y axis first and last element are the min and max values
 
@@ -22,11 +26,11 @@ var chartGraphData;
 var detectedFeatures = {        //object represents all detectable misleading features; default is false but elements are arrays so that features can store necessary data for drawing of the charts
     "truncatedY": [false],
     "invertedY": [false],
-    "misleadingAR": [false],          //we need to store the ideal aspect ratio to draw the chart correctly (when this is zero, the aspect ratio is not misleading)
-    "missingLabels": [false],
-    "multipleAxis": [false],
-    "nonLinearX": [false],
-    "nonLinearY": [false],
+    "misleadingAR": [false],                //can store an improved aspect ratio as 2nd entry
+    "missingLabels": [false],               //stores all missing lavels after the first entry
+    "multipleAxis": [false],                //stores the axis names of detected axis if there are multiple
+    "nonLinearX": [false],                  //can stor multiple booleans if there are multiple x-axis
+    "nonLinearY": [false],                  //can stor multiple booleans if there are multiple y-axis
     "inconsistentTicksX": [false],
     "inconsistentTicksY": [false]
 }
@@ -70,7 +74,7 @@ function showAllButtonClicked() {
 }
 
 
-// -----------------------------test main---------------------------------
+// -----------------------------communication with backend---------------------------------
 
 chrome.storage.sync.get(['key'], function (result) {
     //set the image
@@ -109,10 +113,8 @@ chrome.storage.sync.get(['key'], function (result) {
     });
 });
 
-let misleadingFeaturesDiv = d3.select('#misleading-features-list-group')
-for (feature in misleadingFeaturesTexts) {
-    appendMisleadingFeature(misleadingFeaturesDiv, feature, misleadingFeaturesTexts[feature][0], misleadingFeaturesTexts[feature][1])
-}
+
+// -----------------------------functions to draw the main sections---------------------------------
 
 /**
  * main function that draws the UI
@@ -121,15 +123,32 @@ for (feature in misleadingFeaturesTexts) {
 function drawUI(backendData) {
 
     //process backend data into global variables
+    processBackendData(backendData);
     //draw the original image into the UI
     drawOriginalImage();
     //draw the control chart into the UI
     //draw the improved chart into the UI
     //draw the misleading features into the UI
+    drawMisleadFeaturesList();
 }
 
 function processBackendData(backendData) {
 
+    chartXTicks = backendData['xTicks'];
+    chartYTicks = backendData['yTicks'];
+    chartAR = backendData['aspectRatio'];
+    //set height and width of the drawn charts based on the aspect ratio
+    if (chartAR > 10 / 3) { //fix on x size
+        chartWidth = CHARTSIZE;
+        chartHeight = parseInt(chartWidth / chartAR);
+    } else { //fix on y size
+        chartHeight = CHARTSIZE;
+        chartWidth = parseInt(chartAR * chartHeight);
+    }
+    chartGraphData = JSON.stringify(arr.data);
+    chartGraphData = JSON.parse(chartGraphData);
+    chartGraphData.splice(chartGraphData.length - 1); //remove last element
+    detectedFeatures = backendData['detectedFeatures'];
 }
 
 /**
@@ -145,8 +164,15 @@ function drawOriginalImage() {
     );
 }
 
+function drawMisleadFeaturesList() {
+    let misleadingFeaturesDiv = d3.select('#misleading-features-list-group')
+    for (feature in misleadingFeaturesTexts) {
+        appendMisleadingFeature(misleadingFeaturesDiv, feature, misleadingFeaturesTexts[feature][0], misleadingFeaturesTexts[feature][1])
+    }
+}
 
-//-----------------------------drawing functions---------------------------------
+
+//-----------------------------functions to draw smaller elements---------------------------------
 
 /**
  * function draws a misleading feature in the misleading features list

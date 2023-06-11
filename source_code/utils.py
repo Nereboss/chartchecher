@@ -25,10 +25,10 @@ def detect_truncation(f):
     baseline = float(y_range[0])
     if (baseline != 0):
         message = "The y-axis is truncated!"
-        return x_o, y_o, message
+        return x_o, y_o, message, [True]
     else:
         message = "The y-axis is not truncated and starts at 0 [newline]"
-        return x_o, y_o, message
+        return x_o, y_o, message, [False]
 
 
 def detect_inverted_axis(f):
@@ -43,9 +43,9 @@ def detect_inverted_axis(f):
     x_o, y_o = identify_origin(f, use='invert')
     if (y_increment < 0):
         message = "The y-axis is inverted!"
-        return x_o, y_o, message
+        return x_o, y_o, message, [True]
     else:
-        return None, None, None
+        return None, None, None, [False]
 
 def detect_changed_y_max(chart_data, box_data):
     """
@@ -90,6 +90,9 @@ def detect_missing_labels(chart_data, box_data):
     #print missing elements to console
     print("\nThe chart is missing "+" and ".join([", ".join(missing[:-1]),missing[-1]] if len(missing) > 2 else missing)+". This may cause the chart to be taken out of context or make the shown data hard to validate.\n")
 
+    missing.insert(0, True)
+    return missing
+
 def detect_inconsistent_scales(box_data):
     """
     Function takes in bounding boxes and detects if one or more of the axis do not follow a linear scale
@@ -105,20 +108,33 @@ def detect_inconsistent_scales(box_data):
             different_axis_frames.append(box_data[box_data['type'] == type])          
 
     detected_inconsistencies = []
+    nonLinearX = []
+    nonLinearY = []
+    inconsistentTicksX = []
+    inconsistentTicksY = []
 
-    for different_axis_frame in different_axis_frames:
-        m = check_axis_consistency(different_axis_frame)
-        for inconsistency in m:
+    # for each axis check what inconsistencies exist
+    for axis_frame in different_axis_frames:      #TODO: we need to sort the order to always go from 0-1-2-...
+        message, nonLinear, inconsistentTicks = check_axis_consistency(axis_frame)
+        for inconsistency in message:
             detected_inconsistencies.append(inconsistency)
+        if axis_frame['type'].iloc[0][0] == 'x':    #if the first letter in the string is x, it is an x-axis
+            nonLinearX.append(nonLinear)
+            inconsistentTicksX.append(inconsistentTicks)
+        else:
+            nonLinearY.append(nonLinear)
+            inconsistentTicksY.append(inconsistentTicks)
 
-    return detected_inconsistencies
+    return detected_inconsistencies, nonLinearX, nonLinearY, inconsistentTicksX, inconsistentTicksY
 
 def check_axis_consistency(axis_data):
     """
-    Takes in bounding boxes from axis lables of one axis and calculates whether the axis scale and/or the placement of labels is inconsistent for the axis
+    Takes in bounding boxes from axis lables of ONE axis and calculates whether the axis scale and/or the placement of labels is inconsistent for the axis
     returns a list of detected inconsistencies in axis scales and/or label placements
     """
     messages = []
+    nonLinear = False
+    inconsistentTicks = False
     axis_data = axis_data.copy()        #we need to make a copy of the dataframe to avoid a SettingWithCopyWarning
     axis_name = axis_data['type'].iloc[0]
     axis = 'y' if 'y' in axis_name else 'x'      #we assume all elements have the same type and only check for first element if it belongs to the x or y axis
@@ -138,6 +154,7 @@ def check_axis_consistency(axis_data):
     else:
         print("The ticks across the "+axis_name+" are place inconsistently!")
         messages.append("inconsistent tick placement along the "+axis_name+ " detected")
+        inconsistentTicks = True
 
     numeric_texts = None
     try:
@@ -152,33 +169,40 @@ def check_axis_consistency(axis_data):
         else:
             print("The "+axis_name+" axis does not follow a linear scale!")
             messages.append("non-linear scale along the "+axis_name+ " detected")
+            nonLinear = True
     except ValueError: 
         print('cannot check axis scaling because not all labels are numeric')
 
     # later for the returns: we need to find a way to draw the chart in an "unwarped" way, meaning we need the distances between the labels together with middlepoint of the labels and transform the corresponding x/y values to show them in a linear way
-    return messages
+    return messages, nonLinear, inconsistentTicks
 
 def detect_multiple_axis(box_data):
     """
     Function takes in bounding boxes, detects if there are multiple axis and adjusts the types in the csv file to represent these different axis
     In case there are more axis than axis titles, this function will add example titles to the start of the csv file
     """
+    result = [False]
+
     box_data = pd.read_csv(box_data)
 
     split_x_axis_labels = split_axis_labels(box_data[box_data['type'].str.contains('^x.*label$')], 'x')
     if len(split_x_axis_labels) > 1:
-        #prints for now, remove later
+        #TODO prints for now, remove later
         print('multiple x-axis detected!')
+        result[0] = True
         for x_axis_label in split_x_axis_labels:
             print(x_axis_label['type'].iloc[0] + ': ' + x_axis_label['text'].str.cat(sep='; '))
+            result.append(x_axis_label['type'].iloc[0].replace('-label', '')) 
     else:
         print('only one x-axis detected!')
     split_y_axis_labels = split_axis_labels(box_data[box_data['type'].str.contains('^y.*label$')], 'y')
     if len(split_y_axis_labels) > 1:
         #prints for now, remove later
         print('multiple y-axis detected!')
+        result[0] = True
         for y_axis_label in split_y_axis_labels:
             print(y_axis_label['type'].iloc[0] + ': ' + y_axis_label['text'].str.cat(sep='; '))
+            result.append(y_axis_label['type'].iloc[0].replace('-label', ''))
     else:
         print('only one y-axis detected!')
 
@@ -218,6 +242,7 @@ def detect_multiple_axis(box_data):
     # update the csv file here, for debugging we create a new csv file for now
     # TODO: remove the creation of a new csv file later and find out how to update the original csv file
     box_data.to_csv('new_box_data.csv')
+    return result
 
 def map_axis_titles_to_axis(axis_titles, split_axis_labels):
     """
@@ -412,7 +437,7 @@ def comment_aspect_ratio(d, f):
         smaller = IDEAL_SLOPE
 
     if greater/smaller < math.sqrt(10):
-        return None, 'no_message'
+        return None, 'no_message', [False]
         # the aspect ratio is not far from the ideal
 
 
@@ -425,7 +450,7 @@ def comment_aspect_ratio(d, f):
     _, _, x_p, _ = summarize_axes(f, full=True)
     last = len(x_p) - 1
     x_p = [float(i) for i in list(x_p[last])]
-    return message, x_p
+    return message, x_p, [True, IDEAL_SLOPE]
 
 
 def comment_axis_scales_util(f):
