@@ -79,7 +79,7 @@ function helpButtonClicked() {
 }
 
 function toggleButtonClicked() {
-    console.log('toggle button clicked')
+    console.log('toggle button clicked') //TODO: remove
     var image = document.getElementById("original-image");
     if (image.style.display === "none") {
         image.style.display = "block";
@@ -89,7 +89,8 @@ function toggleButtonClicked() {
 }
 
 function showAllButtonClicked() {
-    console.log('show all button clicked')
+    console.log('show all button clicked') //TODO: remove
+    window.location.href = '/views/detectable_features.html';
 }
 
 
@@ -170,6 +171,7 @@ function processBackendData(backendData) {
     chartGraphData = JSON.parse(chartGraphData);
     chartGraphData.splice(chartGraphData.length - 1); //remove last element
     detectedFeatures = backendData['detectedFeatures'];
+    console.log("dimensions: ", chartWidth, chartHeight);
 }
 
 /**
@@ -317,6 +319,7 @@ function drawChart(parentDiv, controlChart = false) {
 
     // x-axis
     svg.append('g')
+        .style('font', '11px Segoe UI')
         .attr('class', 'xaxisblack')
         .attr('color', 'black')
         .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (yAxisSize + SHIFT_DOWN) + ')')
@@ -325,7 +328,6 @@ function drawChart(parentDiv, controlChart = false) {
     // y-axis
     svg.append('g')
         .style('font', '11px Segoe UI')
-        .style('stroke', '#ef8a62')
         .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
         .call(leftAxis);
 
@@ -333,6 +335,7 @@ function drawChart(parentDiv, controlChart = false) {
     svg.append('path')
         .datum(dataset) // 10. Binds data to the line
         .attr('class', 'line') // Assign a class for styling
+        .style('stroke', '#007bff')
         .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
         .attr('d', line); // 11. Calls the line generator
 
