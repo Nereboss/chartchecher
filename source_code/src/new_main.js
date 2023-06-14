@@ -80,11 +80,14 @@ function helpButtonClicked() {
 
 function toggleButtonClicked() {
     console.log('toggle button clicked') //TODO: remove
-    var image = document.getElementById("original-image");
-    if (image.style.display === "none") {
-        image.style.display = "block";
+    var originalImage = document.getElementById("original-image");
+    var controlChart = document.getElementById("controlSVG");
+    if (originalImage.style.display === "none") {
+        originalImage.style.display = "block";
+        controlChart.style.display = "none";
     } else {
-        image.style.display = "none";
+        originalImage.style.display = "none";
+        controlChart.style.display = "block";
     }
 }
 
@@ -282,8 +285,10 @@ function drawChart(parentDiv, controlChart = false) {
     let elementID;
     if(controlChart) {
         elementID = 'controlSVG';
+        display = 'display: none';
     } else {
         elementID = 'recommendedSVG';
+        display = 'display: block';
     }
 
     const EXPAND_WIDTH = 80;
@@ -293,6 +298,7 @@ function drawChart(parentDiv, controlChart = false) {
         .attr('width', xAxisSize + EXPAND_WIDTH)
         .attr('height', yAxisSize + EXPAND_HEIGHT)
         .attr('id', elementID)
+        .attr('style', display)
         .append('g')
         .attr('align', 'center')
 

@@ -2,9 +2,93 @@
 <html lang='en'>
 <head>
   <meta charset='utf-8'>
-  <title>Chart Checker </title>
+  <title>Chart Checker - All Features</title>
   <link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>
+  <link href='../stylesheets/analyze.css' rel='stylesheet'>
+  <link href='../stylesheets/driver.min.css' rel='stylesheet'>
+
+  <!--  BOOTSTRAP-->
+  <link href='../bootstrap/bootstrap.min.css' rel='stylesheet'>
+  <script src='../bootstrap/popper.min.js'></script>
+  <script src='../bootstrap/jquery-3.2.1.slim.min.js'></script>
+  <script src='../bootstrap/bootstrap.min.js'></script>
+  <!-- END BOOTSTRAP-->
+  
 </head>
-<body>
-    Hello world
+<body style='background-color:#e3e3e3;'>
+  <div class="center-container">      
+    <div class='bottom-container'>
+
+      <!-- Title -->
+      <div class="row align-items-center" id="top-bar">
+        <div class="col-12">
+            <h2>Chart Checker - All detectable misleading features</h2>
+        </div>
+      </div>
+      
+      <!-- Main Table -->
+      <div class="row">
+        <div class="col-12">
+          <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+              <thead>
+                <tr>
+                  <th scope="col">Name</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Why/How is it misleading</th>
+                  <th scope="col">Example</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Truncated Y -->
+                <tr>
+                  <th scope="row">Truncated Y-Axis</th>
+                  <td>A truncated y-axis hides part of the vertical scale. Instead, a portion of the axis is cut off or removed.</td>
+                  <td>This can be misleading as it makes the displayed data look more extreme or exaggerated than it actually is which can lead to misinterpretation and false impressions</td>
+                  <td><button type="button" class="btn btn-primary" id="truncated">Show example</button></td>
+                </tr>
+                <!-- Inverted Y -->
+                <tr>
+                  <th scope="row">Inverted Y-Axis</th>
+                  <td>An inverted y-axis in a chart means that the values on the vertical axis are shown in reverse order, with the higher values at the bottom and the lower values at the top.</td>
+                  <td>This can be misleading because it flips the expected progression of the data, making upwards trends look like downwards trends and visa versa. This can cause confusion and misinterpretation of the data.</td>
+                  <td><button type="button" class="btn btn-primary" id="inverted">Show example</button></td>
+                </tr>
+                <!-- Misleading AR -->
+                <tr>
+                  <th scope="row">Misleading Aspect Ratio</th>
+                  <td>A chart with a misleading aspect ratio distorts the proportions and relationships between data points.</td>
+                  <td>This can be misleading as it makes trends across the data appear more or less steep then they actually are. This misrepresentation can lead to incorrect interpretations and conclusions.</td>
+                  <td><button type="button" class="btn btn-primary" id="ar">Show example</button></td>
+                </tr>
+                <!-- Missing labels -->
+                <tr>
+                  <th scope="row">Missing labels</th>
+                  <!-- TODO: improve this -->
+                  <td>Labels in a chart provide context and clarity about the data being presented. If they are missing, this information is not available. Such labels include the chart title, titles for the x-axis and y-axis or a legend.</td>
+                  <td>This is misleading, as without labels, we may lack critical context about the presented data, which makes it difficult to interpret values and make accurate comparissons.</td>
+                  <td><button type="button" class="btn btn-primary" id="labels">Show example</button></td>
+                </tr>
+                <!-- Multiple axis -->
+                <tr>
+                  <th scope="row">Mutiple Axis</th>
+                  <td>A chart can have multiple x-axis or y-axis, which represent different scales or measurements.</td>
+                  <td>This can be misleading, as it can become unclear which axis belongs to which data series. Furthermore different scales or measurements on each axis can distort comparisons and show misleading patterns. This can lead to incorrect conclusions about relations between different data series.</td>
+                  <td><button type="button" class="btn btn-primary" id="multi">Show example</button></td>
+                </tr>
+                <!-- Inconsistent scales -->
+                <tr>
+                  <th scope="row">Inconsistent scales</th>
+                  <td>Inconsistent scales can make certain data points appear disproportionately large or small compared to others. This can exaggerate or downplay differences between data points.</td>
+                  <td>This can be misleading as it distorts the representation of data, making some sections of the data appear disproportionately large or small compared to others. This misrepresentation can lead to incorrect interpretations and conclusions.</td>
+                  <td><button type="button" class="btn btn-primary" id="scale">Show example</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div> 
+    </div>
+  </div>
+  <script src="../src/detectable_features.js"></script>
 </body>
