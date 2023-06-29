@@ -49,22 +49,25 @@ class AnalyzeAuto(Resource):
             detect_changed_y_max(fn_d, fn_b)    # only writes a comment for now
 
             # Detect if there are any important labels missing
-            detect_missing_labels(fn_d, fn_b)
+            missing_labels = detect_missing_labels(fn_d, fn_b)
 
             # Detect if any axis have inconsistencies
-            detect_inconsistent_scales(fn_b)
+            m, nonLinearX, nonLinearY, inconsistentX, inconsistentY = detect_inconsistent_scales(fn_b)
+            print("axis problems: ", m)
+            for e in m:
+                messages.append(e)
 
             # Detect if there are multiple axis
-            detect_multiple_axis(fn_b)
+            detected_axis = detect_multiple_axis(fn_b)
 
             # Detect inverted axis and add the result
-            x, y, m = detect_inverted_axis(fn_b)
+            x, y, m, inverted = detect_inverted_axis(fn_b)
             if (x != None):
                 coords.append([x, y])
                 messages.append(m)
 
             # Detect trunction and add the result
-            x, y, m = detect_truncation(fn_b)
+            x, y, m, truncated = detect_truncation(fn_b)
             # comment max min append the result, there are guaranteed two values
             _X_pos_min, _Y_pos_min, _X_pos_max, _Y_pos_max, m_min, m_max = comment_max_min(fn_d, fn_b)
             m += m_min
@@ -73,12 +76,12 @@ class AnalyzeAuto(Resource):
             messages.append(m)
 
             # find aspect ratio and add the result
-            m, c = comment_aspect_ratio(fn_d, fn_b)  # messages, cords
+            m, c, misleadingAR = comment_aspect_ratio(fn_d, fn_b)  # messages, cords
             messages.append(m)
             coords.append(list(c))
 
 
-            x_range, y_range, x_increment, y_increment = summarize_axes(fn_b)
+            x_tick_labels, y_tick_labels, x_tick_pos, y_tick_pos = summarize_axes(fn_b, full=True)
 
             ar = calculate_aspect(fn_b)
 
@@ -99,13 +102,41 @@ class AnalyzeAuto(Resource):
             o['y'] = i[1]
             formatted_data.append(o)
 
+        # tick labels and their positions are in separate arrays, need to combine them into one object per tick
+        formatted_x_ticks = []
+        for value, pos in zip(x_tick_labels, x_tick_pos):
+            o = {}
+            o['value'] = float(value)
+            o['pos'] = float(pos[0])
+            formatted_x_ticks.append(o)
+
+        formatted_y_ticks = []
+        for value, pos in zip(y_tick_labels, y_tick_pos):
+            o = {}
+            o['value'] = float(value)
+            o['pos'] = float(pos[1])
+            formatted_y_ticks.append(o)
+
+        formatted_data = fix_non_linear_scales(formatted_data, formatted_x_ticks, 'x')  #TODO: call formatted data for an axis when it is not linear
+
         send_to_frontend = {
             'messages': messages,
-            'coords': coords,
-            'xRange': x_range,
-            'yRange': y_range,
+            'coords': coords,           #find out what this does
+            'xTicks': formatted_x_ticks,
+            'yTicks': formatted_y_ticks,
             'aspectRatio': ar,
             'data': formatted_data,
+            'detectedFeatures': { #adjust all methods that detect misleading features to return a boolean that shows if the feature is detected and insert it here
+                "truncatedY": truncated,
+                "invertedY": inverted,
+                "misleadingAR": misleadingAR,           #first entry is if the AR is misleading, second is an improved AR
+                "missingLabels": missing_labels,        #first entry is if there are missing labels, after is a list of which are missing
+                "multipleAxis": detected_axis,          #first entry is if there are multiple axis, after are the names of the detected axis 
+                "nonLinearX": nonLinearX,                  #when there are multiple axis, this is an array of booleans in the order of the axis
+                "nonLinearY": nonLinearY,
+                "inconsistentTicksX": inconsistentX,      #when there are multiple axis, this is an array of booleans in the order of the axis
+                "inconsistentTicksY": inconsistentY
+            }
         }
 
         # clean up files
