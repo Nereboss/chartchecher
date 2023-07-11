@@ -37,6 +37,7 @@ let imageURL_auto;
 var chartWidth;
 var chartHeight;
 var chartAR;            //aspect ratio of the chart in the original image
+//TODO put the following vars into the detectedFeatures object
 var chartXTicks;        //array of tick marks along the x axis first and last element are the min and max values
 var chartYTicks;        //array of tick marks along the y axis first and last element are the min and max values
 
@@ -56,7 +57,7 @@ var detectedFeatures = {        //object represents all detectable misleading fe
 
 
 
-//-----------------------------event listeners---------------------------------
+//-----------------------------event listeners for buttons---------------------------------
 
 const shareButton = document.getElementById('share-button')
 shareButton.addEventListener('click', function() {shareButtonClicked()})
@@ -174,7 +175,7 @@ function processBackendData(backendData) {
     chartGraphData = JSON.parse(chartGraphData);
     chartGraphData.splice(chartGraphData.length - 1); //remove last element
     detectedFeatures = backendData['detectedFeatures'];
-    console.log("dimensions: ", chartWidth, chartHeight);
+    console.log("dimensions: ", chartWidth, chartHeight); //TODO: remove
 }
 
 /**

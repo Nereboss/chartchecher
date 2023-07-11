@@ -45,8 +45,7 @@ class AnalyzeAuto(Resource):
             coords = []
             messages = []
 
-            # Detect if the Y-Axis maximum was artificially change or isn't optimal
-            detect_changed_y_max(fn_d, fn_b)    # only writes a comment for now
+            #-------------------Start of detection algorithms-------------------
 
             # Detect if there are any important labels missing
             missing_labels = detect_missing_labels(fn_d, fn_b)
@@ -85,6 +84,9 @@ class AnalyzeAuto(Resource):
 
             ar = calculate_aspect(fn_b)
 
+
+            #-------------------Start of detection algorithms-------------------
+
         except:
             # clean up files
             # os.remove(fn_d)
@@ -117,25 +119,25 @@ class AnalyzeAuto(Resource):
             o['pos'] = float(pos[1])
             formatted_y_ticks.append(o)
 
-        formatted_data = fix_non_linear_scales(formatted_data, formatted_x_ticks, 'x')  #TODO: call formatted data for an axis when it is not linear
+        formatted_data = fix_non_linear_scales(formatted_data, formatted_x_ticks, 'x')  #TODO: call formatted data for an axis when scale is not linear
 
         send_to_frontend = {
-            'messages': messages,
-            'coords': coords,           #find out what this does
+            #'messages': messages,
+            #'coords': coords,           #find out what this does
             'xTicks': formatted_x_ticks,
             'yTicks': formatted_y_ticks,
             'aspectRatio': ar,
             'data': formatted_data,
             'detectedFeatures': { #adjust all methods that detect misleading features to return a boolean that shows if the feature is detected and insert it here
-                "truncatedY": truncated,
-                "invertedY": inverted,
-                "misleadingAR": misleadingAR,           #first entry is if the AR is misleading, second is an improved AR
-                "missingLabels": missing_labels,        #first entry is if there are missing labels, after is a list of which are missing
-                "multipleAxis": detected_axis,          #first entry is if there are multiple axis, after are the names of the detected axis 
-                "nonLinearX": nonLinearX,                  #when there are multiple axis, this is an array of booleans in the order of the axis
-                "nonLinearY": nonLinearY,
-                "inconsistentTicksX": inconsistentX,      #when there are multiple axis, this is an array of booleans in the order of the axis
-                "inconsistentTicksY": inconsistentY
+                "truncatedY": truncated,                #list of booleans describing which detected y axis are truncated (in the order of the axis)
+                "invertedY": inverted,                  #list of booleans describing which detected y axis are inverted (in the order of the axis)
+                "misleadingAR": misleadingAR,           #first entry is true if the AR is misleading, second is an improved AR
+                "missingLabels": missing_labels,        #first entry is true if there are missing labels, after is a list of which are missing
+                "multipleAxis": detected_axis,          #first entry is true if there are multiple axis, after are the names of the detected axis 
+                "nonLinearX": nonLinearX,               #list of booleans describing which detected x axis are non linear (in the order of the axis)
+                "nonLinearY": nonLinearY,               #list of booleans describing which detected y axis are non linear (in the order of the axis)
+                "inconsistentTicksX": inconsistentX,    #list of booleans describing which detected x axis have inconsistent tick placements (in the order of the axis)
+                "inconsistentTicksY": inconsistentY     #list of booleans describing which detected y axis have inconsistent tick placements (in the order of the axis)
             }
         }
 
