@@ -15,7 +15,7 @@ const misleadingFeaturesTexts = {
     'misleadingAR': ['Misleading Aspect Ratio', 
                 'The aspect ratio of the chart is misleading. This can make trends appear more extreme than they actually are.'],
     'missingLabels': ['Missing Labels', 
-                'The chart is missing the following labels: INSERTALL. This can be misleading as it makes it harder to understand the context of the chart.'],
+                'The chart is missing the following labels: INSERTALL. This can be misleading as it may cause the chart to be taken out of context or make the shown data harder to understand.'],
     'multipleAxis': ['Multiple Axis', 
                 'The chart has multiple axis. This can be misleading, as it distorts the magnitude of the data and makes trends appear different than they actually are.'],
     'nonLinearX': ['Non-Linear X-Axis', 

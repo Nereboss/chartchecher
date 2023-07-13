@@ -42,89 +42,85 @@ class AnalyzeAuto(Resource):
             fn_d = data_filename
             fn_b = box_filename
 
-            coords = []
-            messages = []
-
             #-------------------Start of detection algorithms-------------------
 
-            # Detect if there are any important labels missing
+            # detect if there are multiple x or y axis in the chart
+            detected_axis, fn_b = detect_multiple_axis(fn_b)    #adjusted fn_b to point to a temporary file containing the data with adjusted axis types
+
+            # detect if there are any important labels missing
             missing_labels = detect_missing_labels(fn_d, fn_b)
 
-            # Detect if any axis have inconsistencies
-            m, nonLinearX, nonLinearY, inconsistentX, inconsistentY = detect_inconsistent_scales(fn_b)
-            print("axis problems: ", m)
-            for e in m:
-                messages.append(e)
+            # detect if any axis have inconsistencies (function can handle multiple x or y axis)
+            nonLinearX, nonLinearY, inconsistentX, inconsistentY = detect_inconsistent_axis_scales(fn_b)
 
-            # Detect if there are multiple axis
-            detected_axis = detect_multiple_axis(fn_b)
+            # detect if the graph has a misleading aspect ratio 
+            # TODO: needs to be adjusted when the tool gets extended to handle charts with multiple graphs
+            misleadingAR = detect_misleading_aspect_ratio(fn_d, fn_b)
 
-            # Detect inverted axis and add the result
-            x, y, m, inverted = detect_inverted_axis(fn_b)
-            if (x != None):
-                coords.append([x, y])
-                messages.append(m)
+            # detections that need to be executed for each y-axis:
+            inverted = []
+            truncated = []
+            for axis in ['y-axis'] + detected_axis[2:]:
+                print("axis: ", axis)
 
-            # Detect trunction and add the result
-            x, y, m, truncated = detect_truncation(fn_b)
-            # comment max min append the result, there are guaranteed two values
-            _X_pos_min, _Y_pos_min, _X_pos_max, _Y_pos_max, m_min, m_max = comment_max_min(fn_d, fn_b)
-            m += m_min
-            m += m_max
-            coords.append([x, y])
-            messages.append(m)
+                # detection of inverted axis
+                is_axis_inverted = detect_inverted_axis(fn_b, axis)  
+                inverted.append(is_axis_inverted)
 
-            # find aspect ratio and add the result
-            m, c, misleadingAR = comment_aspect_ratio(fn_d, fn_b)  # messages, cords
-            messages.append(m)
-            coords.append(list(c))
+                # detection of truncated axis
+                truncated.append(detect_truncation(fn_b, axis, is_axis_inverted))
 
+            #-------------------End of detection algorithms-------------------
 
             x_tick_labels, y_tick_labels, x_tick_pos, y_tick_pos = summarize_axes(fn_b, full=True)
 
             ar = calculate_aspect(fn_b)
 
+            # format graph data
+            data = pd.read_csv(fn_d)
+            # data extracted from csv file in in x:[] and y:[] format, need to process into {x: ~, y: ~} format
+            formatted_data = []
+            for i in data.values:
+                o = {}
+                o['x'] = i[0]
+                o['y'] = i[1]
+                formatted_data.append(o)
 
-            #-------------------Start of detection algorithms-------------------
+
+            # format axis-label data
+            # tick labels and their positions are in separate arrays, need to combine them into one object per tick
+            formatted_x_ticks = []
+            for value, pos in zip(x_tick_labels, x_tick_pos):
+                o = {}
+                o['value'] = extract_float(value)
+                o['pos'] = float(pos[0])
+                formatted_x_ticks.append(o)
+
+            formatted_y_ticks = []
+            for value, pos in zip(y_tick_labels, y_tick_pos):
+                o = {}
+                o['value'] = extract_float(value)
+                o['pos'] = float(pos[1])
+                formatted_y_ticks.append(o)
+
+            # as the graph data in the csv file assumes a linear scale, we need to adjust the data if an axis is not linear
+            # TODO: can currently only handle one graph, needs to be adjusted to alter the graph that belongs to the non-linear axis
+            if True in nonLinearX:
+                formatted_data = fix_non_linear_scales(formatted_data, formatted_x_ticks, 'x')
+            if True in nonLinearY:
+                formatted_data = fix_non_linear_scales(formatted_data, formatted_y_ticks, 'y')
 
         except:
             # clean up files
             # os.remove(fn_d)
             # os.remove(fn_b)
-            raise Exception("Something went wrong. Try again."
+            raise Exception("Something went wrong while detecting misleading features."
                             "Make sure that there are bounding boxes and data.")
+        
 
-        data = pd.read_csv(fn_d)
-
-        # in x:[] and y:[] format, need to process into {x: 0, y: 0 } format
-        formatted_data = []
-        for i in data.values:
-            o = {}
-            o['x'] = i[0]
-            o['y'] = i[1]
-            formatted_data.append(o)
-
-        # tick labels and their positions are in separate arrays, need to combine them into one object per tick
-        formatted_x_ticks = []
-        for value, pos in zip(x_tick_labels, x_tick_pos):
-            o = {}
-            o['value'] = float(value)
-            o['pos'] = float(pos[0])
-            formatted_x_ticks.append(o)
-
-        formatted_y_ticks = []
-        for value, pos in zip(y_tick_labels, y_tick_pos):
-            o = {}
-            o['value'] = float(value)
-            o['pos'] = float(pos[1])
-            formatted_y_ticks.append(o)
-
-        formatted_data = fix_non_linear_scales(formatted_data, formatted_x_ticks, 'x')  #TODO: call formatted data for an axis when scale is not linear
 
         send_to_frontend = {
-            #'messages': messages,
-            #'coords': coords,           #find out what this does
-            'xTicks': formatted_x_ticks,
+            'xTicks': formatted_x_ticks,    #TODO: needs to be adjusted to work with multiple axis (probably adjustments to summarize_axes or let detect multiple axis add to this)
             'yTicks': formatted_y_ticks,
             'aspectRatio': ar,
             'data': formatted_data,
@@ -141,7 +137,7 @@ class AnalyzeAuto(Resource):
             }
         }
 
-        # clean up files
+        # clean up files TODO: check if this is necessary
         # os.remove(fn_d)
         # os.remove(fn_b)
         return send_to_frontend
@@ -189,7 +185,7 @@ class CompleteAnalysis(Resource):
                 messages.append(m)
 
             # find aspect ratio and add the result
-            m, c = comment_aspect_ratio(fn_d, fn_b)  # messages, cords
+            m, c = detect_misleading_aspect_ratio(fn_d, fn_b)  # messages, cords
 
             if m == None:
                 pass
@@ -200,11 +196,11 @@ class CompleteAnalysis(Resource):
             # Detect trunction and add the result
             x, y, m = detect_truncation(fn_b)
             # comment max min append the result, there are guaranteed two values
-            _X_pos_min, _Y_pos_min, _X_pos_max, _Y_pos_max, m_min, m_max = comment_max_min(fn_d, fn_b)
-            # instead of appending to the data,
-            # do it to the origin with the truncation message
-            m += m_min
-            m += m_max
+            # _X_pos_min, _Y_pos_min, _X_pos_max, _Y_pos_max, m_min, m_max = comment_max_min(fn_d, fn_b)    function probably not needed anymore
+            # # instead of appending to the data,
+            # # do it to the origin with the truncation message
+            # m += m_min
+            # m += m_max
             coords.append([x, y])
             messages.append(m)
 
