@@ -118,7 +118,6 @@ class AnalyzeAuto(Resource):
                             "Make sure that there are bounding boxes and data.")
         
 
-
         send_to_frontend = {
             'xTicks': formatted_x_ticks,    #TODO: needs to be adjusted to work with multiple axis (probably adjustments to summarize_axes or let detect multiple axis add to this)
             'yTicks': formatted_y_ticks,

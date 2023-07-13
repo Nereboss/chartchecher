@@ -720,6 +720,8 @@ def extract_float(string):
     If the string does not contain a number, it will return None
     """
     if isinstance(string, str):
+        # remove all commas as they are often used as a thousands seperator
+        string = string.replace(',', '')
         list_of_extracted_numbers = re.findall(r"[-+]?(?:\d*\.*\d+)", string)
         return float(list_of_extracted_numbers[0])      #return the first if multiple were found
     elif isinstance(string, (int, float)):
