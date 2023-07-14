@@ -9,7 +9,7 @@ id,x,y,width,height,text,type
 7,530,512,46,32,721,text-label
 8,14,540,36,24,800,y-axis-label
 9,56,594,46,24,873,text-label
-10,2,640,48,24,"1000",y-axis-label
+10,2,640,48,24,"1,000",y-axis-label
 11,40,653,52,20,1990s,x-axis-label
 12,254,653,54,20,2000s,x-axis-label
 13,467,653,54,20,2010s,x-axis-label

@@ -57,31 +57,34 @@
 
 
             <!--Start Image Comparsion-->
-            <div class="row test-row justify-content-center align-items-center" id="image-compare" style="position: relative;">
+            <div class="row test-row justify-content-center" id="image-compare" style="position: relative;">
                 <div class="col-6">
-                    <div class="card">
+                    <div class="card h-100">
                         <div class="card-header" style="text-align: center">
                             <h3 style="font-weight: bold;">Original Chart</h3>
                         </div>
                         <div class="card-body" id="original-chart">
-                            <div style='background-color: green'>
-                                <img style="z-index: 0; display: block; position: relative;" width="500px" class="img-fluid" id="original-image" src=""> <!--TODO: make the image centered in the card-->
-                                <!-- <svg id="is-this-needed" width="600" height="400">Original chart goes here</svg> -->
+                            <div>
+                                <img class="mx-auto" style="z-index: 0; position: relative; display: block" width="100%" id="original-image" src=""> <!--JS inserts the correct source for the image here-->
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-6">
-                    <div class="card">
+                    <div class="card h-100">
                         <div class="card-header" style="text-align: center">
                             <h3 style="font-weight: bold;">Recommended Chart</h3>
                         </div>
-                        <div class="card-body" id="recommended-chart">
-                            <!-- <svg width="500" height="400">Recommended chart goes here</svg> -->
+                        <div class="card-body">
+                            <div class="row align-items-center h-100">
+                                <div class="col justify-content-center" id="recommended-chart">
+                                    <!--JS inserts the  drawn chart here TODO: make the svg scale correctly</svg> -->
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div style="position: absolute;">
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50px, -50%); width: 100px;">
                     <div class="justify-content-center align-items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="75" height="75" fill="#c50000" class="bi bi-arrow-right" viewBox="0 0 16 16">
                             <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
@@ -101,7 +104,7 @@
                         </div>
                         <div class="card-body">
                             <ul class="list-group" id="misleading-features-list-group">
-                                <!--The list items will be created with JS later and put in here-->
+                                <!--JS will create the list items and insert them here-->
                             </ul>
                         </div>
                     </div>

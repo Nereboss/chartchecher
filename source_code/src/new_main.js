@@ -32,6 +32,8 @@ const misleadingFeaturesTexts = {
 // -----------------------------global variables---------------------------------
 
 let imageURL_auto; 
+let imageWidth;
+let imageHeight;
 
 //data needed to draw the chart axis
 var chartWidth;
@@ -175,7 +177,6 @@ function processBackendData(backendData) {
     chartGraphData = JSON.parse(chartGraphData);
     chartGraphData.splice(chartGraphData.length - 1); //remove last element
     detectedFeatures = backendData['detectedFeatures'];
-    console.log("dimensions: ", chartWidth, chartHeight); //TODO: remove
 }
 
 /**
@@ -186,6 +187,14 @@ function drawOriginalImage() {
     toDataURL(imageURL_auto,
         function (dataUrl) {
             img.src = dataUrl;
+            //set max width depending on the width and height of the image to not have it too wide or too tall
+            let scaleFactor = 400 / imageHeight;
+            let newWidth = imageWidth * scaleFactor;
+            if (newWidth > 730) {
+                img.style.maxWidth = '730px';
+            } else {
+                img.style.maxWidth = newWidth.toString() + 'px';
+            }
         }
     );
 }
@@ -296,6 +305,7 @@ function drawChart(parentDiv, controlChart = false) {
     const EXPAND_HEIGHT = 50;
     let svg = parentDiv
         .append('svg')
+        .attr('class', 'mx-auto')
         .attr('width', xAxisSize + EXPAND_WIDTH)
         .attr('height', yAxisSize + EXPAND_HEIGHT)
         .attr('id', elementID)
@@ -394,11 +404,11 @@ function appendMisleadingFeature(parentDiv, featureID, featureName, featureDescr
     parentDiv.append('li')
                 .attr('class', 'list-group-item')
                 .html(`<div class="row align-items-center">
-                            <div class="col-9">
+                            <div class="col-11">
                                 <div style="font-weight: bold;">${featureName}</div>
-                                ${featureDescription}
+                                <p>${featureDescription}</p>
                             </div>
-                            <div class="col-3">
+                            <div class="col-1">
                                 <div class="d-flex justify-content-end">
                                     <button type="button" class="btn btn-primary" id="${featureID}">Hide</button>
                                 </div>
@@ -453,7 +463,9 @@ function toDataURL(src, callback, outputFormat) {
         let ctx = canvas.getContext('2d');
         let dataURL;
         canvas.height = this.naturalHeight;
+        imageHeight = this.naturalHeight;
         canvas.width = this.naturalWidth;
+        imageWidth = this.naturalWidth;
         ctx.drawImage(this, 0, 0);
         dataURL = canvas.toDataURL(outputFormat);
         callback(dataURL);
