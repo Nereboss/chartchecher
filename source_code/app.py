@@ -48,7 +48,7 @@ class AnalyzeAuto(Resource):
             detected_axis, fn_b = detect_multiple_axis(fn_b)    #adjusted fn_b to point to a temporary file containing the data with adjusted axis types
 
             # detect if there are any important labels missing
-            missing_labels = detect_missing_labels(fn_d, fn_b)
+            missing_labels = detect_missing_labels(fn_b)
 
             # detect if any axis have inconsistencies (function can handle multiple x or y axis)
             nonLinearX, nonLinearY, inconsistentX, inconsistentY = detect_inconsistent_axis_scales(fn_b)
@@ -60,8 +60,13 @@ class AnalyzeAuto(Resource):
             # detections that need to be executed for each y-axis:
             inverted = []
             truncated = []
-            for axis in ['y-axis'] + detected_axis[2:]:
-                print("axis: ", axis)
+
+            # extract all y-axis to run axis-specific detection algorithms
+            all_y_axis = ['y-axis']
+            for axis in detected_axis[1:]:
+                if bool(re.search('y\d+-axis', axis)):
+                    all_y_axis.append(axis)
+            for axis in all_y_axis:
 
                 # detection of inverted axis
                 is_axis_inverted = detect_inverted_axis(fn_b, axis)  
@@ -72,43 +77,38 @@ class AnalyzeAuto(Resource):
 
             #-------------------End of detection algorithms-------------------
 
-            x_tick_labels, y_tick_labels, x_tick_pos, y_tick_pos = summarize_axes(fn_b, full=True)
+
+
+            #-------------------Start of chart data extraction-------------------
 
             ar = calculate_aspect(fn_b)
+            chart_title = get_chart_title(fn_b)
 
             # format graph data
             data = pd.read_csv(fn_d)
             # data extracted from csv file in in x:[] and y:[] format, need to process into {x: ~, y: ~} format
-            formatted_data = []
+            formatted_graph_data = []
             for i in data.values:
                 o = {}
                 o['x'] = i[0]
                 o['y'] = i[1]
-                formatted_data.append(o)
+                formatted_graph_data.append(o)
 
 
-            # format axis-label data
-            # tick labels and their positions are in separate arrays, need to combine them into one object per tick
-            formatted_x_ticks = []
-            for value, pos in zip(x_tick_labels, x_tick_pos):
-                o = {}
-                o['value'] = extract_float(value)
-                o['pos'] = float(pos[0])
-                formatted_x_ticks.append(o)
+            #format data of all axis
+            formatted_axis_data = {}
+            all_axis = detected_axis[1:]
+            for axis in all_axis:
+                formatted_axis_data[axis] = extract_axis_data(fn_b, axis)
 
-            formatted_y_ticks = []
-            for value, pos in zip(y_tick_labels, y_tick_pos):
-                o = {}
-                o['value'] = extract_float(value)
-                o['pos'] = float(pos[1])
-                formatted_y_ticks.append(o)
+            #-------------------End of chart data extraction-------------------
 
             # as the graph data in the csv file assumes a linear scale, we need to adjust the data if an axis is not linear
-            # TODO: can currently only handle one graph, needs to be adjusted to alter the graph that belongs to the non-linear axis
-            if True in nonLinearX:
-                formatted_data = fix_non_linear_scales(formatted_data, formatted_x_ticks, 'x')
-            if True in nonLinearY:
-                formatted_data = fix_non_linear_scales(formatted_data, formatted_y_ticks, 'y')
+            # TODO: tool can currently only handle one graph, needs to be adjusted to alter the graph that belongs to the non-linear axis
+            if nonLinearX[0]:
+                formatted_graph_data = fix_non_linear_scales(formatted_graph_data, formatted_axis_data['x-axis']['ticks'], 'x')
+            if nonLinearY[0]:
+                formatted_graph_data = fix_non_linear_scales(formatted_graph_data, formatted_axis_data['y-axis']['ticks'], 'y')
 
         except:
             # clean up files
@@ -119,11 +119,11 @@ class AnalyzeAuto(Resource):
         
 
         send_to_frontend = {
-            'xTicks': formatted_x_ticks,    #TODO: needs to be adjusted to work with multiple axis (probably adjustments to summarize_axes or let detect multiple axis add to this)
-            'yTicks': formatted_y_ticks,
-            'aspectRatio': ar,
-            'data': formatted_data,
-            'detectedFeatures': { #adjust all methods that detect misleading features to return a boolean that shows if the feature is detected and insert it here
+            'axisData': formatted_axis_data,            #dictionary with key being axis name and value being a dictionary with title and tick markers
+            'graphData': formatted_graph_data,          # list of points to draw the graph
+            'aspectRatio': ar,                          #aspect ratio of the chart
+            'chartTitle': chart_title,                  #title of the chart
+            'detectedFeatures': {   
                 "truncatedY": truncated,                #list of booleans describing which detected y axis are truncated (in the order of the axis)
                 "invertedY": inverted,                  #list of booleans describing which detected y axis are inverted (in the order of the axis)
                 "misleadingAR": misleadingAR,           #first entry is true if the AR is misleading, second is an improved AR
@@ -136,9 +136,6 @@ class AnalyzeAuto(Resource):
             }
         }
 
-        # clean up files TODO: check if this is necessary
-        # os.remove(fn_d)
-        # os.remove(fn_b)
         return send_to_frontend
 
 

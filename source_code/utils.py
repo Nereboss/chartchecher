@@ -51,7 +51,7 @@ def detect_inverted_axis(box_data, axis='y-axis'):
     return inverted
 
 
-def detect_missing_labels(chart_data, box_data):
+def detect_missing_labels(box_data):
     """
     Function takes in bounding box data and detects if there are any labels missing.
     Missing title, x-axis-title or y-axis-title will lead to those placed being marked in the recommended chart
@@ -60,7 +60,7 @@ def detect_missing_labels(chart_data, box_data):
     """
     box_data = pd.read_csv(box_data)
     type_values = box_data['type'].values
-    # find all axis in the chart and add them to the list of possible types (both title and label for each axis)
+    # as a chart can contain multiple axis, find all axis and add them to the list of possible types (both title and label for each axis)
     new_axis_labels = list(set(filter(lambda x: re.match('^[xy][0-9]+-axis-label$', x), type_values)))
     new_axis_labels.sort()
     # add title and label for each axis to the list of possible types
@@ -78,8 +78,7 @@ def detect_missing_labels(chart_data, box_data):
 def detect_inconsistent_axis_scales(box_data):
     """
     Function takes in bounding boxes and detects if one or more of the axis do not follow a linear scale
-    TODO maybe needs to be extended to be able to handle multiple axis (or create helper function that gets BBs for one axis and checks this for them that can be called on all axis)
-    returns a list of detected inconsistencies or an empty list if none were found
+    returns a tuple of all detected inconsistencies (non-linear x-axis, non-linear y-axis, inconsistent tick labels on x-axis, incosistent tick labels on y-axis) each in form of a list of booleans describing which axis (x-axis, x1-axis, etc.) the inconsistency was detected in
     """
     box_data = pd.read_csv(box_data)
     
@@ -94,8 +93,10 @@ def detect_inconsistent_axis_scales(box_data):
     inconsistentTicksX = []
     inconsistentTicksY = []
 
+    different_axis_frames.sort(key=lambda x: x['type'].iloc[0]) # sort the axis dataframes by their type (x-axis-label, x1-axis-label, y0-axis-label, y1-axis-label, etc.)
+
     # for each axis check what inconsistencies exist
-    for axis_frame in different_axis_frames:      #TODO: we need to sort the order to always go from 0-1-2-...
+    for axis_frame in different_axis_frames:
         nonLinear, inconsistentTicks = check_axis_consistency(axis_frame)
         if axis_frame['type'].iloc[0][0] == 'x':    #if the first letter in the string is x, it is an x-axis
             nonLinearX.append(nonLinear)
@@ -135,7 +136,7 @@ def check_axis_consistency(axis_data):
 
     numeric_texts = None
     try:
-        numeric_texts = axis_data['text'].astype(float)
+        numeric_texts = axis_data['text'].apply(extract_float)
         value_difference_to_next_label = numeric_texts.diff(periods=-1).dropna()
         distance_to_difference_factors = distances_to_next_label / value_difference_to_next_label
         consistency_of_scale = calculate_conistency(distance_to_difference_factors, 0.05)
@@ -147,7 +148,7 @@ def check_axis_consistency(axis_data):
             print("The "+axis_name+" axis does not follow a linear scale!")
             nonLinear = True
     except ValueError: 
-        print('cannot check axis scaling because not all labels are numeric')
+        print('cannot check axis scaling because not all labels contain numeric information!')
 
     # later for the returns: we need to find a way to draw the chart in an "unwarped" way, meaning we need the distances between the labels together with middlepoint of the labels and transform the corresponding x/y values to show them in a linear way
     return nonLinear, inconsistentTicks
@@ -155,32 +156,22 @@ def check_axis_consistency(axis_data):
 def detect_multiple_axis(box_data):
     """
     Function takes in bounding boxes, detects if there are multiple axis and adjusts the types of the axis labels and titles in the csv file to represent these different axis.
-    In case there are more axis than axis titles, this function will add example titles to the start of the csv file.
+    Returns a list containing true and all detected axis or containing False if only one x and one y axis were detected
     """
     result = [False]
-
     box_data = pd.read_csv(box_data)
 
     split_x_axis_labels = split_axis_labels(box_data[box_data['type'].str.contains('^x.*label$')], 'x')
+    for x_axis_label in split_x_axis_labels:
+        result.append(x_axis_label['type'].iloc[0].replace('-label', '')) 
     if len(split_x_axis_labels) > 1:
-        #TODO prints for now, remove later
-        print('multiple x-axis detected!')
         result[0] = True
-        for x_axis_label in split_x_axis_labels:
-            print(x_axis_label['type'].iloc[0] + ': ' + x_axis_label['text'].str.cat(sep='; '))
-            result.append(x_axis_label['type'].iloc[0].replace('-label', '')) 
-    else:
-        print('only one x-axis detected!')
+        
     split_y_axis_labels = split_axis_labels(box_data[box_data['type'].str.contains('^y.*label$')], 'y')
+    for y_axis_label in split_y_axis_labels:
+        result.append(y_axis_label['type'].iloc[0].replace('-label', ''))
     if len(split_y_axis_labels) > 1:
-        #prints for now, remove later
-        print('multiple y-axis detected!')
         result[0] = True
-        for y_axis_label in split_y_axis_labels:
-            print(y_axis_label['type'].iloc[0] + ': ' + y_axis_label['text'].str.cat(sep='; '))
-            result.append(y_axis_label['type'].iloc[0].replace('-label', ''))
-    else:
-        print('only one y-axis detected!')
 
 
     # if there are multiple axis and titles then we need to map each title to the corresponding axis
@@ -215,8 +206,7 @@ def detect_multiple_axis(box_data):
         y_axis_label.set_index('id', inplace=True)
         box_data.update(y_axis_label)
 
-    # update the csv file here, for debugging we create a new csv file for now
-    # TODO: remove the creation of a new csv file later and find out how to update the original csv file
+    # create new temporary csv file to update axis types without affecting the original csv file
     box_data.to_csv('temp_box_data.csv')
     return result, 'temp_box_data.csv'
 
@@ -492,7 +482,7 @@ def find_min_max(d):
 
 def parse_num(num):
     try:
-        return float(num)
+        return extract_float(num)
     except:
         pass
     try:
@@ -728,3 +718,38 @@ def extract_float(string):
         return string
     else:
         return None
+    
+def extract_axis_data(box_data, axis_name):
+    """
+    Extracts the title and tick labels of the given axis from the box_data
+    returns a dictionary containing the axis title and a list of axis ticks
+    """
+    direction = 'y' if 'y' in axis_name else 'x'
+    df = pd.read_csv(box_data)
+    axis_title = df.loc[df['type'] == axis_name + '-title']
+    if axis_title.empty:
+        axis_title = ''
+    else:
+        axis_title = axis_title['text'].values[0]
+    axis_labels = df.loc[df['type'] == axis_name + '-label']
+    # need to sort the axis labels by their position on the axis so we dont depend on the order in the csv file
+    axis_labels.sort_values(by=[direction], ascending= True if direction == 'x' else False, inplace=True)
+    ticks = []
+    for value, pos in axis_labels[['text', direction]].values:
+        o = {}
+        o['value'] = extract_float(value)
+        o['pos'] = float(pos)
+        ticks.append(o)
+    return {'title': axis_title, 'ticks': ticks}
+
+def get_chart_title(box_data):
+    """
+    Extracts the title of the chart
+    Returns the title or an empty string if no title was found
+    """
+    df = pd.read_csv(box_data)
+    chart_title = df.loc[df['type'] == 'title']
+    if chart_title.empty:
+        return ''
+    else:
+        return chart_title['text'].values[0]
