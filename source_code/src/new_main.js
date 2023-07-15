@@ -336,7 +336,7 @@ function drawChart(parentDiv, controlChart = false) {
 
         //chart title
         let titleColor = '#000000', title = chartTitle;
-        if (title == '') {
+        if (!controlChart && detectedFeatures.missingLabels[0] && title == '') {
             title = 'missing chart title';
             titleColor = '#CC0000'
         }
@@ -350,7 +350,7 @@ function drawChart(parentDiv, controlChart = false) {
 
         //x-axis title
         let xTitleColor = '#000000', xTitle = xAxisData[0]['title'];
-        if (xTitle == '') {
+        if (!controlChart && detectedFeatures.missingLabels[0] && xTitle == '') {
             xTitle = 'missing x axis title';
             xTitleColor = '#CC0000'
         }
@@ -363,7 +363,7 @@ function drawChart(parentDiv, controlChart = false) {
 
         //y-axis title
         let yTitleColor = '#000000', yTitle = yAxisData[0]['title'];
-        if (yTitle == '') {
+        if (!controlChart && detectedFeatures.missingLabels[0] && yTitle == '') {
             yTitle = 'missing y axis title';
             yTitleColor = '#CC0000'
         }
