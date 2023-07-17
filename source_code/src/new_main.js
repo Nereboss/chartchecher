@@ -239,65 +239,75 @@ function drawChart(parentDiv, controlChart = false) {
 
     //-----------------set x-axis scale-----------------
 
-    //functions to get the domain and range out of the xTicks object (needed to correctly represent the ticks of the original image)
-    let x0AxisTicks = xAxisData[0]['ticks'];
-    let xOffset = x0AxisTicks[0].pos;
-    let xFactor = (x0AxisTicks[x0AxisTicks.length-1].pos - xOffset) / xAxisSize;
-    let xTicksDomain = x0AxisTicks.map(function (d) {return d.value;});
-    let drawnTickValuesX = xTicksDomain;     //needs to be saved to draw the ticks later because xTicksDomain can be overwritten
-    let xTicksRange = x0AxisTicks.map(function (d) {return (d.pos - xOffset) / xFactor;});
+    let xScale = [];
+    let drawnTickValuesX = [];
 
-    if (!controlChart && detectedFeatures.nonLinearX[0]) {       //when the x-axis is non-linear we need to use the first and last value to create a linear scale
-        xTicksDomain = [x0AxisTicks[0].value, x0AxisTicks[x0AxisTicks.length-1].value];
-        xTicksRange = [0, xAxisSize];
-    }
-    
-    // using d3 to construct a linear scale for the x- and y-axis 
-    // (domain is the range of values in the data, range is the range of values in the drawn chart)
-    let xScale = d3.scaleLinear()  
-        .domain(xTicksDomain)
-        .range(xTicksRange);
+    for (let i = 0; i < xAxisData.length; i++) {
+        //functions to get the domain and range out of the xTicks object (needed to correctly represent the ticks of the original image)
+        let x0AxisTicks = xAxisData[i]['ticks'];
+        let xOffset = x0AxisTicks[0].pos;
+        let xFactor = (x0AxisTicks[x0AxisTicks.length-1].pos - xOffset) / xAxisSize;
+        let xTicksDomain = x0AxisTicks.map(function (d) {return d.value;});
+        drawnTickValuesX.push(xTicksDomain);     //needs to be saved to draw the ticks later because xTicksDomain can be overwritten
+        let xTicksRange = x0AxisTicks.map(function (d) {return (d.pos - xOffset) / xFactor;});
 
-
-    //-----------------set y-axis scale-----------------
-
-    //functions to get the domain and range out of the yTicks object (needed to correctly represent the ticks of the original image)
-    let y0AxisTicks = yAxisData[0]['ticks'];
-    let yOffset = y0AxisTicks[0].pos;
-    let yFactor = (y0AxisTicks[y0AxisTicks.length-1].pos - yOffset) / yAxisSize;
-    let yTicksDomain = y0AxisTicks.map(function (d) {return d.value;});
-    let drawnTickValuesY = yTicksDomain;     //needs to be saved to draw the ticks later in case yTicksDomain is overwritten
-    let yTicksRange = y0AxisTicks.map(function (d) {return (d.pos - yOffset) / yFactor;});
-
-    //when the y-axis is truncated we need to "shift" the existing scale to start at zero
-    if(!controlChart && detectedFeatures.truncatedY[0]) {
-        let maxValue = yTicksDomain[yTicksDomain.length-1];
-        let compressFactor = 1-(yTicksDomain[0]/maxValue);
-        yTicksDomain = yTicksDomain.map(function (d) {return (d-maxValue)/compressFactor + maxValue;});
+        if (!controlChart && detectedFeatures.nonLinearX[0]) {       //when the x-axis is non-linear we need to use the first and last value to create a linear scale
+            xTicksDomain = [x0AxisTicks[0].value, x0AxisTicks[x0AxisTicks.length-1].value];
+            xTicksRange = [0, xAxisSize];
+        }
+        
+        // using d3 to construct a linear scale for the x- and y-axis 
+        // (domain is the range of values in the data, range is the range of values in the drawn chart)
+        xScale.push(d3.scaleLinear()  
+            .domain(xTicksDomain)
+            .range(xTicksRange));
     }
 
-    //when the y-axis is inverted we need to reverse the order of the ticks
-    if(!controlChart && detectedFeatures.invertedY[0]) {
-        yTicksDomain = yTicksDomain.reverse();
-    }
+    //-----------------set y-axis scales-----------------
 
-    if (!controlChart && detectedFeatures.nonLinearY[0]) {       //when the y-axis is non-linear we need to use the first and last value to create a linear scale
-        yTicksDomain = [yTicksDomain[0].value, yTicksDomain[yTicksDomain.length-1].value];
-        yTicksRange = [yAxisSize, 0];
-    }
-    let yScale = d3.scaleLinear()
-            .domain(yTicksDomain)
-            .range(yTicksRange.reverse());    //reverse as the largest value needs to be first because the chart will be drawn "top to bottom"
+    let yScale = [];
+    let drawnTickValuesY = [];
 
+    for (let i = 0; i < yAxisData.length; i++) {
+        //functions to get the domain and range out of the yTicks object (needed to correctly represent the ticks of the original image)
+        let y0AxisTicks = yAxisData[i]['ticks'];
+        let yOffset = y0AxisTicks[0].pos;
+        let yFactor = (y0AxisTicks[y0AxisTicks.length-1].pos - yOffset) / yAxisSize;
+        let yTicksDomain = y0AxisTicks.map(function (d) {return d.value;});
+        drawnTickValuesY.push(yTicksDomain);     //needs to be saved to draw the ticks later in case yTicksDomain is overwritten
+        let yTicksRange = y0AxisTicks.map(function (d) {return (d.pos - yOffset) / yFactor;});
+
+        //when the y-axis is truncated we need to "shift" the existing scale to start at zero
+        if(!controlChart && detectedFeatures.truncatedY[i]) {
+            let maxValue = yTicksDomain[yTicksDomain.length-1];
+            let compressFactor = 1-(yTicksDomain[0]/maxValue);
+            yTicksDomain = yTicksDomain.map(function (d) {return (d-maxValue)/compressFactor + maxValue;});
+        }
+
+        //when the y-axis is inverted we need to reverse the order of the ticks
+        if(!controlChart && detectedFeatures.invertedY[i]) {
+            yTicksDomain = yTicksDomain.reverse();
+        }
+
+        //when the y-axis is non-linear we need to use the first and last value to create a linear scale
+        if (!controlChart && detectedFeatures.nonLinearY[i]) {
+            yTicksDomain = [yTicksDomain[0].value, yTicksDomain[yTicksDomain.length-1].value];
+            yTicksRange = [yAxisSize, 0];
+        }
+
+        yScale.push(d3.scaleLinear()
+                .domain(yTicksDomain)
+                .range(yTicksRange.reverse()));    //reverse as the largest value needs to be first because the chart will be drawn "top to bottom"
+    }
     
     //-----------------prepare line dataset-----------------
 
     let line = d3.line()
         .x(function (d) {
-            return xScale(d.x);
+            return xScale[0](d.x);
         }) // set the x values for the line generator
         .y(function (d) {
-            return yScale(d.y);
+            return yScale[0](d.y);
         });
 
     let dataset = chartGraphData.map(function (d) {
@@ -316,10 +326,12 @@ function drawChart(parentDiv, controlChart = false) {
         display = 'display: block';
     }
 
-    const EXPAND_WIDTH = 80;
-    const EXPAND_HEIGHT = 50 + 10 + 35;
-    const X_TITLE_OFFSET = 50;
-    const Y_TITLE_OFFSET = 10;
+    const X_AXIS_DISTANCE = 50;             //the distance between the x-axis if multiple were found
+    const X_AXIS_EXPAND = X_AXIS_DISTANCE*(xAxisData.length-1);
+    const Y_AXIS_DISTANCE = 70;             //the distance between the y-axis if multiple were found
+    const Y_AXIS_EXPAND = Y_AXIS_DISTANCE*(yAxisData.length-1);
+    const EXPAND_WIDTH = 80 + Y_AXIS_EXPAND;
+    const EXPAND_HEIGHT = 50 + 10 + 35 + X_AXIS_EXPAND;
     let svg = parentDiv
         .append('svg')
         .attr('class', 'mx-auto')
@@ -332,11 +344,11 @@ function drawChart(parentDiv, controlChart = false) {
         .attr('transform', 'translate(20,30)');
 
     
-    //-----------------draw chart and axis titles-----------------
+    //-----------------draw chart title-----------------
 
         //chart title
         let titleColor = '#000000', title = chartTitle;
-        if (!controlChart && detectedFeatures.missingLabels[0] && title == '') {
+        if (!controlChart && detectedFeatures.missingLabels[0] && title == ' ') {
             title = 'missing chart title';
             titleColor = '#CC0000'
         }
@@ -346,74 +358,89 @@ function drawChart(parentDiv, controlChart = false) {
         .attr('text-anchor', 'middle')
         .attr('font-weight', 'bold')
         .attr('fill', titleColor)
+        .style("font-size", "20px")
         .text(title);
-
-        //x-axis title
-        let xTitleColor = '#000000', xTitle = xAxisData[0]['title'];
-        if (!controlChart && detectedFeatures.missingLabels[0] && xTitle == '') {
-            xTitle = 'missing x axis title';
-            xTitleColor = '#CC0000'
-        }
-        svg.append('text')
-        .attr('x', (xAxisSize + EXPAND_WIDTH)/2)
-        .attr('y', (yAxisSize + X_TITLE_OFFSET))
-        .attr('text-anchor', 'middle')
-        .attr('fill', xTitleColor)
-        .text(xTitle);
-
-        //y-axis title
-        let yTitleColor = '#000000', yTitle = yAxisData[0]['title'];
-        if (!controlChart && detectedFeatures.missingLabels[0] && yTitle == '') {
-            yTitle = 'missing y axis title';
-            yTitleColor = '#CC0000'
-        }
-        svg.append('text')
-        .attr('text-anchor', 'middle')
-        .attr('transform', 'translate(0,' + (yAxisSize/2 + Y_TITLE_OFFSET) + ')rotate(-90)')
-        .attr('fill', yTitleColor)
-        .text(yTitle);
 
     const SHIFT_DOWN = 11;
     const SHIFT_RIGHT = 40;
 
     //-----------------set axis ticks-----------------
 
-    let bottomAxis;
-    if(!controlChart && detectedFeatures.inconsistentTicksX[0]) {    //when the x-axis is inconsistent we let d3 decide which ticks to draw
-        bottomAxis = d3.axisBottom(xScale).ticks(xAxisData[0]['ticks'].length);
-    } else {                                        //otherwise we draw the ticks from the oginal image
-        bottomAxis = d3.axisBottom(xScale).tickValues(drawnTickValuesX).tickFormat(x => `${x}`) // weird tick format is necessary to not round the tick and keep the original from the image
+    let bottomAxis = [];
+    for (let i = 0; i < xAxisData.length; i++) {
+        // when the x-axis is inconsistent or truncated, we let d3 decide which ticks to draw. Otherwise we draw the ticks from the oginal image
+        if(!controlChart && detectedFeatures.inconsistentTicksX[i]) {
+            bottomAxis.push(d3.axisBottom(xScale[i]).ticks(xAxisData[i]['ticks'].length));
+        } else {
+            bottomAxis.push(d3.axisBottom(xScale[i]).tickValues(drawnTickValuesX[i]).tickFormat(x => `${x}`)) // weird tick format is necessary to not round the tick and keep the original from the image
+        }
     }
 
-    let leftAxis;
-    if(!controlChart && (detectedFeatures.inconsistentTicksY[0] || detectedFeatures.truncatedY[0])) {  //when the y-axis is truncated and shown in a improved way, the axis ticks will be inconsistent which is why we improve the ticks there too
-        leftAxis = d3.axisLeft(yScale).ticks(yAxisData[0]['ticks'].length);
-    } else {
-        leftAxis = d3.axisLeft(yScale).tickValues(drawnTickValuesY).tickFormat(x => `${x}`)
+    //loop over all y-axes to get correct ticks for each
+    let leftAxis = [];
+    for (let i = 0; i < yAxisData.length; i++) {
+        //when the y-axis is inconsistent or truncated, we let d3 decide which ticks to draw. Otherwise we draw the ticks from the oginal image
+        if(!controlChart && (detectedFeatures.inconsistentTicksY[i] || detectedFeatures.truncatedY[i])) {
+            leftAxis.push(d3.axisLeft(yScale[i]).ticks(yAxisData[i]['ticks'].length));
+        } else {                                        
+            leftAxis.push(d3.axisLeft(yScale[i]).tickValues(drawnTickValuesY[i]).tickFormat(x => `${x}`)) // weird tick format is necessary to keep the exact unrounded number from original from the image
+        }
     }
 
-    //-----------------draw the chart-----------------
+    //-----------------draw the axis-----------------
 
-    // x-axis
-    svg.append('g')
-        .style('font', '11px Segoe UI')
-        .attr('class', 'xaxisblack')
-        .attr('color', 'black')
-        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (yAxisSize + SHIFT_DOWN) + ')')
-        .call(bottomAxis);
+    // x-axis (in a loop as a chart can have multiple x-axes)
+    for (let i = 0; i < xAxisData.length; i++) {
 
-    // y-axis
-    svg.append('g')
-        .style('font', '11px Segoe UI')
-        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
-        .call(leftAxis);
+        //draw the axis
+        svg.append('g')
+            .style('font', '11px Segoe UI')
+            .attr('transform', 'translate(' + (SHIFT_RIGHT+Y_AXIS_EXPAND) + ',' + (yAxisSize + SHIFT_DOWN + (i*X_AXIS_DISTANCE)) + ')')
+            .call(bottomAxis[i]);
 
-    //append the datapath
+        //draw the axis title
+        let xTitleColor = '#000000', xTitle = xAxisData[i]['title'];
+        if (!controlChart && detectedFeatures.missingLabels[0] && xTitle == ' ') {
+            xTitle = 'missing x axis title';
+            xTitleColor = '#CC0000'
+        }
+        svg.append('text')
+        .attr('x', (xAxisSize + EXPAND_WIDTH+Y_AXIS_EXPAND)/2)
+        .attr('y', (yAxisSize + 50 + (i*X_AXIS_DISTANCE)))
+        .attr('text-anchor', 'middle')
+        .attr('fill', xTitleColor)
+        .text(xTitle);
+
+    }
+    // y-axis (in a loop as a chart can have multiple y-axis)
+    for (let i = 0; i < yAxisData.length; i++) {
+
+        //draw the axis
+        svg.append('g')
+            .style('font', '11px Segoe UI')
+            .attr('transform', 'translate(' + (SHIFT_RIGHT+i*Y_AXIS_DISTANCE) + ',' + SHIFT_DOWN + ')')
+            .call(leftAxis[i]);
+
+        //draw the axis title
+        let yTitleColor = '#000000', yTitle = yAxisData[i]['title'];
+        if (!controlChart && detectedFeatures.missingLabels[0] && yTitle == ' ') {
+            yTitle = 'missing y axis title';
+            yTitleColor = '#CC0000'
+        }
+        svg.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('transform', 'translate(' + i*Y_AXIS_DISTANCE +',' + (yAxisSize/2 + 10) + ')rotate(-90)')
+        .attr('fill', yTitleColor)
+        .text(yTitle);
+    }
+
+    //-----------------draw the graph-----------------
+
     svg.append('path')
         .datum(dataset) // 10. Binds data to the line
         .attr('class', 'line') // Assign a class for styling
         .style('stroke', '#007bff')
-        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
+        .attr('transform', 'translate(' + (SHIFT_RIGHT+Y_AXIS_EXPAND) + ',' + SHIFT_DOWN + ')')
         .attr('d', line); // 11. Calls the line generator
 
 }

@@ -275,7 +275,7 @@ def map_axis_titles_to_axis(axis_titles, split_axis_labels):
         # For the sizes we use the data of the bounding boxes of the axis and set the ids to -1 to indicate that they are not from the original csv file
         for axis in axis_box_data_list:
             if axis['axis_name']+'title' not in axis_titles['type'].values:
-                axis_titles = axis_titles.append({'id': -1, 'type': axis['axis_name'] + 'title', 'x': axis['x_min'], 'y': axis['y_min'], 'width': axis['x_max']-axis['x_min'], 'height': axis['y_max']-axis['y_min'], 'text': axis['axis_name'].replace('-', ' ')+ 'example title'}, ignore_index=True)
+                axis_titles = axis_titles.append({'id': -1, 'type': axis['axis_name'] + 'title', 'x': axis['x_min'], 'y': axis['y_min'], 'width': axis['x_max']-axis['x_min'], 'height': axis['y_max']-axis['y_min'], 'text': ' '}, ignore_index=True)
     
     return axis_titles
 
@@ -728,7 +728,7 @@ def extract_axis_data(box_data, axis_name):
     df = pd.read_csv(box_data)
     axis_title = df.loc[df['type'] == axis_name + '-title']
     if axis_title.empty:
-        axis_title = ''
+        axis_title = ' '
     else:
         axis_title = axis_title['text'].values[0]
     axis_labels = df.loc[df['type'] == axis_name + '-label']
@@ -750,6 +750,6 @@ def get_chart_title(box_data):
     df = pd.read_csv(box_data)
     chart_title = df.loc[df['type'] == 'title']
     if chart_title.empty:
-        return ''
+        return ' '
     else:
         return chart_title['text'].values[0]
