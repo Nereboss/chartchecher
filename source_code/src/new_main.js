@@ -6,17 +6,16 @@ const margin = {top: 50, right: 10, bottom: 20, left: 150};
 
 const misleadingFeaturesTexts = {
     // some information about the misleading features changes dynamically with the chart
-    // the places where such information is inserted are marked with INSERT1, INSERT2, etc.
-    // the places where all missing labels are inserted are marked with INSERTALL
+    // the places where such information is inserted are marked with INSERT_...
     // the places where the axis titles are inserted for misleading features that are axis-specific are marked with TITLE
     'missingLabels': ['Missing Labels', 
-                'The chart is missing the following labels: INSERTALL. This can be misleading as it may cause the chart to be taken out of context or make the shown data harder to understand.'],
+                'The chart is missing the following labels: INSERT_ALL. This can be misleading as it may cause the chart to be taken out of context or make the shown data harder to understand.'],
     'multipleAxis': ['Multiple Axis', 
-                'The chart has multiple axis. This can be misleading, as it distorts the magnitude of the data and makes trends appear different than they actually are.'],
+                'The chart has multiple axis. This can be misleading, as it distorts the magnitude of the data and makes trends appear different than they actually are.'],     //TODO: improve description
     'misleadingAR': ['Misleading Aspect Ratio', 
                 'The aspect ratio of the chart is misleading. This can make trends appear more extreme than they actually are.'],
     'truncatedY': ['Truncated Y-Axis', 
-                `The Y-Axis (Y-TITLE) is truncated. The bottom most value is INSERT1 instead of a more traditional 0. This can be misleading as it displays the differences between those values as larger than they actually are.`],
+                `The Y-Axis (Y-TITLE) is truncated. The bottom most value is INSERT_TRUNC instead of a more traditional 0. This can be misleading as it displays the differences between those values as larger than they actually are.`],
     'invertedY': ['Inverted Y-Axis', 
                 `The Y-Axis (Y-TITLE) is inverted. This can be misleading as it makes upwards trends appear like they are downwards trends and vice versa.`],
     'nonLinearX': ['Non-Linear X-Axis', 
@@ -450,17 +449,18 @@ function drawChart(parentDiv, controlChart = false) {
  * function draws the detected misleading features into the list in the UI
  */
 function drawMisleadFeaturesList() {
-    inserter = (feature, axisNr) => {
+    inserter = (feature, axisNr=0) => {
         res = misleadingFeaturesTexts[feature][1]
-        if (res.includes('INSERTALL')) {
-            //replace INSERTALL with a list of insert-values and split off the last element with an 'and' instead of a comma
-            res = res.replace('INSERTALL', detectedFeatures[feature].slice(1, detectedFeatures[feature].length - 1).join(', ') + ' and ' + detectedFeatures[feature][detectedFeatures[feature].length - 1]);
-        } else {
-            for (let i = 1; i < detectedFeatures[feature].length; i++) {
-                console.log('INSERT'+i)
-                res = res.replace('INSERT'+i, detectedFeatures[feature][i]);
-            }
+        if (res.includes('INSERT_ALL')) {
+            //replace INSERT_ALL with a list of insert-values and split off the last element with an 'and' instead of a comma
+            res = res.replace('INSERT_ALL', detectedFeatures[feature].slice(1, detectedFeatures[feature].length - 1).join(', ') + ' and ' + detectedFeatures[feature][detectedFeatures[feature].length - 1]);
         }
+        if (res.includes('INSERT_TRUNC')) {
+            //insert the bottom most y-axis label of the correct axis
+            res = res.replace('INSERT_TRUNC', yAxisData[axisNr]['ticks'][0].value);
+        }
+
+        //replace axis titles
         if (res.includes('X-TITLE')) {               //tested if its an x-axis feature
             let axisTitle = xAxisData[axisNr]['title'];
             let replacement = axisTitle == ' ' ? 'no title' : 'titled "' + axisTitle + '"';
@@ -471,8 +471,8 @@ function drawMisleadFeaturesList() {
             res = res.replace('Y-TITLE', replacement);
         }
         //remove any remaining INSERT strings (necessary for enumeration of inserts without set length)
-        res = res.replace(/INSERT\d+/i, '');
-        res = res.replace(/INSERTALL/i, '');
+        res = res.replace(/INSERT_\p{L}+/i, '');
+        res = res.replace(/INSERT_ALL/i, '');
         return res;
     }
 
@@ -491,8 +491,6 @@ function drawMisleadFeaturesList() {
                 }
             }
         }
-
-        
     }
 }
 
