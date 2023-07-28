@@ -487,7 +487,7 @@ function drawMisleadFeaturesList() {
         } else {          //handle axis-specific features and loop through all axes
             for (currentAxis in detectedFeatures[feature]) {
                 if (detectedFeatures[feature][currentAxis]) {
-                    appendMisleadingFeature(misleadingFeaturesDiv, feature, misleadingFeaturesTexts[feature][0], inserter(feature, currentAxis))
+                    appendMisleadingFeature(misleadingFeaturesDiv, feature+currentAxis, misleadingFeaturesTexts[feature][0], inserter(feature, currentAxis))
                 }
             }
         }
@@ -541,8 +541,14 @@ function misleadingFeatureButtonClicked(id) {
     }
     console.log(`${id} button clicked; toggle the feature here`) //TODO toggle the feature here
 
+    //if the id ends with a number, use that number as the axis number, otherwise use 0 (also used for all misleading features that are not axis specific)
+    let axisNr = id.match(/\d+$/);
+    axisNr = axisNr == null ? 0 : parseInt(axisNr);
+    //remove the number at the end from the id (if there was one)
+    id = id.replace(/\d+$/, '');
+    
     //toggle the variable in the detectedFeatures object
-    detectedFeatures[id][0] = !detectedFeatures[id][0];
+    detectedFeatures[id][axisNr] = !detectedFeatures[id][axisNr];
     let oldChartSVG = document.getElementById('recommendedSVG');
     if (oldChartSVG != null) {
         oldChartSVG.remove();          //remove the old recommended chart so we can redraw it
