@@ -8,24 +8,25 @@ const misleadingFeaturesTexts = {
     // some information about the misleading features changes dynamically with the chart
     // the places where such information is inserted are marked with INSERT1, INSERT2, etc.
     // the places where all missing labels are inserted are marked with INSERTALL
-    'truncatedY': ['Truncated Y-Axis', 
-                'The Y-Axis is truncated. The bottom most value is INSERT1 instead of a more traditional 0. This can be misleading as it displays the differences between those values as larger than they actually are.'],
-    'invertedY': ['Inverted Y-Axis', 
-                'The Y-Axis is inverted. This can be misleading as it makes upwards trends appear like they are downwards trends and vice versa.'],
-    'misleadingAR': ['Misleading Aspect Ratio', 
-                'The aspect ratio of the chart is misleading. This can make trends appear more extreme than they actually are.'],
+    // the places where the axis titles are inserted for misleading features that are axis-specific are marked with TITLE
     'missingLabels': ['Missing Labels', 
                 'The chart is missing the following labels: INSERTALL. This can be misleading as it may cause the chart to be taken out of context or make the shown data harder to understand.'],
     'multipleAxis': ['Multiple Axis', 
                 'The chart has multiple axis. This can be misleading, as it distorts the magnitude of the data and makes trends appear different than they actually are.'],
+    'misleadingAR': ['Misleading Aspect Ratio', 
+                'The aspect ratio of the chart is misleading. This can make trends appear more extreme than they actually are.'],
+    'truncatedY': ['Truncated Y-Axis', 
+                `The Y-Axis (Y-TITLE) is truncated. The bottom most value is INSERT1 instead of a more traditional 0. This can be misleading as it displays the differences between those values as larger than they actually are.`],
+    'invertedY': ['Inverted Y-Axis', 
+                `The Y-Axis (Y-TITLE) is inverted. This can be misleading as it makes upwards trends appear like they are downwards trends and vice versa.`],
     'nonLinearX': ['Non-Linear X-Axis', 
-                'The X-Axis does not follow a linear scale.'],
+                'The X-Axis (X-TITLE) does not follow a linear scale.'],
     'nonLinearY': ['Non-Linear Y-Axis', 
-                'The Y-Axis does not follow a linear scale.'],
+                'The Y-Axis (Y-TITLE) does not follow a linear scale.'],
     'inconsistentTicksX': ['Inconsistent Ticks on X-Axis', 
-                'The tick markers along the X-Axis are place in inconsistent intervals. This can make it harder to judge the values on the graph.'],
+                'The tick markers along the X-Axis (X-TITLE) are place in inconsistent intervals. This can make it harder to judge the values on the graph.'],
     'inconsistentTicksY': ['Inconsistent Ticks on Y-Axis', 
-                'The tick markers along the Y-Axis are place in inconsistent intervals. This can make it harder to judge the values on the graph']
+                'The tick markers along the Y-Axis (Y-TITLE) are place in inconsistent intervals. This can make it harder to judge the values on the graph']
     //TODO: improve descriptions 
 }
 
@@ -51,8 +52,8 @@ var detectedFeatures = {        //object represents all detectable misleading fe
     "misleadingAR": [false],                //can store an improved aspect ratio as 2nd entry
     "missingLabels": [false],               //stores all missing lavels after the first entry
     "multipleAxis": [false],                //stores the axis names of detected axis if there are multiple
-    "nonLinearX": [false],                  //can stor multiple booleans if there are multiple x-axis
-    "nonLinearY": [false],                  //can stor multiple booleans if there are multiple y-axis
+    "nonLinearX": [false],                  //can store multiple booleans if there are multiple x-axis
+    "nonLinearY": [false],                  //can store multiple booleans if there are multiple y-axis
     "inconsistentTicksX": [false],
     "inconsistentTicksY": [false]
 }
@@ -449,7 +450,7 @@ function drawChart(parentDiv, controlChart = false) {
  * function draws the detected misleading features into the list in the UI
  */
 function drawMisleadFeaturesList() {
-    inserter = (feature) => {
+    inserter = (feature, axisNr) => {
         res = misleadingFeaturesTexts[feature][1]
         if (res.includes('INSERTALL')) {
             //replace INSERTALL with a list of insert-values and split off the last element with an 'and' instead of a comma
@@ -460,6 +461,15 @@ function drawMisleadFeaturesList() {
                 res = res.replace('INSERT'+i, detectedFeatures[feature][i]);
             }
         }
+        if (res.includes('X-TITLE')) {               //tested if its an x-axis feature
+            let axisTitle = xAxisData[axisNr]['title'];
+            let replacement = axisTitle == ' ' ? 'no title' : 'titled "' + axisTitle + '"';
+            res = res.replace('X-TITLE', replacement);
+        } else if (res.includes('Y-TITLE')) {        //tested if its an y-axis feature
+            let axisTitle = yAxisData[axisNr]['title'];
+            let replacement = axisTitle == ' ' ? 'no title' : 'titled "' + axisTitle + '"';
+            res = res.replace('Y-TITLE', replacement);
+        }
         //remove any remaining INSERT strings (necessary for enumeration of inserts without set length)
         res = res.replace(/INSERT\d+/i, '');
         res = res.replace(/INSERTALL/i, '');
@@ -469,9 +479,20 @@ function drawMisleadFeaturesList() {
     let misleadingFeaturesDiv = d3.select('#misleading-features-list-group')
     //for every feature we check if the backend detected it and if so we add it to the list
     for (feature in misleadingFeaturesTexts) {
-        if (detectedFeatures[feature][0]) {
-            appendMisleadingFeature(misleadingFeaturesDiv, feature, misleadingFeaturesTexts[feature][0], inserter(feature)
-        )}
+        //first handle features that are not axis specific (only axis-specifc features end with X or Y)
+        if (!/.*[XY]$/.test(feature)) {
+            if (detectedFeatures[feature][0]) {
+                appendMisleadingFeature(misleadingFeaturesDiv, feature, misleadingFeaturesTexts[feature][0], inserter(feature)
+            )}
+        } else {          //handle axis-specific features and loop through all axes
+            for (currentAxis in detectedFeatures[feature]) {
+                if (detectedFeatures[feature][currentAxis]) {
+                    appendMisleadingFeature(misleadingFeaturesDiv, feature, misleadingFeaturesTexts[feature][0], inserter(feature, currentAxis))
+                }
+            }
+        }
+
+        
     }
 }
 
