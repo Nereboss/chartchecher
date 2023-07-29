@@ -69,12 +69,21 @@ const toggleOriginalOrControlChart = document.getElementById('toggle-button')
 toggleOriginalOrControlChart.addEventListener('click', function() {toggleButtonClicked()})
 const showAllDetectableFeaturesButton = document.getElementById('show-all-button')
 showAllDetectableFeaturesButton.addEventListener('click', function() {showAllButtonClicked()})
+const shareWholeUIButton = document.getElementById('wholeUIBTN')
+shareWholeUIButton.addEventListener('click', function() {shareButtonClicked('#share-content')})
+const shareChartOnlyButton = document.getElementById('chartOnlyBTN')
+shareChartOnlyButton.addEventListener('click', function() {shareButtonClicked('#share-chart')})
 
 
 // -----------------------------functions for event listeners---------------------------------
 
-function shareButtonClicked() {
-    console.log('share button clicked')
+function shareButtonClicked(elementToDraw='#share-content') {
+
+    html2canvas(document.querySelector(elementToDraw)).then(canvas => {
+        var img = document.getElementById('share-image')
+        var imageData = canvas.toDataURL("image/png")
+        img.src = imageData
+    });
 }
 
 function helpButtonClicked() {
