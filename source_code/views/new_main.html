@@ -10,7 +10,8 @@
   <script src='../src/driver.min.js'></script>
   <script src='../src/jquery-3.5.1.min.js'></script>
   <script src='../src/d3.v4.js'></script>
-  <script src='../src/wpd.js'></script> <!-- TODO: check if this is needed--> 
+  <script src='../src/html2canvas.min.js'></script>
+  <script src='../src/tutorial.js'></script>
 
 
   <!--  BOOTSTRAP-->
@@ -34,7 +35,7 @@
                 <div class="col-4 justify-content-center align-items-center">
                     <div class="d-flex justify-content-end align-items-center">
                         <div class="p-1">
-                            <button type="button" class="btn btn-primary" id="share-button">
+                            <button type="button" class="btn btn-primary" id="share-button" data-toggle="modal" data-target="#exampleModalCenter">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-share" viewbox="0 0 16 16">
                                     <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z">
                                     </path>
@@ -57,56 +58,62 @@
 
 
             <!--Start Image Comparsion-->
-            <div class="row test-row justify-content-center align-items-center" id="image-compare" style="position: relative;">
-                <div class="col-6">
-                    <div class="card">
-                        <div class="card-header" style="text-align: center">
-                            <h3 style="font-weight: bold;">Original Chart</h3>
+            <div id="share-content">
+                <div class="row test-row justify-content-center" id="image-compare" style="position: relative; padding-bottom: 10px;">
+                    <div class="col-6">
+                        <div class="card h-100" id="original-card">
+                            <div class="card-header" style="text-align: center">
+                                <h3 style="font-weight: bold;">Original Chart</h3>
+                            </div>
+                            <div class="card-body" id="original-chart">
+                                <div>
+                                    <img class="mx-auto" style="z-index: 0; position: relative; display: block" width="100%" id="original-image" src=""> <!--JS inserts the correct source for the image here-->
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-body" id="original-chart">
-                            <div style='background-color: green'>
-                                <img style="z-index: 0; display: block; position: relative;" width="500px" class="img-fluid" id="original-image" src=""> <!--TODO: make the image centered in the card-->
-                                <!-- <svg id="is-this-needed" width="600" height="400">Original chart goes here</svg> -->
+                    </div>
+                    <div class="col-6">
+                        <div class="card h-100" id="recommended-card">
+                            <div class="card-header" style="text-align: center">
+                                <h3 style="font-weight: bold;">Recommended Chart</h3>
+                            </div>
+                            <div class="card-body" id="share-chart">
+                                <div class="row align-items-center h-100">
+                                    <div class="col justify-content-center" id="recommended-chart">
+                                        <!--JS inserts the  drawn chart here TODO: make the svg scale correctly</svg> -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-38px, -50%); width: 100px;">
+                        <div class="justify-content-center align-items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="75" height="75" fill="#c50000" class="bi bi-arrow-right" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <!--End Image Comparsion-->
+
+
+                <!--Start Detected misleading features-->
+                <div class="row justify-content-center align-items-center" id="misleading-features">
+                    <div class="col">
+                        <div class="card" id="misleading-features-card">
+                            <div class="card-header" style="text-align: center">
+                                <h3 style="font-weight: bold;">Detected Misleading Features</h3>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-group" id="misleading-features-list-group">
+                                    <!--JS will create the list items and insert them here-->
+                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-6">
-                    <div class="card">
-                        <div class="card-header" style="text-align: center">
-                            <h3 style="font-weight: bold;">Recommended Chart</h3>
-                        </div>
-                        <div class="card-body" id="recommended-chart">
-                            <!-- <svg width="500" height="400">Recommended chart goes here</svg> -->
-                        </div>
-                    </div>
-                </div>
-                <div style="position: absolute;">
-                    <div class="justify-content-center align-items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="75" height="75" fill="#c50000" class="bi bi-arrow-right" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
-                          </svg>
-                    </div>
-                </div>
             </div>
-            <!--End Image Comparsion-->
 
-
-            <!--Start Detected misleading features-->
-            <div class="row justify-content-center align-items-center" id="misleading-features">
-                <div class="col">
-                    <div class="card">
-                        <div class="card-header" style="text-align: center">
-                            <h3 style="font-weight: bold;">Detected Misleading Features</h3>
-                        </div>
-                        <div class="card-body">
-                            <ul class="list-group" id="misleading-features-list-group">
-                                <!--The list items will be created with JS later and put in here-->
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
             <!--End Detected misleading features-->
 
 
@@ -127,6 +134,40 @@
             </div>
             <!--End Bottom Buttons-->
 
+            <!--Start sharing modal-->
+            <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Right-click the image to copy or save it</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="row justify-content-center">Select which content to share:</div>
+                        <div class="row" style="padding-bottom: 10px;">
+                            <div class="col text-center">
+                                
+                                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                    <label class="btn btn-primary active" id="wholeUIBTN">
+                                    <input type="radio" name="options" id="wholeUI" autocomplete="off" checked> Whole UI
+                                    </label>
+                                    <label class="btn btn-primary" id="chartOnlyBTN">
+                                    <input type="radio" name="options" id="chartOnly" autocomplete="off"> Only recommended chart
+                                    </label>
+                                </div>
+                            
+                            </div>
+                        </div>
+                        <img class="img-thumbnail" style="z-index: 0; position: relative;" class="img-fluid" id="share-image" height="100%" width="100%" src="">
+                    </div>
+                </div>
+                </div>
+            </div>
+
+            <!--End sharing modal-->
 
         </div>
     </div>

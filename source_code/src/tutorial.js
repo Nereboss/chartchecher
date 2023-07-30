@@ -3,7 +3,42 @@ function tutorial() {
   driver.highlight('#Simple11');
 }
 
-function tutorial3() {
+//tutorial for the main page
+function tutorialMain() {
+  const driver = new Driver();
+
+  driver.defineSteps([
+    {
+      element: '#original-card',
+      popover: {
+        title: 'Input Chart',
+        description: 'Here the original image is shown for a direct comparison.',
+        position: 'mid-center'
+      }
+    },
+    {
+      element: '#recommended-card',
+      popover: {
+        title: 'Alternative Chart',
+        description: 'This shows the alternative chart that we recommend, as it removes all the misleading features that are present in the original chart.',
+        position: 'mid-center'
+      }
+    },
+    {
+      element: '#misleading-features-card',
+      popover: {
+        title: 'List of detected misleading features',
+        description: 'This shows a list of all the misleading features that were detected in the original chart together with explanations. From here you can also choose to show or hide individual features in the recommended chart to further understand their effects.',
+        position: 'mid-center'
+      }
+    },
+
+  ]);
+  driver.start();
+}
+
+//tutorial for the manual mode
+function tutorialManual() {
   const driver = new Driver();
 // Define the steps for introduction
 
@@ -62,10 +97,14 @@ function tutorial3() {
   driver.start();
 }
 
-document.getElementById('TutorialLink').addEventListener('click', function() {
-  //need to set timeout for this thing to fire correctly (20ms for now)
-  setTimeout(() => {
-    //timeout begins
-    tutorial3();
-  }, 200);
-});
+//tutorial for the manual mode
+let manualTutorial = document.getElementById('TutorialLink')
+if (manualTutorial != null) {
+  manualTutorial.addEventListener('click', function() {
+    //need to set timeout for this thing to fire correctly (20ms for now)
+    setTimeout(() => {
+      //timeout begins
+      tutorialManual();
+    }, 200);
+  });
+}

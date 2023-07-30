@@ -1,0 +1,18 @@
+id,x,y,width,height,text,type
+0,0,24,477,60,Gun deaths in Florida,title
+1,0,98,467,40,Number ofmurders committed using firearms,text-title
+2,34,143,15,18,0,y-axis-label
+3,14,240,36,24,200,y-axis-label
+4,356,272,169,107,2005 Florida enacted its 'Stand Your Ground' law,text-label
+5,15,341,34,20,400,y-axis-label
+6,15,441,34,20,600,y-axis-label
+7,530,512,46,32,721,text-label
+8,14,540,36,24,800,y-axis-label
+9,56,594,46,24,873,text-label
+10,2,640,48,24,"1,000",y-axis-label
+11,40,653,52,20,1990s,x-axis-label
+12,254,653,54,20,2000s,x-axis-label
+13,467,653,54,20,2010s,x-axis-label
+14,0,696,412,28,Source: Florida Department of Law Enforcement,text-label
+15,1,737,138,18,C. Cnan 16/02/2014,text-label
+16,532,735,61,20,REUTERS,text-label

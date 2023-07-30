@@ -1,0 +1,21 @@
+id,x,y,width,height,text,type
+0,143.0,81.0,1392.0,90.0,Arizona is Running out of Water,title
+1,135.0,181.0,1405.0,130.0,Arizona has been in a drought for the last 22 years and things just keep getting worse. The elevations levels of Lake Meade are indicated with points of the lowest and higest elevation for each year.,text-label
+2,221.0,331.0,210.0,36.0,Low Elevation,legend-label
+3,619.0,329.0,221.0,44.0,High Elevation,legend-label
+4,88.0,468.0,70.0,30.0,1220,y-axis-label
+5,88.0,614.0,72.0,32.0,1200,y-axis-label
+6,88.0,762.0,72.0,30.0,1180,y-axis-label
+7,88.0,908.0,72.0,30.0,1160,y-axis-label
+8,88.0,1056.0,72.0,30.0,1140,y-axis-label
+9,88.0,1202.0,72.0,32.0,1120,y-axis-label
+10,88.0,1350.0,70.0,30.0,1100,y-axis-label
+11,88.0,1496.0,72.0,32.0,1080,y-axis-label
+12,1265.0,1517.0,482.0,118.0,2015 continues the downward trend. The water elevation is nearly 100% lower then in 1995,text-label
+13,88.0,1644.0,72.0,32.0,1060,y-axis-label
+14,152.0,1684.0,70.0,30.0,1995,x-axis-label
+15,574.0,1684.0,70.0,30.0,2000,x-axis-label
+16,996.0,1684.0,72.0,30.0,2005,x-axis-label
+17,1420.0,1682.0,70.0,32.0,2010,x-axis-label
+18,1842.0,1684.0,72.0,30.0,2015,x-axis-label
+19,1396.0,1769.0,525.0,43.0,Source: Hoover Dam Control Room,text-title

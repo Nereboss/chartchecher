@@ -5,9 +5,9 @@ id,x,y,width,height,text,type
 3,54,594,50,24,400,y-axis-label
 4,54,708,50,26,200,y-axis-label
 5,54,825,50,24,0,y-axis-label
-6,133,884,50,24,0,x-axis-label
-7,291,884,50,24,2,x-axis-label
-8,442,884,50,24,4,x-axis-label
-9,598,884,50,24,6,x-axis-label
-10,755,884,50,24,8,x-axis-label
+6,133,884,24,24,0,x-axis-label
+7,291,884,24,24,2,x-axis-label
+8,442,884,24,24,4,x-axis-label
+9,599,884,24,24,6,x-axis-label
+10,755,884,24,24,8,x-axis-label
 11,900,884,32,24,10,x-axis-label

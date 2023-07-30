@@ -2,43 +2,43 @@ const portNumber = 5000;
 
 const SCALE = 1.5;
 const CHARTSIZE = 175*SCALE;  
-const margin = {top: 50, right: 10, bottom: 20, left: 150};
-
 const misleadingFeaturesTexts = {
     // some information about the misleading features changes dynamically with the chart
-    // the places where such information is inserted are marked with INSERT1, INSERT2, etc.
-    // the places where all missing labels are inserted are marked with INSERTALL
-    'truncatedY': ['Truncated Y-Axis', 
-                'The Y-Axis is truncated. The bottom most value is INSERT1 instead of a more traditional 0. This can be misleading as it displays the differences between those values as larger than they actually are.'],
-    'invertedY': ['Inverted Y-Axis', 
-                'The Y-Axis is inverted. This can be misleading as it makes upwards trends appear like they are downwards trends and vice versa.'],
+    // the places where such information is inserted are marked with INSERT_...
+    // the places where the axis titles are inserted for misleading features that are axis-specific are marked with TITLE
+    'missingLabels': ['Missing Labels', 
+                'The chart is missing the following labels: INSERT_ALL. This can be misleading as it may cause the chart to be taken out of context or make the shown data harder to understand.'],
+    'multipleAxis': ['Multiple Axis', 
+                'The chart has multiple axis. This can be misleading, as it might not be clear which data series belongs to which axis. If the axis have different scales, it can also distort comparisons between data series and result in misleading patterns.'],
     'misleadingAR': ['Misleading Aspect Ratio', 
                 'The aspect ratio of the chart is misleading. This can make trends appear more extreme than they actually are.'],
-    'missingLabels': ['Missing Labels', 
-                'The chart is missing the following labels: INSERTALL. This can be misleading as it makes it harder to understand the context of the chart.'],
-    'multipleAxis': ['Multiple Axis', 
-                'The chart has multiple axis. This can be misleading, as it distorts the magnitude of the data and makes trends appear different than they actually are.'],
+    'truncatedY': ['Truncated Y-Axis', 
+                `The Y-Axis (Y-TITLE) is truncated. The bottom most value is INSERT_TRUNC instead of a more traditional 0. This can be misleading as it shows the differences between the displayed values as larger than they actually are.`],
+    'invertedY': ['Inverted Y-Axis', 
+                `The Y-Axis (Y-TITLE) is inverted. This can be misleading as it makes upwards trends appear like they are downwards trends and vice versa.`],
     'nonLinearX': ['Non-Linear X-Axis', 
-                'The X-Axis does not follow a linear scale.'],
+                'The X-Axis (X-TITLE) does not follow a linear scale. This can make it difficult to judge trends as the same distance on the axis does not always represent the same difference in the data.'],
     'nonLinearY': ['Non-Linear Y-Axis', 
-                'The Y-Axis does not follow a linear scale.'],
+                'The Y-Axis (Y-TITLE) does not follow a linear scale. This can make it difficult to judge trends as the same distance on the axis does not always represent the same difference in the data.'],
     'inconsistentTicksX': ['Inconsistent Ticks on X-Axis', 
-                'The tick markers along the X-Axis are place in inconsistent intervals. This can make it harder to judge the values on the graph.'],
+                'The tick markers along the X-Axis (X-TITLE) are place in inconsistent intervals. This can make it harder to judge the values on the graph.'],
     'inconsistentTicksY': ['Inconsistent Ticks on Y-Axis', 
-                'The tick markers along the Y-Axis are place in inconsistent intervals. This can make it harder to judge the values on the graph']
-    //TODO: improve descriptions 
+                'The tick markers along the Y-Axis (Y-TITLE) are place in inconsistent intervals. This can make it harder to judge the values on the graph']
 }
 
 // -----------------------------global variables---------------------------------
 
 let imageURL_auto; 
+let imageWidth;
+let imageHeight;
 
 //data needed to draw the chart axis
 var chartWidth;
 var chartHeight;
 var chartAR;            //aspect ratio of the chart in the original image
-var chartXTicks;        //array of tick marks along the x axis first and last element are the min and max values
-var chartYTicks;        //array of tick marks along the y axis first and last element are the min and max values
+var chartTitle;         //title of the chart (if there is one)
+var xAxisData;        //2d array containing all x-axis in ascending order [x-axis, x1-axis, ...] together with their title and tick labels
+var yAxisData;        //2d array containing all y-axis in ascending order [y-axis, y1-axis, ...] together with their title and tick labels
 
 //data needed to draw the graphs
 var chartGraphData;
@@ -48,15 +48,15 @@ var detectedFeatures = {        //object represents all detectable misleading fe
     "misleadingAR": [false],                //can store an improved aspect ratio as 2nd entry
     "missingLabels": [false],               //stores all missing lavels after the first entry
     "multipleAxis": [false],                //stores the axis names of detected axis if there are multiple
-    "nonLinearX": [false],                  //can stor multiple booleans if there are multiple x-axis
-    "nonLinearY": [false],                  //can stor multiple booleans if there are multiple y-axis
+    "nonLinearX": [false],                  //can store multiple booleans if there are multiple x-axis
+    "nonLinearY": [false],                  //can store multiple booleans if there are multiple y-axis
     "inconsistentTicksX": [false],
     "inconsistentTicksY": [false]
 }
 
 
 
-//-----------------------------event listeners---------------------------------
+//-----------------------------event listeners for buttons---------------------------------
 
 const shareButton = document.getElementById('share-button')
 shareButton.addEventListener('click', function() {shareButtonClicked()})
@@ -66,20 +66,32 @@ const toggleOriginalOrControlChart = document.getElementById('toggle-button')
 toggleOriginalOrControlChart.addEventListener('click', function() {toggleButtonClicked()})
 const showAllDetectableFeaturesButton = document.getElementById('show-all-button')
 showAllDetectableFeaturesButton.addEventListener('click', function() {showAllButtonClicked()})
+const shareWholeUIButton = document.getElementById('wholeUIBTN')
+shareWholeUIButton.addEventListener('click', function() {shareButtonClicked('#share-content')})
+const shareChartOnlyButton = document.getElementById('chartOnlyBTN')
+shareChartOnlyButton.addEventListener('click', function() {shareButtonClicked('#share-chart')})
 
 
 // -----------------------------functions for event listeners---------------------------------
 
-function shareButtonClicked() {
-    console.log('share button clicked')
+function shareButtonClicked(elementToDraw='#share-content') {
+
+    html2canvas(document.querySelector(elementToDraw)).then(canvas => {
+        var img = document.getElementById('share-image')
+        var imageData = canvas.toDataURL("image/png")
+        img.src = imageData
+    });
 }
 
 function helpButtonClicked() {
-    console.log('help button clicked')
+    //start the tutorial, similar to the manual mode
+    setTimeout(() => {
+      //timeout begins
+      tutorialMain();
+    }, 200);
 }
 
 function toggleButtonClicked() {
-    console.log('toggle button clicked') //TODO: remove
     var originalImage = document.getElementById("original-image");
     var controlChart = document.getElementById("controlSVG");
     if (originalImage.style.display === "none") {
@@ -92,7 +104,7 @@ function toggleButtonClicked() {
 }
 
 function showAllButtonClicked() {
-    console.log('show all button clicked') //TODO: remove
+    //redirect to the view that shows all detectable features
     window.location.href = '/views/detectable_features.html';
 }
 
@@ -102,7 +114,6 @@ function showAllButtonClicked() {
 chrome.storage.sync.get(['key'], function (result) {
     //set the image
     imageURL_auto = result.key;  //https://localhost/***/chart.png
-    // console.log(imageURL_auto, result.key);
     const filename = imageURL_auto.split('/').reverse()[0];  //chart.png
     const base_filename = filename.split('.')[0]; //chart
 
@@ -159,9 +170,24 @@ function drawUI(backendData) {
 
 function processBackendData(backendData) {
 
-    chartXTicks = backendData['xTicks'];
-    chartYTicks = backendData['yTicks'];
+    xAxisData = []
+    yAxisData = []
+    let axisData = backendData['axisData']
+    for (axis in axisData) {
+        if (/x\d*-axis/.test(axis)) {
+            xAxisData.push(axis)
+        }
+        else if (/y\d*-axis/.test(axis)) {
+            yAxisData.push(axis)
+        }
+    }
+    xAxisData.sort()
+    yAxisData.sort()
+    xAxisData = xAxisData.map(axis => axisData[axis])
+    yAxisData = yAxisData.map(axis => axisData[axis])
+
     chartAR = backendData['aspectRatio'];
+    chartTitle = backendData['chartTitle'];
     //set height and width of the drawn charts based on the aspect ratio
     if (chartAR > 10 / 3) { //fix on x size
         chartWidth = CHARTSIZE;
@@ -170,11 +196,9 @@ function processBackendData(backendData) {
         chartHeight = CHARTSIZE;
         chartWidth = parseInt(chartAR * chartHeight);
     }
-    chartGraphData = JSON.stringify(backendData['data']);
+    chartGraphData = JSON.stringify(backendData['graphData']);
     chartGraphData = JSON.parse(chartGraphData);
-    chartGraphData.splice(chartGraphData.length - 1); //remove last element
     detectedFeatures = backendData['detectedFeatures'];
-    console.log("dimensions: ", chartWidth, chartHeight);
 }
 
 /**
@@ -185,14 +209,21 @@ function drawOriginalImage() {
     toDataURL(imageURL_auto,
         function (dataUrl) {
             img.src = dataUrl;
+            //set max width depending on the width and height of the image to not have it too wide or too tall
+            let scaleFactor = 400 / imageHeight;
+            let newWidth = imageWidth * scaleFactor;
+            if (newWidth > 730) {
+                img.style.maxWidth = '730px';
+            } else {
+                img.style.maxWidth = newWidth.toString() + 'px';
+            }
         }
     );
 }
 
 /**
  * function that we use to draw all the chart images in the UI
- * TODO: expand this function step by step to eventually include the removal of all misleading features
- * if all detected tactics are false, it will draw the input-image (control chart)
+ * if all detected tactics are false, it will draw the chart from the input-image (control chart)
  * @param {html_element} parentDiv the div in which the chart will be drawn
  * @param {boolean} controlChart whether or not to draw the control chart
  */
@@ -216,63 +247,75 @@ function drawChart(parentDiv, controlChart = false) {
 
     //-----------------set x-axis scale-----------------
 
-    //functions to get the domain and range out of the xTicks object (needed to correctly represent the ticks of the original image)
-    let xOffset = chartXTicks[0].pos;
-    let xFactor = (chartXTicks[chartXTicks.length-1].pos - xOffset) / xAxisSize;
-    let xTicksDomain = chartXTicks.map(function (d) {return d.value;});
-    let drawnTickValuesX = xTicksDomain;     //needs to be saved to draw the ticks later because xTicksDomain can be overwritten
-    let xTicksRange = chartXTicks.map(function (d) {return (d.pos - xOffset) / xFactor;});
+    let xScale = [];
+    let drawnTickValuesX = [];
 
-    if (!controlChart && detectedFeatures.nonLinearX[0]) {       //when the x-axis is non-linear we need to use the first and last value to create a linear scale
-        xTicksDomain = [chartXTicks[0].value, chartXTicks[chartXTicks.length-1].value];
-        xTicksRange = [0, xAxisSize];
-    }
-    
-    // using d3 to construct a linear scale for the x- and y-axis 
-    // (domain is the range of values in the data, range is the range of values in the drawn chart)
-    let xScale = d3.scaleLinear()  
-        .domain(xTicksDomain)
-        .range(xTicksRange);
+    for (let i = 0; i < xAxisData.length; i++) {
+        //functions to get the domain and range out of the xTicks object (needed to correctly represent the ticks of the original image)
+        let x0AxisTicks = xAxisData[i]['ticks'];
+        let xOffset = x0AxisTicks[0].pos;
+        let xFactor = (x0AxisTicks[x0AxisTicks.length-1].pos - xOffset) / xAxisSize;
+        let xTicksDomain = x0AxisTicks.map(function (d) {return d.value;});
+        drawnTickValuesX.push(xTicksDomain);     //needs to be saved to draw the ticks later because xTicksDomain can be overwritten
+        let xTicksRange = x0AxisTicks.map(function (d) {return (d.pos - xOffset) / xFactor;});
 
-
-    //-----------------set y-axis scale-----------------
-
-    //functions to get the domain and range out of the yTicks object (needed to correctly represent the ticks of the original image)
-    let yOffset = chartYTicks[0].pos;
-    let yFactor = (chartYTicks[chartYTicks.length-1].pos - yOffset) / yAxisSize;
-    let yTicksDomain = chartYTicks.map(function (d) {return d.value;});
-    let drawnTickValuesY = yTicksDomain;     //needs to be saved to draw the ticks later in case yTicksDomain is overwritten
-    let yTicksRange = chartYTicks.map(function (d) {return (d.pos - yOffset) / yFactor;});
-
-    //when the y-axis is truncated we need to "shift" the existing scale to start at zero
-    if(!controlChart && detectedFeatures.truncatedY[0]) {
-        let maxValue = yTicksDomain[yTicksDomain.length-1];
-        let compressFactor = 1-(yTicksDomain[0]/maxValue);
-        yTicksDomain = yTicksDomain.map(function (d) {return (d-maxValue)/compressFactor + maxValue;});
+        if (!controlChart && detectedFeatures.nonLinearX[0]) {       //when the x-axis is non-linear we need to use the first and last value to create a linear scale
+            xTicksDomain = [x0AxisTicks[0].value, x0AxisTicks[x0AxisTicks.length-1].value];
+            xTicksRange = [0, xAxisSize];
+        }
+        
+        // using d3 to construct a linear scale for the x- and y-axis 
+        // (domain is the range of values in the data, range is the range of values in the drawn chart)
+        xScale.push(d3.scaleLinear()  
+            .domain(xTicksDomain)
+            .range(xTicksRange));
     }
 
-    //when the y-axis is inverted we need to reverse the order of the ticks
-    if(!controlChart && detectedFeatures.invertedY[0]) {
-        yTicksDomain = yTicksDomain.reverse();
-    }
+    //-----------------set y-axis scales-----------------
 
-    if (!controlChart && detectedFeatures.nonLinearY[0]) {       //when the y-axis is non-linear we need to use the first and last value to create a linear scale
-        yTicksDomain = [yTicksDomain[0].value, yTicksDomain[yTicksDomain.length-1].value];
-        yTicksRange = [yAxisSize, 0];
-    }
-    let yScale = d3.scaleLinear()
-            .domain(yTicksDomain)
-            .range(yTicksRange.reverse());    //reverse as the largest value needs to be first because the chart will be drawn "top to bottom"
+    let yScale = [];
+    let drawnTickValuesY = [];
 
+    for (let i = 0; i < yAxisData.length; i++) {
+        //functions to get the domain and range out of the yTicks object (needed to correctly represent the ticks of the original image)
+        let y0AxisTicks = yAxisData[i]['ticks'];
+        let yOffset = y0AxisTicks[0].pos;
+        let yFactor = (y0AxisTicks[y0AxisTicks.length-1].pos - yOffset) / yAxisSize;
+        let yTicksDomain = y0AxisTicks.map(function (d) {return d.value;});
+        drawnTickValuesY.push(yTicksDomain);     //needs to be saved to draw the ticks later in case yTicksDomain is overwritten
+        let yTicksRange = y0AxisTicks.map(function (d) {return (d.pos - yOffset) / yFactor;});
+
+        //when the y-axis is truncated we need to "shift" the existing scale to start at zero
+        if(!controlChart && detectedFeatures.truncatedY[i]) {
+            let maxValue = yTicksDomain[yTicksDomain.length-1];
+            let compressFactor = 1-(yTicksDomain[0]/maxValue);
+            yTicksDomain = yTicksDomain.map(function (d) {return (d-maxValue)/compressFactor + maxValue;});
+        }
+
+        //when the y-axis is inverted we need to reverse the order of the ticks
+        if(!controlChart && detectedFeatures.invertedY[i]) {
+            yTicksDomain = yTicksDomain.reverse();
+        }
+
+        //when the y-axis is non-linear we need to use the first and last value to create a linear scale
+        if (!controlChart && detectedFeatures.nonLinearY[i]) {
+            yTicksDomain = [yTicksDomain[0].value, yTicksDomain[yTicksDomain.length-1].value];
+            yTicksRange = [yAxisSize, 0];
+        }
+
+        yScale.push(d3.scaleLinear()
+                .domain(yTicksDomain)
+                .range(yTicksRange.reverse()));    //reverse as the largest value needs to be first because the chart will be drawn "top to bottom"
+    }
     
     //-----------------prepare line dataset-----------------
 
     let line = d3.line()
         .x(function (d) {
-            return xScale(d.x);
+            return xScale[0](d.x);
         }) // set the x values for the line generator
         .y(function (d) {
-            return yScale(d.y);
+            return yScale[0](d.y);
         });
 
     let dataset = chartGraphData.map(function (d) {
@@ -291,58 +334,121 @@ function drawChart(parentDiv, controlChart = false) {
         display = 'display: block';
     }
 
-    const EXPAND_WIDTH = 80;
-    const EXPAND_HEIGHT = 50;
+    const X_AXIS_DISTANCE = 50;             //the distance between the x-axis if multiple were found
+    const X_AXIS_EXPAND = X_AXIS_DISTANCE*(xAxisData.length-1);
+    const Y_AXIS_DISTANCE = 70;             //the distance between the y-axis if multiple were found
+    const Y_AXIS_EXPAND = Y_AXIS_DISTANCE*(yAxisData.length-1);
+    const EXPAND_WIDTH = 80 + Y_AXIS_EXPAND;
+    const EXPAND_HEIGHT = 50 + 10 + 35 + X_AXIS_EXPAND;
     let svg = parentDiv
         .append('svg')
+        .attr('class', 'mx-auto')
         .attr('width', xAxisSize + EXPAND_WIDTH)
         .attr('height', yAxisSize + EXPAND_HEIGHT)
         .attr('id', elementID)
         .attr('style', display)
         .append('g')
         .attr('align', 'center')
+        .attr('transform', 'translate(20,30)');
+
+    
+    //-----------------draw chart title-----------------
+
+        //chart title
+        let titleColor = '#000000', title = chartTitle;
+        if (!controlChart && detectedFeatures.missingLabels[0] && title == ' ') {
+            title = 'missing chart title';
+            titleColor = '#CC0000'
+        }
+        svg.append('text')
+        .attr('x', (xAxisSize + EXPAND_WIDTH)/2)
+        .attr('y', -10)
+        .attr('text-anchor', 'middle')
+        .attr('font-weight', 'bold')
+        .attr('fill', titleColor)
+        .style("font-size", "20px")
+        .text(title);
 
     const SHIFT_DOWN = 11;
     const SHIFT_RIGHT = 40;
 
     //-----------------set axis ticks-----------------
 
-    let bottomAxis;
-    if(!controlChart && detectedFeatures.inconsistentTicksX[0]) {    //when the x-axis is inconsistent we let d3 decide which ticks to draw
-        bottomAxis = d3.axisBottom(xScale).ticks(chartXTicks.length);
-    } else {                                        //otherwise we draw the ticks from the oginal image
-        bottomAxis = d3.axisBottom(xScale).tickValues(drawnTickValuesX).tickFormat(x => `${x}`) // weird tick format is necessary to not round the tick and keep the original from the image
+    let bottomAxis = [];
+    for (let i = 0; i < xAxisData.length; i++) {
+        // when the x-axis is inconsistent or truncated, we let d3 decide which ticks to draw. Otherwise we draw the ticks from the oginal image
+        if(!controlChart && detectedFeatures.inconsistentTicksX[i]) {
+            bottomAxis.push(d3.axisBottom(xScale[i]).ticks(xAxisData[i]['ticks'].length));
+        } else {
+            bottomAxis.push(d3.axisBottom(xScale[i]).tickValues(drawnTickValuesX[i]).tickFormat(x => `${x}`)) // weird tick format is necessary to not round the tick and keep the original from the image
+        }
     }
 
-    let leftAxis;
-    if(!controlChart && (detectedFeatures.inconsistentTicksY[0] || detectedFeatures.truncatedY[0])) {  //when the y-axis is truncated and shown in a improved way, the axis ticks will be inconsistent which is why we improve the ticks there too
-        leftAxis = d3.axisLeft(yScale).ticks(chartYTicks.length);
-    } else {
-        leftAxis = d3.axisLeft(yScale).tickValues(drawnTickValuesY).tickFormat(x => `${x}`)
+    //loop over all y-axes to get correct ticks for each
+    let leftAxis = [];
+    for (let i = 0; i < yAxisData.length; i++) {
+        //when the y-axis is inconsistent or truncated, we let d3 decide which ticks to draw. Otherwise we draw the ticks from the oginal image
+        if(!controlChart && (detectedFeatures.inconsistentTicksY[i] || detectedFeatures.truncatedY[i])) {
+            leftAxis.push(d3.axisLeft(yScale[i]).ticks(yAxisData[i]['ticks'].length));
+        } else {                                        
+            leftAxis.push(d3.axisLeft(yScale[i]).tickValues(drawnTickValuesY[i]).tickFormat(x => `${x}`)) // weird tick format is necessary to keep the exact unrounded number from original from the image
+        }
     }
 
-    //-----------------draw the chart-----------------
+    //-----------------draw the axis-----------------
 
-    // x-axis
-    svg.append('g')
-        .style('font', '11px Segoe UI')
-        .attr('class', 'xaxisblack')
-        .attr('color', 'black')
-        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + (yAxisSize + SHIFT_DOWN) + ')')
-        .call(bottomAxis);
+    // x-axis (in a loop as a chart can have multiple x-axes)
+    for (let i = 0; i < xAxisData.length; i++) {
 
-    // y-axis
-    svg.append('g')
-        .style('font', '11px Segoe UI')
-        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
-        .call(leftAxis);
+        //draw the axis
+        svg.append('g')
+            .style('font', '11px Segoe UI')
+            .attr('transform', 'translate(' + (SHIFT_RIGHT+Y_AXIS_EXPAND) + ',' + (yAxisSize + SHIFT_DOWN + (i*X_AXIS_DISTANCE)) + ')')
+            .call(bottomAxis[i]);
 
-    //append the datapath
+        //draw the axis title
+        let xTitleColor = '#000000', xTitle = xAxisData[i]['title'];
+        if (!controlChart && detectedFeatures.missingLabels[0] && xTitle == ' ') {
+            xTitle = 'missing x axis title';
+            xTitleColor = '#CC0000'
+        }
+        svg.append('text')
+        .attr('x', (xAxisSize + EXPAND_WIDTH+Y_AXIS_EXPAND)/2)
+        .attr('y', (yAxisSize + 50 + (i*X_AXIS_DISTANCE)))
+        .attr('text-anchor', 'middle')
+        .attr('fill', xTitleColor)
+        .text(xTitle);
+
+    }
+    // y-axis (in a loop as a chart can have multiple y-axis)
+    for (let i = 0; i < yAxisData.length; i++) {
+
+        //draw the axis
+        svg.append('g')
+            .style('font', '11px Segoe UI')
+            .attr('transform', 'translate(' + (SHIFT_RIGHT+i*Y_AXIS_DISTANCE) + ',' + SHIFT_DOWN + ')')
+            .call(leftAxis[i]);
+
+        //draw the axis title
+        let yTitleColor = '#000000', yTitle = yAxisData[i]['title'];
+        if (!controlChart && detectedFeatures.missingLabels[0] && yTitle == ' ') {
+            yTitle = 'missing y axis title';
+            yTitleColor = '#CC0000'
+        }
+        svg.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('transform', 'translate(' + i*Y_AXIS_DISTANCE +',' + (yAxisSize/2 + 10) + ')rotate(-90)')
+        .attr('fill', yTitleColor)
+        .text(yTitle);
+    }
+
+    //-----------------draw the graph-----------------
+
     svg.append('path')
         .datum(dataset) // 10. Binds data to the line
         .attr('class', 'line') // Assign a class for styling
         .style('stroke', '#007bff')
-        .attr('transform', 'translate(' + SHIFT_RIGHT + ',' + SHIFT_DOWN + ')')
+        .attr('transform', 'translate(' + (SHIFT_RIGHT+Y_AXIS_EXPAND) + ',' + SHIFT_DOWN + ')')
         .attr('d', line); // 11. Calls the line generator
 
 }
@@ -351,29 +457,48 @@ function drawChart(parentDiv, controlChart = false) {
  * function draws the detected misleading features into the list in the UI
  */
 function drawMisleadFeaturesList() {
-    inserter = (feature) => {
+    inserter = (feature, axisNr=0) => {
         res = misleadingFeaturesTexts[feature][1]
-        if (res.includes('INSERTALL')) {
-            //replace INSERTALL with a list of insert-values and split off the last element with an 'and' instead of a comma
-            res = res.replace('INSERTALL', detectedFeatures[feature].slice(1, detectedFeatures[feature].length - 1).join(', ') + ' and ' + detectedFeatures[feature][detectedFeatures[feature].length - 1]);
-        } else {
-            for (let i = 1; i < detectedFeatures[feature].length; i++) {
-                console.log('INSERT'+i)
-                res = res.replace('INSERT'+i, detectedFeatures[feature][i]);
-            }
+        if (res.includes('INSERT_ALL')) {
+            //replace INSERT_ALL with a list of insert-values and split off the last element with an 'and' instead of a comma
+            res = res.replace('INSERT_ALL', detectedFeatures[feature].slice(1, detectedFeatures[feature].length - 1).join(', ') + ' and ' + detectedFeatures[feature][detectedFeatures[feature].length - 1]);
+        }
+        if (res.includes('INSERT_TRUNC')) {
+            //insert the bottom most y-axis label of the correct axis
+            res = res.replace('INSERT_TRUNC', yAxisData[axisNr]['ticks'][0].value);
+        }
+
+        //replace axis titles
+        if (res.includes('X-TITLE')) {               //tested if its an x-axis feature
+            let axisTitle = xAxisData[axisNr]['title'];
+            let replacement = axisTitle == ' ' ? 'no title' : 'titled "' + axisTitle + '"';
+            res = res.replace('X-TITLE', replacement);
+        } else if (res.includes('Y-TITLE')) {        //tested if its an y-axis feature
+            let axisTitle = yAxisData[axisNr]['title'];
+            let replacement = axisTitle == ' ' ? 'no title' : 'titled "' + axisTitle + '"';
+            res = res.replace('Y-TITLE', replacement);
         }
         //remove any remaining INSERT strings (necessary for enumeration of inserts without set length)
-        res = res.replace(/INSERT\d+/i, '');
-        res = res.replace(/INSERTALL/i, '');
+        res = res.replace(/INSERT_\p{L}+/i, '');
+        res = res.replace(/INSERT_ALL/i, '');
         return res;
     }
 
     let misleadingFeaturesDiv = d3.select('#misleading-features-list-group')
     //for every feature we check if the backend detected it and if so we add it to the list
     for (feature in misleadingFeaturesTexts) {
-        if (detectedFeatures[feature][0]) {
-            appendMisleadingFeature(misleadingFeaturesDiv, feature, misleadingFeaturesTexts[feature][0], inserter(feature)
-        )}
+        //first handle features that are not axis specific (only axis-specifc features end with X or Y)
+        if (!/.*[XY]$/.test(feature)) {
+            if (detectedFeatures[feature][0]) {
+                appendMisleadingFeature(misleadingFeaturesDiv, feature, misleadingFeaturesTexts[feature][0], inserter(feature)
+            )}
+        } else {          //handle axis-specific features and loop through all axes
+            for (currentAxis in detectedFeatures[feature]) {
+                if (detectedFeatures[feature][currentAxis]) {
+                    appendMisleadingFeature(misleadingFeaturesDiv, feature+currentAxis, misleadingFeaturesTexts[feature][0], inserter(feature, currentAxis))
+                }
+            }
+        }
     }
 }
 
@@ -388,16 +513,15 @@ function drawMisleadFeaturesList() {
  * @param {string} featureDescription the description of the feature that will be displayed
  */
 function appendMisleadingFeature(parentDiv, featureID, featureName, featureDescription) {
-    //TODO can add a style with a max width here based on the images so a large description doesnt stretch the UI too much
     //add the feature as a list item using the following HTML code
     parentDiv.append('li')
                 .attr('class', 'list-group-item')
                 .html(`<div class="row align-items-center">
-                            <div class="col-9">
+                            <div class="col-11">
                                 <div style="font-weight: bold;">${featureName}</div>
-                                ${featureDescription}
+                                <p>${featureDescription}</p>
                             </div>
-                            <div class="col-3">
+                            <div class="col-1">
                                 <div class="d-flex justify-content-end">
                                     <button type="button" class="btn btn-primary" id="${featureID}">Hide</button>
                                 </div>
@@ -422,10 +546,15 @@ function misleadingFeatureButtonClicked(id) {
     } else {
         console.log('Error: button text is not Show or Hide')
     }
-    console.log(`${id} button clicked; toggle the feature here`) //TODO toggle the feature here
 
+    //if the id ends with a number, use that number as the axis number, otherwise use 0 (also used for all misleading features that are not axis specific)
+    let axisNr = id.match(/\d+$/);
+    axisNr = axisNr == null ? 0 : parseInt(axisNr);
+    //remove the number at the end from the id (if there was one)
+    id = id.replace(/\d+$/, '');
+    
     //toggle the variable in the detectedFeatures object
-    detectedFeatures[id][0] = !detectedFeatures[id][0];
+    detectedFeatures[id][axisNr] = !detectedFeatures[id][axisNr];
     let oldChartSVG = document.getElementById('recommendedSVG');
     if (oldChartSVG != null) {
         oldChartSVG.remove();          //remove the old recommended chart so we can redraw it
@@ -452,7 +581,9 @@ function toDataURL(src, callback, outputFormat) {
         let ctx = canvas.getContext('2d');
         let dataURL;
         canvas.height = this.naturalHeight;
+        imageHeight = this.naturalHeight;
         canvas.width = this.naturalWidth;
+        imageWidth = this.naturalWidth;
         ctx.drawImage(this, 0, 0);
         dataURL = canvas.toDataURL(outputFormat);
         callback(dataURL);

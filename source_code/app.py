@@ -18,7 +18,7 @@ from PIL import Image
 
 import requests
 
-SAMPLES_DIRECTORY = 'sample_charts/'
+SAMPLES_DIRECTORY = 'chartchecker_sample_charts/'
 
 
 class AnalyzeAuto(Resource):
@@ -34,114 +34,121 @@ class AnalyzeAuto(Resource):
         req = request.get_json()
 
         base_filename = (req['base_filename'])
-        image_filename = base_filename + '.png'
-        box_filename = SAMPLES_DIRECTORY + base_filename + '-pred1-texts.csv'
-        data_filename = SAMPLES_DIRECTORY + base_filename + '_data.csv'
+
+        remove_files = False
+        # these files are created by the manual mode, so we can use them if they exist
+        if os.path.isfile('c-pred1-texts.csv') and os.path.isfile('CompleteAnalysis_data.csv'):
+            remove_files = True
+            box_filename = 'c-pred1-texts.csv'
+            data_filename = 'CompleteAnalysis_data.csv'
+        else:
+            # this currently points to the data available in the samples folder, should be adjusted after the tool is extended to automatically extract graph data 
+            box_filename = SAMPLES_DIRECTORY + base_filename + '-pred1-texts.csv'
+            data_filename = SAMPLES_DIRECTORY + base_filename + '_data.csv'
 
         try:
             fn_d = data_filename
             fn_b = box_filename
 
-            coords = []
-            messages = []
+            #-------------------Start of detection algorithms-------------------
 
-            # Detect if the Y-Axis maximum was artificially change or isn't optimal
-            detect_changed_y_max(fn_d, fn_b)    # only writes a comment for now
+            # detect if there are multiple x or y axis in the chart
+            detected_axis, fn_b = detect_multiple_axis(fn_b)    #adjusted fn_b to point to a temporary file containing the data with adjusted axis types
 
-            # Detect if there are any important labels missing
-            missing_labels = detect_missing_labels(fn_d, fn_b)
+            # detect if there are any important labels missing
+            missing_labels = detect_missing_labels(fn_b)
 
-            # Detect if any axis have inconsistencies
-            m, nonLinearX, nonLinearY, inconsistentX, inconsistentY = detect_inconsistent_scales(fn_b)
-            print("axis problems: ", m)
-            for e in m:
-                messages.append(e)
+            # detect if any axis have inconsistencies (function can handle multiple x or y axis)
+            nonLinearX, nonLinearY, inconsistentX, inconsistentY = detect_inconsistent_axis_scales(fn_b)
 
-            # Detect if there are multiple axis
-            detected_axis = detect_multiple_axis(fn_b)
+            # detect if the graph has a misleading aspect ratio 
+            # TODO: needs to be adjusted when the tool gets extended to handle charts with multiple graphs
+            misleadingAR = detect_misleading_aspect_ratio(fn_d, fn_b)
 
-            # Detect inverted axis and add the result
-            x, y, m, inverted = detect_inverted_axis(fn_b)
-            if (x != None):
-                coords.append([x, y])
-                messages.append(m)
+            # detections that need to be executed for each y-axis:
+            inverted = []
+            truncated = []
 
-            # Detect trunction and add the result
-            x, y, m, truncated = detect_truncation(fn_b)
-            # comment max min append the result, there are guaranteed two values
-            _X_pos_min, _Y_pos_min, _X_pos_max, _Y_pos_max, m_min, m_max = comment_max_min(fn_d, fn_b)
-            m += m_min
-            m += m_max
-            coords.append([x, y])
-            messages.append(m)
+            # extract all y-axis to run axis-specific detection algorithms
+            all_y_axis = ['y-axis']
+            for axis in detected_axis[1:]:
+                if bool(re.search('y\d+-axis', axis)):
+                    all_y_axis.append(axis)
+            for axis in all_y_axis:
 
-            # find aspect ratio and add the result
-            m, c, misleadingAR = comment_aspect_ratio(fn_d, fn_b)  # messages, cords
-            messages.append(m)
-            coords.append(list(c))
+                # detection of inverted axis
+                is_axis_inverted = detect_inverted_axis(fn_b, axis)  
+                inverted.append(is_axis_inverted)
+
+                # detection of truncated axis
+                truncated.append(detect_truncation(fn_b, axis, is_axis_inverted))
+
+            #-------------------End of detection algorithms-------------------
 
 
-            x_tick_labels, y_tick_labels, x_tick_pos, y_tick_pos = summarize_axes(fn_b, full=True)
+
+            #-------------------Start of chart data extraction-------------------
 
             ar = calculate_aspect(fn_b)
+            chart_title = get_chart_title(fn_b)
+
+            # format graph data
+            data = pd.read_csv(fn_d)
+            # data extracted from csv file in in x:[] and y:[] format, need to process into {x: ~, y: ~} format
+            formatted_graph_data = []
+            for i in data.values:
+                o = {}
+                o['x'] = i[0]
+                o['y'] = i[1]
+                formatted_graph_data.append(o)
+
+
+            #format data of all axis
+            formatted_axis_data = {}
+            all_axis = detected_axis[1:]
+            for axis in all_axis:
+                formatted_axis_data[axis] = extract_axis_data(fn_b, axis)
+
+            #-------------------End of chart data extraction-------------------
+
+            # as the graph data in the csv file assumes a linear scale, we need to adjust the data if an axis is not linear
+            # TODO: tool can currently only handle one graph, needs to be adjusted to alter the graph that belongs to the non-linear axis
+            if nonLinearX[0]:
+                formatted_graph_data = fix_non_linear_scales(formatted_graph_data, formatted_axis_data['x-axis']['ticks'], 'x')
+            if nonLinearY[0]:
+                formatted_graph_data = fix_non_linear_scales(formatted_graph_data, formatted_axis_data['y-axis']['ticks'], 'y')
 
         except:
             # clean up files
             # os.remove(fn_d)
             # os.remove(fn_b)
-            raise Exception("Something went wrong. Try again."
+            raise Exception("Something went wrong while detecting misleading features."
                             "Make sure that there are bounding boxes and data.")
-
-        data = pd.read_csv(fn_d)
-
-        # in x:[] and y:[] format, need to process into {x: 0, y: 0 } format
-        formatted_data = []
-        for i in data.values:
-            o = {}
-            o['x'] = i[0]
-            o['y'] = i[1]
-            formatted_data.append(o)
-
-        # tick labels and their positions are in separate arrays, need to combine them into one object per tick
-        formatted_x_ticks = []
-        for value, pos in zip(x_tick_labels, x_tick_pos):
-            o = {}
-            o['value'] = float(value)
-            o['pos'] = float(pos[0])
-            formatted_x_ticks.append(o)
-
-        formatted_y_ticks = []
-        for value, pos in zip(y_tick_labels, y_tick_pos):
-            o = {}
-            o['value'] = float(value)
-            o['pos'] = float(pos[1])
-            formatted_y_ticks.append(o)
-
-        formatted_data = fix_non_linear_scales(formatted_data, formatted_x_ticks, 'x')  #TODO: call formatted data for an axis when it is not linear
+        
 
         send_to_frontend = {
-            'messages': messages,
-            'coords': coords,           #find out what this does
-            'xTicks': formatted_x_ticks,
-            'yTicks': formatted_y_ticks,
-            'aspectRatio': ar,
-            'data': formatted_data,
-            'detectedFeatures': { #adjust all methods that detect misleading features to return a boolean that shows if the feature is detected and insert it here
-                "truncatedY": truncated,
-                "invertedY": inverted,
-                "misleadingAR": misleadingAR,           #first entry is if the AR is misleading, second is an improved AR
-                "missingLabels": missing_labels,        #first entry is if there are missing labels, after is a list of which are missing
-                "multipleAxis": detected_axis,          #first entry is if there are multiple axis, after are the names of the detected axis 
-                "nonLinearX": nonLinearX,                  #when there are multiple axis, this is an array of booleans in the order of the axis
-                "nonLinearY": nonLinearY,
-                "inconsistentTicksX": inconsistentX,      #when there are multiple axis, this is an array of booleans in the order of the axis
-                "inconsistentTicksY": inconsistentY
+            'axisData': formatted_axis_data,            #dictionary with key being axis name and value being a dictionary with title and tick markers
+            'graphData': formatted_graph_data,          # list of points to draw the graph
+            'aspectRatio': ar,                          #aspect ratio of the chart
+            'chartTitle': chart_title,                  #title of the chart
+            'detectedFeatures': {   
+                "truncatedY": truncated,                #list of booleans describing which detected y axis are truncated (in the order of the axis)
+                "invertedY": inverted,                  #list of booleans describing which detected y axis are inverted (in the order of the axis)
+                "misleadingAR": misleadingAR,           #first entry is true if the AR is misleading, second is an improved AR
+                "missingLabels": missing_labels,        #first entry is true if there are missing labels, after is a list of which are missing
+                "multipleAxis": detected_axis,          #first entry is true if there are multiple axis, after are the names of the detected axis 
+                "nonLinearX": nonLinearX,               #list of booleans describing which detected x axis are non linear (in the order of the axis)
+                "nonLinearY": nonLinearY,               #list of booleans describing which detected y axis are non linear (in the order of the axis)
+                "inconsistentTicksX": inconsistentX,    #list of booleans describing which detected x axis have inconsistent tick placements (in the order of the axis)
+                "inconsistentTicksY": inconsistentY     #list of booleans describing which detected y axis have inconsistent tick placements (in the order of the axis)
             }
         }
 
-        # clean up files
-        # os.remove(fn_d)
-        # os.remove(fn_b)
+        # after completion, remove files that were generated by the manual mode
+        if remove_files:
+            os.remove('c-pred1-texts.csv')
+            os.remove('CompleteAnalysis_data.csv')
+
         return send_to_frontend
 
 
@@ -177,58 +184,11 @@ class CompleteAnalysis(Resource):
             df_b = df_b.drop(columns=['Q'])
             df_b.to_csv(fn_b, index=False)
 
-            coords = []
-            messages = []
-
-            # Detect inverted axis and add the result
-            x, y, m = detect_inverted_axis(fn_b)
-            if (x != None):
-                coords.append([x, y])
-                messages.append(m)
-
-            # find aspect ratio and add the result
-            m, c = comment_aspect_ratio(fn_d, fn_b)  # messages, cords
-
-            if m == None:
-                pass
-            else:
-                messages.append(m)
-                coords.append(list(c))
-
-            # Detect trunction and add the result
-            x, y, m = detect_truncation(fn_b)
-            # comment max min append the result, there are guaranteed two values
-            _X_pos_min, _Y_pos_min, _X_pos_max, _Y_pos_max, m_min, m_max = comment_max_min(fn_d, fn_b)
-            # instead of appending to the data,
-            # do it to the origin with the truncation message
-            m += m_min
-            m += m_max
-            coords.append([x, y])
-            messages.append(m)
-
-            x_range, y_range, x_increment, y_increment = summarize_axes(fn_b)
-            ar = calculate_aspect(fn_b)
-            # data
         except:
-            # os.remove(fn_d)
-            # os.remove(fn_b)
-            raise Exception("Something went wrong. Try again."
+            raise Exception("Something went wrong while saving the text and chart data."
                             "Make sure that there are bounding boxes and data.")
 
-        send_to_frontend = {
-            'messages': messages,
-            'coords': coords,
-            'xRange': x_range,
-            'yRange': y_range,
-            'aspectRatio': ar,
-            'data': data,
-        }
-
-        # clean up files
-        # os.remove(fn_d)
-        # os.remove(fn_b)
-
-        return send_to_frontend
+        return 'successfully saved data'
 
 
 class AutofillType(Resource):

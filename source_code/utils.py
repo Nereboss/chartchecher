@@ -12,92 +12,73 @@ import pandas as pd
 # d is the data csv
 
 
-def detect_truncation(f):
+def detect_truncation(box_data, axis='y-axis', inverted=False):
     """
-    Fuction takes in the axis specification data and identifies
-    if the y-axis is truncatedg
-    return: (x,y) coordinates of the approximate location of where it happens
-    This is calculated by the (x,y) of the y-axis-label (bottom-most)
-    Otherwise return "The axis is not truncated"
+    Fuction takes in the axis specification data and identifies if the y-axis given is truncatedg
+    return: True if truncated, False if not
     """
-    x_range, y_range, x_increment, y_increment = summarize_axes(f)
-    x_o, y_o = identify_origin(f, use='truncate')
-    baseline = float(y_range[0])
-    if (baseline != 0):
-        message = "The y-axis is truncated!"
-        return x_o, y_o, message, [True, baseline]
-    else:
-        message = "The y-axis is not truncated and starts at 0 [newline]"
-        return x_o, y_o, message, [False]
+
+    df = pd.read_csv(box_data)
+    df = df[['text', 'type', 'y']]  # drop all others, only need 'text', 'type' and the y-position
+    df = df.loc[df['type'] == axis+'-label']
+    # extract row with min to check of text contains zero
+    y_label = df[df['y'] == df['y'].max()] if not inverted else df[df['y'] == df['y'].min()]
+    y_label_text = y_label.iloc[0]['text']
+    truncated = False
+    if extract_float(y_label_text) != 0:
+        truncated = True
+
+    return truncated
 
 
-def detect_inverted_axis(f):
+def detect_inverted_axis(box_data, axis='y-axis'):
     """
-    Fuction takes in the axis specification data and identifies
-    if the y-axis is inverted
-    return: (x,y) coordinates of the approximate location of where it happens
-    This is calculated by the (x,y) of the y-axis-label (bottom-most)
-    otherwise return None
+    Fuction takes in the axis specification data and identifies if the given y-axis is inverted
+    return: True if inverted, False if not
     """
-    x_range, y_range, x_increment, y_increment = summarize_axes(f)
-    x_o, y_o = identify_origin(f, use='invert')
-    if (y_increment < 0):
-        message = "The y-axis is inverted!"
-        return x_o, y_o, message, [True]
-    else:
-        return None, None, None, [False]
+    df = pd.read_csv(box_data)
+    df = df[['text', 'type', 'y']]  # drop all others, only need 'text', 'type' and the y-position
+    df = df.loc[df['type'] == axis+'-label']
+    # extract rows with min and max values and select their text
+    top_y_label = df[df['y'] == df['y'].min()]
+    top_y_label_text = top_y_label.iloc[0]['text']
+    bottom_y_label = df[df['y'] == df['y'].max()]
+    bottom_y_label_text = bottom_y_label.iloc[0]['text']
+    inverted = False
+    if extract_float(bottom_y_label_text) > extract_float(top_y_label_text):
+        inverted = True
 
-def detect_changed_y_max(chart_data, box_data):
-    """
-    Function takes in chart and bounding box data and
-    identifies if the Y-axis maximum is at a reasonable value for the chart
-    return: TODO, currently only prints result in console
-    """
-    x_range_list, y_range_list, x_increment, y_increment = summarize_axes(box_data)
-    y_min = float(y_range_list[0])     #y min and max are in str format, - not supported; how do other functions get results from summarize axes?
-    y_max = float(y_range_list[1])
-    y_range = y_max - y_min
-    graph_data = pd.read_csv(chart_data)
-    graph_y_data = graph_data['y'].to_numpy()
-    graph_max = graph_y_data.max()
-    graph_min = graph_y_data.min()
-    inverted = False if y_min < y_max else True
-    if inverted:
-        used_range = graph_min - y_max
-    else:
-        used_range = graph_max - y_min
-    used_range_factor = abs(used_range / y_range)
-    if used_range_factor < 0.67:
-        print("\n", f"The y-axis maximum is not well adjusted for the chart with {(1-round(used_range_factor, 4))*100}% of the space wasted!", "\n")
+    return inverted
 
-def detect_missing_labels(chart_data, box_data):
+
+def detect_missing_labels(box_data):
     """
     Function takes in bounding box data and detects if there are any labels missing.
-    Missing title, x-axis-title or y-axis-title will lead to those placed being marked in the improved chart
-    while missing x-axis-labels or y-axis labels will make it so we are unable to draw a chart
+    Missing title, x-axis-title or y-axis-title will lead to those placed being marked in the recommended chart
+    Missing legend-title or legend-labels will not be marked in the recommended chart
+    Missing x-axis-labels or y-axis labels will result in us being unable to draw a recommended chart due to how the chart and axis data is stored
     """
     box_data = pd.read_csv(box_data)
-    possible_types = ['title', 'x-axis-title', 'x-axis-label', 'y-axis-title', 'y-axis-label', 'legend-title', 'legend-label'] # we intentionally left out 'text-label' as that is optional
     type_values = box_data['type'].values
-    missing = []
-    for type in possible_types:
-        if type not in type_values:
-            missing.append(type)
+    # as a chart can contain multiple axis, find all axis and add them to the list of possible types (both title and label for each axis)
+    new_axis_labels = list(set(filter(lambda x: re.match('^[xy][0-9]+-axis-label$', x), type_values)))
+    new_axis_labels.sort()
+    # add title and label for each axis to the list of possible types
+    new_axis = [f(value) for value in new_axis_labels for f in (lambda x: x[:-5]+'title', lambda x: x)]
+    possible_types = ['title', 'x-axis-title', 'x-axis-label', 'y-axis-title', 'y-axis-label'] + new_axis +['legend-title', 'legend-label'] # we intentionally left out 'text-label' as that is optional
     
-    # TODO add missing labels to the csv-file (with -1 for all fields except text and type; that way we can know which fields were missing later)
-    # differenciate between labels that makes it unable to draw a chart (if those exist) and others 
-            
-    #print missing elements to console
-    print("\nThe chart is missing "+" and ".join([", ".join(missing[:-1]),missing[-1]] if len(missing) > 2 else missing)+". This may cause the chart to be taken out of context or make the shown data hard to validate.\n")
+    missing = list(filter(lambda type: type not in type_values, possible_types))
+    # if there are any missing labels, return them, otherwise return False
+    if missing != []:
+        missing.insert(0, True) #insert true at the beginning of the list to indicate that there are missing labels
+        return missing
+    else:
+        return [False]
 
-    missing.insert(0, True)
-    return missing
-
-def detect_inconsistent_scales(box_data):
+def detect_inconsistent_axis_scales(box_data):
     """
     Function takes in bounding boxes and detects if one or more of the axis do not follow a linear scale
-    TODO maybe needs to be extended to be able to handle multiple axis (or create helper function that gets BBs for one axis and checks this for them that can be called on all axis)
-    returns a list of detected inconsistencies or an empty list if none were found
+    returns a tuple of all detected inconsistencies (non-linear x-axis, non-linear y-axis, inconsistent tick labels on x-axis, incosistent tick labels on y-axis) each in form of a list of booleans describing which axis (x-axis, x1-axis, etc.) the inconsistency was detected in
     """
     box_data = pd.read_csv(box_data)
     
@@ -107,17 +88,16 @@ def detect_inconsistent_scales(box_data):
         if re.match('^[xy][0-9]?-axis-label$', type):       # regex represents x/y-axis-labels as a chart might have multiple of each
             different_axis_frames.append(box_data[box_data['type'] == type])          
 
-    detected_inconsistencies = []
     nonLinearX = []
     nonLinearY = []
     inconsistentTicksX = []
     inconsistentTicksY = []
 
+    different_axis_frames.sort(key=lambda x: x['type'].iloc[0]) # sort the axis dataframes by their type (x-axis-label, x1-axis-label, y0-axis-label, y1-axis-label, etc.)
+
     # for each axis check what inconsistencies exist
-    for axis_frame in different_axis_frames:      #TODO: we need to sort the order to always go from 0-1-2-...
-        message, nonLinear, inconsistentTicks = check_axis_consistency(axis_frame)
-        for inconsistency in message:
-            detected_inconsistencies.append(inconsistency)
+    for axis_frame in different_axis_frames:
+        nonLinear, inconsistentTicks = check_axis_consistency(axis_frame)
         if axis_frame['type'].iloc[0][0] == 'x':    #if the first letter in the string is x, it is an x-axis
             nonLinearX.append(nonLinear)
             inconsistentTicksX.append(inconsistentTicks)
@@ -125,14 +105,13 @@ def detect_inconsistent_scales(box_data):
             nonLinearY.append(nonLinear)
             inconsistentTicksY.append(inconsistentTicks)
 
-    return detected_inconsistencies, nonLinearX, nonLinearY, inconsistentTicksX, inconsistentTicksY
+    return nonLinearX, nonLinearY, inconsistentTicksX, inconsistentTicksY
 
 def check_axis_consistency(axis_data):
     """
     Takes in bounding boxes from axis lables of ONE axis and calculates whether the axis scale and/or the placement of labels is inconsistent for the axis
     returns a list of detected inconsistencies in axis scales and/or label placements
     """
-    messages = []
     nonLinear = False
     inconsistentTicks = False
     axis_data = axis_data.copy()        #we need to make a copy of the dataframe to avoid a SettingWithCopyWarning
@@ -153,12 +132,11 @@ def check_axis_consistency(axis_data):
         print("The ticks across the "+axis_name+" are place consistently!")
     else:
         print("The ticks across the "+axis_name+" are place inconsistently!")
-        messages.append("inconsistent tick placement along the "+axis_name+ " detected")
         inconsistentTicks = True
 
     numeric_texts = None
     try:
-        numeric_texts = axis_data['text'].astype(float)
+        numeric_texts = axis_data['text'].apply(extract_float)
         value_difference_to_next_label = numeric_texts.diff(periods=-1).dropna()
         distance_to_difference_factors = distances_to_next_label / value_difference_to_next_label
         consistency_of_scale = calculate_conistency(distance_to_difference_factors, 0.05)
@@ -168,43 +146,32 @@ def check_axis_consistency(axis_data):
             print("The "+axis_name+" axis follows a linear scale!")
         else:
             print("The "+axis_name+" axis does not follow a linear scale!")
-            messages.append("non-linear scale along the "+axis_name+ " detected")
             nonLinear = True
     except ValueError: 
-        print('cannot check axis scaling because not all labels are numeric')
+        print('cannot check axis scaling because not all labels contain numeric information!')
 
     # later for the returns: we need to find a way to draw the chart in an "unwarped" way, meaning we need the distances between the labels together with middlepoint of the labels and transform the corresponding x/y values to show them in a linear way
-    return messages, nonLinear, inconsistentTicks
+    return nonLinear, inconsistentTicks
 
 def detect_multiple_axis(box_data):
     """
-    Function takes in bounding boxes, detects if there are multiple axis and adjusts the types in the csv file to represent these different axis
-    In case there are more axis than axis titles, this function will add example titles to the start of the csv file
+    Function takes in bounding boxes, detects if there are multiple axis and adjusts the types of the axis labels and titles in the csv file to represent these different axis.
+    Returns a list containing true and all detected axis or containing False if only one x and one y axis were detected
     """
     result = [False]
-
     box_data = pd.read_csv(box_data)
 
     split_x_axis_labels = split_axis_labels(box_data[box_data['type'].str.contains('^x.*label$')], 'x')
+    for x_axis_label in split_x_axis_labels:
+        result.append(x_axis_label['type'].iloc[0].replace('-label', '')) 
     if len(split_x_axis_labels) > 1:
-        #TODO prints for now, remove later
-        print('multiple x-axis detected!')
         result[0] = True
-        for x_axis_label in split_x_axis_labels:
-            print(x_axis_label['type'].iloc[0] + ': ' + x_axis_label['text'].str.cat(sep='; '))
-            result.append(x_axis_label['type'].iloc[0].replace('-label', '')) 
-    else:
-        print('only one x-axis detected!')
+        
     split_y_axis_labels = split_axis_labels(box_data[box_data['type'].str.contains('^y.*label$')], 'y')
+    for y_axis_label in split_y_axis_labels:
+        result.append(y_axis_label['type'].iloc[0].replace('-label', ''))
     if len(split_y_axis_labels) > 1:
-        #prints for now, remove later
-        print('multiple y-axis detected!')
         result[0] = True
-        for y_axis_label in split_y_axis_labels:
-            print(y_axis_label['type'].iloc[0] + ': ' + y_axis_label['text'].str.cat(sep='; '))
-            result.append(y_axis_label['type'].iloc[0].replace('-label', ''))
-    else:
-        print('only one y-axis detected!')
 
 
     # if there are multiple axis and titles then we need to map each title to the corresponding axis
@@ -239,10 +206,9 @@ def detect_multiple_axis(box_data):
         y_axis_label.set_index('id', inplace=True)
         box_data.update(y_axis_label)
 
-    # update the csv file here, for debugging we create a new csv file for now
-    # TODO: remove the creation of a new csv file later and find out how to update the original csv file
-    box_data.to_csv('new_box_data.csv')
-    return result
+    # create new temporary csv file to update axis types without affecting the original csv file
+    box_data.to_csv('temp_box_data.csv')
+    return result, 'temp_box_data.csv'
 
 def map_axis_titles_to_axis(axis_titles, split_axis_labels):
     """
@@ -309,7 +275,7 @@ def map_axis_titles_to_axis(axis_titles, split_axis_labels):
         # For the sizes we use the data of the bounding boxes of the axis and set the ids to -1 to indicate that they are not from the original csv file
         for axis in axis_box_data_list:
             if axis['axis_name']+'title' not in axis_titles['type'].values:
-                axis_titles = axis_titles.append({'id': -1, 'type': axis['axis_name'] + 'title', 'x': axis['x_min'], 'y': axis['y_min'], 'width': axis['x_max']-axis['x_min'], 'height': axis['y_max']-axis['y_min'], 'text': axis['axis_name'].replace('-', ' ')+ 'example title'}, ignore_index=True)
+                axis_titles = axis_titles.append({'id': -1, 'type': axis['axis_name'] + 'title', 'x': axis['x_min'], 'y': axis['y_min'], 'width': axis['x_max']-axis['x_min'], 'height': axis['y_max']-axis['y_min'], 'text': ' '}, ignore_index=True)
     
     return axis_titles
 
@@ -386,8 +352,9 @@ def split_axis_labels(axis_labels, axis, threshold=0.05):
     
 def calculate_conistency(range_of_values, threshold=0.05):
     """
-    helper function that checks whether all values in the given range have similar values within the threshold
-    range_of_values: dataframe of values that should be checked
+    helper function that checks whether all values in the given range have similar values within the threshold. 
+    range_of_values: dataframe of values that should be checked. 
+    return: True if range is consistent False otherwise
     """
     average_value = range_of_values.mean()
     threshhold_min, threshhold_max = average_value * (1-threshold), average_value * (1+threshold)
@@ -397,11 +364,10 @@ def calculate_conistency(range_of_values, threshold=0.05):
     return True
 
 
-def comment_aspect_ratio(d, f):
+def detect_misleading_aspect_ratio(d, f):
     """
-    Function takes in x,y data and the actual chart to determine whether the aspect ratio is ok
-    Draws the info box on the right most x-axis label
-    Also responsible for drawing the entire charts
+    Function takes in x,y data and the actual chart to determine whether the aspect ratio is misleading.
+    Return: True if the aspect ratio is misleading, otherwise False and an ideal aspect ratio
     """
     df = pd.read_csv(d)
     x = df['x'].to_numpy()
@@ -410,10 +376,10 @@ def comment_aspect_ratio(d, f):
     # make a correction to the slopes
 
     x_labels, y_labels, x_pos, y_pos = summarize_axes(f, full=True)
-    xl_first = float(x_labels[0])
-    xl_last = float(x_labels[-1])
-    yl_first = float(y_labels[0])
-    yl_last = float(y_labels[-1])
+    xl_first = extract_float(x_labels[0])
+    xl_last = extract_float(x_labels[-1])
+    yl_first = extract_float(y_labels[0])
+    yl_last = extract_float(y_labels[-1])
     xp_first = float(x_pos[0][0])
     xp_last = float(x_pos[-1][0])
     yp_first = float(y_pos[0][1])
@@ -437,20 +403,16 @@ def comment_aspect_ratio(d, f):
         smaller = IDEAL_SLOPE
 
     if greater/smaller < math.sqrt(10):
-        return None, 'no_message', [False]
         # the aspect ratio is not far from the ideal
-
-
-    message = 'Actual Aspect Ratio (AR): ' + "{:.2f}".format(ACTUAL_SLOPE)
-    message += '. Ideal AR: ' + "{:.2f}".format(IDEAL_SLOPE)
+        return [False]
 
     if 'log' in comment_axis_scales_util(f):
-        message += '. Log axis detected. Aspect Ratio is only robust for linear charts at this time.'
+        print('. Log axis detected. Aspect Ratio is only robust for linear charts at this time.')
 
     _, _, x_p, _ = summarize_axes(f, full=True)
     last = len(x_p) - 1
     x_p = [float(i) for i in list(x_p[last])]
-    return message, x_p, [True, IDEAL_SLOPE]
+    return [True, IDEAL_SLOPE]
 
 
 def comment_axis_scales_util(f):
@@ -461,9 +423,12 @@ def comment_axis_scales_util(f):
     type_x = 'linear'
     type_y = 'linear'
 
-    r = summarize_axes(f, full=True)
-    x_axis_ticks = np.asarray(r[0]).astype(np.float)  # x axis ticks
-    y_axis_ticks = np.asarray(r[1]).astype(np.float)  # y axis ticks
+    x_labels, y_labels, x_pos, y_pos = summarize_axes(f, full=True)
+    #need to change the arrays r[0] and r[1] to only contain numbers
+    x_labels = [extract_float(i) for i in x_labels]
+    y_labels = [extract_float(i) for i in y_labels]
+    x_axis_ticks = np.asarray(x_labels).astype(np.float)  # x axis ticks
+    y_axis_ticks = np.asarray(y_labels).astype(np.float)  # y axis ticks
 
     if 0 in x_axis_ticks:
         type_x = 'linear'
@@ -506,39 +471,6 @@ def comment_axis_scales_util(f):
     return type_x, type_y
 
 
-
-
-def comment_max_min(d, f):
-    """
-    Function takes the max and the min points of the data (y) and attempts to output
-    and attempts to annotate them
-    requires: summarize axes() both versions
-    """
-    # let X,Y be the point
-    x_min, y_min, x_max, y_max = find_min_max(d)
-
-    x, y, x_p, y_p = summarize_axes(f, full=True)
-    x = [float(i) for i in x]
-    y = [float(i) for i in y]
-
-    x_0 = [x[0], x_p[0]]
-    x_m = [x[-1], x_p[-1]]
-    y_0 = [y[0], y_p[0]]
-    y_n = [y[-1], y_p[-1]]
-
-    X_scale = (x_m[1][0] - x_0[1][0]) / (x_m[0] - x_0[0])  # pixels per step
-    Y_scale = (y_n[1][1] - y_0[1][1]) / (y_n[0] - y_0[0])  # pixels per step
-
-    X_pos_min = (x_min - x_0[0]) * X_scale + x_0[1][0]
-    Y_pos_min = -(y_min - y_n[0]) * Y_scale + y_0[1][1]
-    X_pos_max = (x_max - x_0[0]) * X_scale + x_0[1][0]
-    Y_pos_max = -(y_max - y_n[0]) * Y_scale + y_0[1][1]
-
-    m_min = ""
-    m_max = ""
-    return X_pos_min, Y_pos_min, X_pos_max, Y_pos_max, m_min, m_max
-
-
 def find_min_max(d):
     df = pd.read_csv(d)
     x = df['x'].to_numpy()
@@ -550,7 +482,7 @@ def find_min_max(d):
 
 def parse_num(num):
     try:
-        return float(num)
+        return extract_float(num)
     except:
         pass
     try:
@@ -737,7 +669,7 @@ def ms_helper(s, dx, dy, Rx, Ry, cull=False):
     return abs(ret)
 
 
-def fix_non_linear_scales(graph_data, axis_ticks, axis_type):
+def fix_non_linear_scales(graph_data, axis_ticks, direction):
     """
     We assume the csv files that save the graph values are created assuming a linear scale.
     When a non-linear scale is detected, this function will transform the values to fit the scale.
@@ -765,7 +697,59 @@ def fix_non_linear_scales(graph_data, axis_ticks, axis_type):
             tick_start_value = start['value']
             local_change_factor = value_per_tick_factor_local/value_per_tick_factor_previous
             for point in graph_data:
-                if point[axis_type] > tick_start_value:      # All points after the tick start value are on a non-linear scale and will be adjusted
-                    point[axis_type] = (point[axis_type] - tick_start_value) * local_change_factor + tick_start_value
+                if point[direction] > tick_start_value:      # All points after the tick start value are on a non-linear scale and will be adjusted
+                    point[direction] = (point[direction] - tick_start_value) * local_change_factor + tick_start_value
             value_per_tick_factor_previous = value_per_tick_factor_local
     return graph_data
+
+def extract_float(string):
+    """
+    Extracts a float from a string to be able to handle axis labels that contain characters like '$' or '%'
+    Requires the string to contain a number and the comma seperator to be a dot
+    If the string is already a float or int, it will return the same value
+    If the string does not contain a number, it will return None
+    """
+    if isinstance(string, str):
+        # remove all commas as they are often used as a thousands seperator
+        string = string.replace(',', '')
+        list_of_extracted_numbers = re.findall(r"[-+]?(?:\d*\.*\d+)", string)
+        return float(list_of_extracted_numbers[0])      #return the first if multiple were found
+    elif isinstance(string, (int, float)):
+        return string
+    else:
+        return None
+    
+def extract_axis_data(box_data, axis_name):
+    """
+    Extracts the title and tick labels of the given axis from the box_data
+    returns a dictionary containing the axis title and a list of axis ticks
+    """
+    direction = 'y' if 'y' in axis_name else 'x'
+    df = pd.read_csv(box_data)
+    axis_title = df.loc[df['type'] == axis_name + '-title']
+    if axis_title.empty:
+        axis_title = ' '
+    else:
+        axis_title = axis_title['text'].values[0]
+    axis_labels = df.loc[df['type'] == axis_name + '-label']
+    # need to sort the axis labels by their position on the axis so we dont depend on the order in the csv file
+    axis_labels.sort_values(by=[direction], ascending= True if direction == 'x' else False, inplace=True)
+    ticks = []
+    for value, pos in axis_labels[['text', direction]].values:
+        o = {}
+        o['value'] = extract_float(value)
+        o['pos'] = float(pos)
+        ticks.append(o)
+    return {'title': axis_title, 'ticks': ticks}
+
+def get_chart_title(box_data):
+    """
+    Extracts the title of the chart
+    Returns the title or an empty string if no title was found
+    """
+    df = pd.read_csv(box_data)
+    chart_title = df.loc[df['type'] == 'title']
+    if chart_title.empty:
+        return ' '
+    else:
+        return chart_title['text'].values[0]
