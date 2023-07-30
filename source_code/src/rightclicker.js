@@ -1,11 +1,10 @@
 // define all possible services
-const allServices = ['auto','manual','google'];
+const allServices = ['auto','manual'];
 
 
 var services = {
     'auto': ['auto', 'Auto Analyze', '', 'image'],
-    'manual': ['manual', 'Manual Analyze', '', 'image'],
-    'google': ['Google', 'Google search', 'https://www.google.com/searchbyimage?image_url=', 'image']
+    'manual': ['manual', 'Manual Analyze', '', 'image']
 };
 
 function contextClick(info, tab){
@@ -24,7 +23,7 @@ function imageSearch(service, query){
     if (service == 'auto') {
       chrome.storage.sync.set({key: query}, function () {
       });
-      const url = '/views/auto_analyze.html';
+      const url = '/views/new_main.html';
       var win = window.open(url, 'newAnalysis');
       win.focus();
     }
@@ -35,21 +34,6 @@ function imageSearch(service, query){
       var win = window.open(url, 'newAnalysis');
       win.focus();
     }
-    else if (service=='google') { //TODO: this is only temporary, when work is done use auto analyze instead
-      chrome.storage.sync.set({key: query}, function () {
-      });
-      const url = '/views/new_main.html';
-      var win = window.open(url, 'newAnalysis');
-      win.focus();
-    }
-
-  // if (service=="all"){
-  //   for (var i = 0; i < myServices.length; i++) {
-  //     openService(myServices[i],query);
-  //   }
-  // } else {
-  //   openService(service,query);
-  // }
 }
 
 // Open a new tab with a query on a service

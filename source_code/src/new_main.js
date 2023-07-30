@@ -2,8 +2,6 @@ const portNumber = 5000;
 
 const SCALE = 1.5;
 const CHARTSIZE = 175*SCALE;  
-const margin = {top: 50, right: 10, bottom: 20, left: 150};
-
 const misleadingFeaturesTexts = {
     // some information about the misleading features changes dynamically with the chart
     // the places where such information is inserted are marked with INSERT_...
@@ -11,22 +9,21 @@ const misleadingFeaturesTexts = {
     'missingLabels': ['Missing Labels', 
                 'The chart is missing the following labels: INSERT_ALL. This can be misleading as it may cause the chart to be taken out of context or make the shown data harder to understand.'],
     'multipleAxis': ['Multiple Axis', 
-                'The chart has multiple axis. This can be misleading, as it distorts the magnitude of the data and makes trends appear different than they actually are.'],     //TODO: improve description
+                'The chart has multiple axis. This can be misleading, as it might not be clear which data series belongs to which axis. If the axis have different scales, it can also distort comparisons between data series and result in misleading patterns.'],
     'misleadingAR': ['Misleading Aspect Ratio', 
                 'The aspect ratio of the chart is misleading. This can make trends appear more extreme than they actually are.'],
     'truncatedY': ['Truncated Y-Axis', 
-                `The Y-Axis (Y-TITLE) is truncated. The bottom most value is INSERT_TRUNC instead of a more traditional 0. This can be misleading as it displays the differences between those values as larger than they actually are.`],
+                `The Y-Axis (Y-TITLE) is truncated. The bottom most value is INSERT_TRUNC instead of a more traditional 0. This can be misleading as it shows the differences between the displayed values as larger than they actually are.`],
     'invertedY': ['Inverted Y-Axis', 
                 `The Y-Axis (Y-TITLE) is inverted. This can be misleading as it makes upwards trends appear like they are downwards trends and vice versa.`],
     'nonLinearX': ['Non-Linear X-Axis', 
-                'The X-Axis (X-TITLE) does not follow a linear scale.'],
+                'The X-Axis (X-TITLE) does not follow a linear scale. This can make it difficult to judge trends as the same distance on the axis does not always represent the same difference in the data.'],
     'nonLinearY': ['Non-Linear Y-Axis', 
-                'The Y-Axis (Y-TITLE) does not follow a linear scale.'],
+                'The Y-Axis (Y-TITLE) does not follow a linear scale. This can make it difficult to judge trends as the same distance on the axis does not always represent the same difference in the data.'],
     'inconsistentTicksX': ['Inconsistent Ticks on X-Axis', 
                 'The tick markers along the X-Axis (X-TITLE) are place in inconsistent intervals. This can make it harder to judge the values on the graph.'],
     'inconsistentTicksY': ['Inconsistent Ticks on Y-Axis', 
                 'The tick markers along the Y-Axis (Y-TITLE) are place in inconsistent intervals. This can make it harder to judge the values on the graph']
-    //TODO: improve descriptions 
 }
 
 // -----------------------------global variables---------------------------------
@@ -87,7 +84,6 @@ function shareButtonClicked(elementToDraw='#share-content') {
 }
 
 function helpButtonClicked() {
-    console.log('help button clicked')
     //start the tutorial, similar to the manual mode
     setTimeout(() => {
       //timeout begins
@@ -108,7 +104,7 @@ function toggleButtonClicked() {
 }
 
 function showAllButtonClicked() {
-    console.log('show all button clicked') //TODO: remove
+    //redirect to the view that shows all detectable features
     window.location.href = '/views/detectable_features.html';
 }
 
@@ -118,7 +114,6 @@ function showAllButtonClicked() {
 chrome.storage.sync.get(['key'], function (result) {
     //set the image
     imageURL_auto = result.key;  //https://localhost/***/chart.png
-    // console.log(imageURL_auto, result.key);
     const filename = imageURL_auto.split('/').reverse()[0];  //chart.png
     const base_filename = filename.split('.')[0]; //chart
 
@@ -518,7 +513,6 @@ function drawMisleadFeaturesList() {
  * @param {string} featureDescription the description of the feature that will be displayed
  */
 function appendMisleadingFeature(parentDiv, featureID, featureName, featureDescription) {
-    //TODO can add a style with a max width here based on the images so a large description doesnt stretch the UI too much
     //add the feature as a list item using the following HTML code
     parentDiv.append('li')
                 .attr('class', 'list-group-item')
@@ -552,7 +546,6 @@ function misleadingFeatureButtonClicked(id) {
     } else {
         console.log('Error: button text is not Show or Hide')
     }
-    console.log(`${id} button clicked; toggle the feature here`) //TODO toggle the feature here
 
     //if the id ends with a number, use that number as the axis number, otherwise use 0 (also used for all misleading features that are not axis specific)
     let axisNr = id.match(/\d+$/);

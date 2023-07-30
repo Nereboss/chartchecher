@@ -40,48 +40,54 @@
                 </tr>
               </thead>
               <tbody>
-                <!-- Truncated Y -->
+                <!-- Inconsistent axis scales -->
                 <tr>
-                  <th scope="row">Truncated Y-Axis</th>
-                  <td>A truncated y-axis hides part of the vertical scale. Instead, a portion of the axis is cut off or removed.</td>
-                  <td>This can be misleading as it makes the displayed data look more extreme or exaggerated than it actually is which can lead to misinterpretation and false impressions</td>
-                  <td><button type="button" class="btn btn-primary" id="truncated">Show example</button></td>
+                  <th scope="row">Inconsistent axis scales</th>
+                  <td>Inconsistent axis scales can make certain data points appear disproportionately large or small compared to others. This can exaggerate or downplay differences between data points.</td>
+                  <td>This can be misleading as it distorts the representation of data, making some sections of the data appear disproportionately large or small compared to others. This misrepresentation can lead to incorrect interpretations and conclusions.</td>
+                  <td><button type="button" class="btn btn-primary" id="scale">Show example</button></td>
+                </tr>
+                <!-- Inconsistent tick placement-->
+                <tr>
+                  <th scope="row">Inconsistent placement of tick labels</th>
+                  <td>Tick labels are used to indicate the scale of a chart. If they are placed with inconsistent spacing, it can be hard to identify the scale in certain parts of the chart.</td>
+                  <td>This can be misleading as it highlights sections of data that contain more tick labels while making it harder to judge the value of data points in other sections with less tick labels.</td>
+                  <td><button type="button" class="btn btn-primary" id="tick">Show example</button></td>
                 </tr>
                 <!-- Inverted Y -->
                 <tr>
-                  <th scope="row">Inverted Y-Axis</th>
+                  <th scope="row">Inverted y-axis</th>
                   <td>An inverted y-axis in a chart means that the values on the vertical axis are shown in reverse order, with the higher values at the bottom and the lower values at the top.</td>
-                  <td>This can be misleading because it flips the expected progression of the data, making upwards trends look like downwards trends and visa versa. This can cause confusion and misinterpretation of the data.</td>
+                  <td>This can be misleading because it flips the expected progression of the data, making upwards trends appear like downwards trends and visa versa. This can cause confusion and misinterpretation of the data.</td>
                   <td><button type="button" class="btn btn-primary" id="inverted">Show example</button></td>
                 </tr>
                 <!-- Misleading AR -->
                 <tr>
-                  <th scope="row">Misleading Aspect Ratio</th>
-                  <td>A chart with a misleading aspect ratio distorts the proportions and relationships between data points.</td>
+                  <th scope="row">Misleading aspect ratio</th>
+                  <td>A chart with a misleading aspect ratio distorts the proportions and relationships between data points by choosing scales for the x-axis and/or y-axis that are not optimal for the displayed data.</td>
                   <td>This can be misleading as it makes trends across the data appear more or less steep then they actually are. This misrepresentation can lead to incorrect interpretations and conclusions.</td>
                   <td><button type="button" class="btn btn-primary" id="ar">Show example</button></td>
                 </tr>
                 <!-- Missing labels -->
                 <tr>
                   <th scope="row">Missing labels</th>
-                  <!-- TODO: improve this -->
                   <td>Labels in a chart provide context and clarity about the data being presented. If they are missing, this information is not available. Such labels include the chart title, titles for the x-axis and y-axis or a legend.</td>
-                  <td>This is misleading, as without labels, we may lack critical context about the presented data, which makes it difficult to interpret values and make accurate comparissons.</td>
+                  <td>This is misleading as, without labels, we may lack critical context about the presented data, which makes it difficult to interpret values and make accurate comparissons.</td>
                   <td><button type="button" class="btn btn-primary" id="labels">Show example</button></td>
                 </tr>
                 <!-- Multiple axis -->
                 <tr>
                   <th scope="row">Mutiple Axis</th>
-                  <td>A chart can have multiple x-axis or y-axis, which represent different scales or measurements.</td>
+                  <td>A chart that contains multiple data series can feature multiple x-axis or y-axis, which can represent different scales or measurements.</td>
                   <td>This can be misleading, as it can become unclear which axis belongs to which data series. Furthermore different scales or measurements on each axis can distort comparisons and show misleading patterns. This can lead to incorrect conclusions about relations between different data series.</td>
                   <td><button type="button" class="btn btn-primary" id="multi">Show example</button></td>
                 </tr>
-                <!-- Inconsistent scales -->
+                <!-- Truncated Y -->
                 <tr>
-                  <th scope="row">Inconsistent scales</th>
-                  <td>Inconsistent scales can make certain data points appear disproportionately large or small compared to others. This can exaggerate or downplay differences between data points.</td>
-                  <td>This can be misleading as it distorts the representation of data, making some sections of the data appear disproportionately large or small compared to others. This misrepresentation can lead to incorrect interpretations and conclusions.</td>
-                  <td><button type="button" class="btn btn-primary" id="scale">Show example</button></td>
+                  <th scope="row">Truncated y-axis</th>
+                  <td>A truncated y-axis removes a portion of the vertical axis scale, highlighing only a certain section of the data.</td>
+                  <td>This can be misleading as it makes the displayed data look more extreme or exaggerated than it actually is which can lead to misinterpretation and false impressions</td>
+                  <td><button type="button" class="btn btn-primary" id="truncated">Show example</button></td>
                 </tr>
               </tbody>
             </table>

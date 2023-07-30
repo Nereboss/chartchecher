@@ -1,5 +1,3 @@
-console.log('detectable_features.js')
-
 const truncated = document.getElementById('truncated')
 truncated.addEventListener('click', () => {truncatedButtonClicked()})
 const inverted = document.getElementById('inverted')
@@ -12,6 +10,8 @@ const multi = document.getElementById('multi')
 multi.addEventListener('click', () => {multiButtonClicked()})
 const scale = document.getElementById('scale')
 scale.addEventListener('click', () => {scaleButtonClicked()})
+const tick = document.getElementById('tick')
+tick.addEventListener('click', () => {tickButtonClicked()})
 
 function truncatedButtonClicked() {
     chrome.storage.sync.set({key: "../chartchecker_sample_charts/LakeMeadCase.png"}, function () {
@@ -44,6 +44,12 @@ function multiButtonClicked() {
 }
 
 function scaleButtonClicked() {
+    chrome.storage.sync.set({key: "../chartchecker_sample_charts/InconsistentAxisExample1.png"}, function () {
+    });
+    window.location.href = '/views/new_main.html';
+}
+
+function tickButtonClicked() {
     chrome.storage.sync.set({key: "../chartchecker_sample_charts/InconsistentAxisExample1.png"}, function () {
     });
     window.location.href = '/views/new_main.html';
