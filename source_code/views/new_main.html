@@ -11,7 +11,7 @@
   <script src='../src/jquery-3.5.1.min.js'></script>
   <script src='../src/d3.v4.js'></script>
   <script src='../src/html2canvas.min.js'></script>
-  <script src='../src/wpd.js'></script> <!-- TODO: check if this is needed--> 
+  <script src='../src/tutorial.js'></script>
 
 
   <!--  BOOTSTRAP-->
@@ -61,7 +61,7 @@
             <div id="share-content">
                 <div class="row test-row justify-content-center" id="image-compare" style="position: relative; padding-bottom: 10px;">
                     <div class="col-6">
-                        <div class="card h-100">
+                        <div class="card h-100" id="original-card">
                             <div class="card-header" style="text-align: center">
                                 <h3 style="font-weight: bold;">Original Chart</h3>
                             </div>
@@ -73,7 +73,7 @@
                         </div>
                     </div>
                     <div class="col-6">
-                        <div class="card h-100">
+                        <div class="card h-100" id="recommended-card">
                             <div class="card-header" style="text-align: center">
                                 <h3 style="font-weight: bold;">Recommended Chart</h3>
                             </div>
@@ -100,7 +100,7 @@
                 <!--Start Detected misleading features-->
                 <div class="row justify-content-center align-items-center" id="misleading-features">
                     <div class="col">
-                        <div class="card">
+                        <div class="card" id="misleading-features-card">
                             <div class="card-header" style="text-align: center">
                                 <h3 style="font-weight: bold;">Detected Misleading Features</h3>
                             </div>

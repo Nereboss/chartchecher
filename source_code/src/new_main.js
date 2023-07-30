@@ -88,6 +88,11 @@ function shareButtonClicked(elementToDraw='#share-content') {
 
 function helpButtonClicked() {
     console.log('help button clicked')
+    //start the tutorial, similar to the manual mode
+    setTimeout(() => {
+      //timeout begins
+      tutorialMain();
+    }, 200);
 }
 
 function toggleButtonClicked() {
