@@ -679,8 +679,8 @@ extractData2.addEventListener('click', function() {
 
 });
 
-//complete analysis
-function completeAnalysis() {
+//manual analysis
+function manualAnalysis() {
   var d = document.getElementById('mainChart');
   var origHeight = d.height / Gscale;
   var origWidth = d.width / Gscale;
@@ -735,236 +735,9 @@ function completeAnalysis() {
           throw new Error('Network response was not ok.');
         })
         .then(function(arr) {
-          console.log(arr, 'arr from complete analysis');
-
-          const local_xr = arr.xRange;
-          const local_yr = arr.yRange;
-          const local_ar = arr.aspectRatio;
-          var local_data = JSON.parse(arr.data);
-          local_data.splice(local_data.length - 1); //remove last element
-
-
-          const small_margin = 10;
-
-          var l_margin = { top: 50, right: 10, bottom: 20, left: 150 },
-            l_width = THUMBNAIL_WIDTH - l_margin.left - l_margin.right,
-            l_height = THUMBNAIL_HEIGHT - l_margin.top - l_margin.bottom;
-
-          if (local_ar > 10 / 3) {
-            //fix x to THUMBNAIL_WIDTH
-            l_width = THUMBNAIL_WIDTH - small_margin;
-            l_height = parseInt(l_width / local_ar);
-          } else {
-            //fix y to THUMBNAIL_HEIGHT
-            l_height = THUMBNAIL_HEIGHT - l_margin.top - l_margin.bottom;
-            l_width = parseInt(local_ar * l_height);
-          }
-
-
-          const modal = document.getElementById('Modal2');
-          const sameImage = document.getElementById('mainChart');
-          // Get the image and insert it inside the modal - use its "alt" text as a caption
-          const modalImg = document.getElementById('ModalImage');
-          modal.style.display = 'block';
-          modalImg.src = sameImage.src;
-
-          const x = modalImg.width;
-          const y = modalImg.height;
-          const MAX_X = 1150;
-          const MAX_Y = 700;
-          let scalingRatio = 1;
-
-          if (x / y > MAX_X / MAX_Y) {
-            //fix x to MAX_X
-            modalImg.width = MAX_X;
-            scalingRatio = MAX_X / x;
-            modalImg.height = scalingRatio * y;
-          } else {
-            //fix y to MAX_Y
-            modalImg.height = MAX_Y;
-            scalingRatio = MAX_Y / y;
-            modalImg.width = scalingRatio * x;
-          }
-
-          // Get the <span> element that closes the modal
-          var span = document.getElementsByClassName('close')[0];
-
-          // When the user clicks on <span> (x), close the modal
-          span.onclick = function() {
-            modal.style.display = 'none';
-          };
-
-          var modal2 = d3.select('#Modal2');
-          var canvas = d3.select('#gameCanvasModal');
-
-          for (var i = 0; i < arr.messages.length; ++i) {
-            var msg = arr.messages[i];
-            var coords = arr.coords[i];
-
-            var div = modal2.append('div')
-              .attr('class', 'tooltip')
-              .style('opacity', 0);
-
-            const OFFSET = 0;
-            const VERTICAL_OFFSET = -60;
-
-            canvas.append('svg')
-              .attr('width', '50px')
-              .attr('height', '50px')
-              .attr('x', coords[0] * scalingRatio + OFFSET)
-              .attr('y', coords[1] * scalingRatio + VERTICAL_OFFSET)
-              .attr('opacity', 0.3)
-              .attr('viewBox', '0 0 180 180')
-              .attr('class', 'draggable')
-              .html(infoBoxGlobal)
-              .on('mouseover', function() {
-                this.attributes.opacity.value = 1;
-              })
-              .on('mouseout', function() {
-                this.attributes.opacity.value = 0.3;
-              })
-
-
-              .append('rect')
-              .attr('width', '200px')
-              .attr('height', '200px')
-              .attr('x', 0)
-              .attr('y', 0)
-              .attr('opacity', 0.3)
-              .attr('fill', 'red')
-              .attr('hiddenText', msg)
-              .on('click', function(d) {
-                //remove all the tool_tip_on_click before  a new click
-                var paras = document.getElementsByClassName('tooltip_on_click');
-                while (paras[0]) {
-                  paras[0].parentNode.removeChild(paras[0]);
-                }
-                paras = document.getElementsByClassName('tooltip_svg');
-                while (paras[0]) {
-                  paras[0].parentNode.removeChild(paras[0]);
-                }
-
-                const annotation = (this.attributes.hiddenText.value);
-                const trunc = annotation.includes('truncate'); //booleans
-                const aspect = annotation.includes('(AR)'); //booleans
-                const inverted = annotation.includes('inverted'); //booleans
-
-                var div2 = modal2.append('div')
-                  .attr('class', 'tooltip_on_click')
-                  .style('opacity', 0);
-
-
-                if (trunc) {
-                  const ORIG_OFFSET = 150;
-                  drawThumbTrunc(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, ORIG_OFFSET, annotation);
-
-                } else if (aspect) {
-                  const ORIG_OFFSET = 150;
-                  const str = annotation;
-                  const aspect1 = (str.split('Actual Aspect Ratio (AR): ')[1].split('Ideal'));
-                  const a1 = parseFloat(aspect1);
-                  const aspect2 = str.split('Ideal AR: ')[1];
-                  const a2 = parseFloat(aspect2);
-                  drawThumbAR(l_margin, l_width, l_height, local_xr, local_yr, local_data, div2, ORIG_OFFSET, a1, a2, annotation);
-                  //set timeout for Aspect Popup
-                  setTimeout(() => {
-                    //Wilkinson
-                    // WilkinsonPopup -- id
-                    const a = document.getElementById('WhatIsAspectRatio');
-                    a.addEventListener('click', function() {
-
-                      wpd.popup.show('WhatIsAspectRatio');
-
-                      const closer = document.getElementById('CloseAspectPopup');
-                      closer.addEventListener('click', function() {
-                        wpd.popup.close('WhatIsAspectRatio');
-                      });
-
-                    });
-
-                  }, 500);
-
-
-                  //set timeout for Aspect Popup
-                  setTimeout(() => {
-                    //Wilkinson
-                    // WilkinsonPopup -- id
-                    const arp = document.getElementById('WhatIsAspectRatio');
-                    arp.addEventListener('click', function() {
-
-                      wpd.popup.show('AspectPopup');
-
-                      const closer = document.getElementById('CloseAspectPopup');
-                      closer.addEventListener('click', function() {
-                        wpd.popup.close('AspectPopup');
-                      });
-
-                    });
-
-                  }, 500);
-
-
-                } else if (inverted) {
-                  var svg = div2
-                    .style('height', '80px')
-                    .style('z-index', 10000000)
-                    .html(annotation);
-
-                } else {
-
-
-                  var svg = div2
-                    .style('height', '80px')
-                    .style('z-index', 10000000)
-                    .html(annotation);
-
-
-                  try {
-
-                    document.getElementById('WilkinsonAdvice').style.zIndex = '10000000';
-                    document.getElementById('WilkinsonAdvice').addEventListener('click', function() {
-                    });
-
-                    //set timeout for wilkinson
-                    setTimeout(() => {
-                      //Wilkinson
-                      // WilkinsonPopup -- id
-                      const wilk = document.getElementById('WilkinsonAdvice');
-                      wilk.addEventListener('click', function() {
-                        console.log('wilkinson popup');
-                        wpd.popup.show('WilkinsonPopup');
-
-                        const closer = document.getElementById('CloseStepSize');
-                        closer.addEventListener('click', function() {
-                          wpd.popup.close('WilkinsonPopup');
-                        });
-
-                      });
-
-                    }, 500);
-                  } catch (e) {
-                    console.log('log');
-                  }
-
-
-                }
-                div2.transition()
-                  .duration(200)
-                  .style('opacity', .85);
-
-                div2.style('left', (d3.event.pageX) + 'px')
-                  .style('top', (d3.event.pageY) + 2.75 * VERTICAL_OFFSET + 'px');
-              });
-
-            var g = canvas.append('g')
-              .attr('x', coords[0] + OFFSET)
-              .attr('y', coords[1]);
-            g.append('rect')
-              .attr('x', coords[0] + OFFSET)
-              .attr('y', coords[1]);
-
-
-          }
+          console.log('manually input data successfully saved')
+          //open the main view to show the results
+          window.location.href = '/views/new_main.html';
         })
 
         .catch(function(error) {
@@ -978,7 +751,7 @@ function completeAnalysis() {
 
 const completeAnalysisButton = document.getElementById('CompleteAnalysis');
 completeAnalysisButton.addEventListener('click', function() {
-  completeAnalysis();
+  manualAnalysis();
 });
 
 

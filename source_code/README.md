@@ -23,7 +23,7 @@ On the upper right corner, turn on developer mode. Then click on `Load unpacked`
 You have have to delete the ``__pycache__`` directory.
 
 ###How to use the system
-For our demo (also presented in the use cases of the paper), go to the `sample_charts` directory of the codebase.
+For our demo (also presented in the use cases of the paper), go to the `chartchecker_sample_charts` directory of the codebase.
 After you have loaded the sample images, right click the image to load our extension.
 Line Chart Analyzer.
 You can perform an Auto Analysis or Manual Analysis.

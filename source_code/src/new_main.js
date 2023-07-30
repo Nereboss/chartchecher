@@ -198,7 +198,6 @@ function processBackendData(backendData) {
     }
     chartGraphData = JSON.stringify(backendData['graphData']);
     chartGraphData = JSON.parse(chartGraphData);
-    chartGraphData.splice(chartGraphData.length - 1); //remove last element
     detectedFeatures = backendData['detectedFeatures'];
 }
 

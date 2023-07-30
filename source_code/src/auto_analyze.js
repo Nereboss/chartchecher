@@ -1,6 +1,5 @@
 let Gscale_auto; //scaling the main image
-let imageURL_auto; // = "file:///D:/Daten/Bachelorarbeit/bachelor_thesis/source_code/sample_charts/sunspots_smooth.png";
-// comment this in to always use the sunspots sample chart
+let imageURL_auto;
 
 //thumbnail sizes
 // scaled up to fit our new UI but it breaks the old one
