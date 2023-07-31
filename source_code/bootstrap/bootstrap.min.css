@@ -5391,10 +5391,10 @@ button.close {
    transform: translate(0, -25%)
 }
 
-/*.modal.show .modal-dialog {*/
-/*    -webkit-transform: translate(0, 0);*/
-/*    transform: translate(0, 0)*/
-/*}*/
+.modal.show .modal-dialog {
+   -webkit-transform: translate(0, 0);
+   transform: translate(0, 0)
+}
 
 .modal-dialog-centered {
    display: -webkit-box;
@@ -5476,27 +5476,27 @@ button.close {
    padding: 1rem
 }
 
-/*.modal-footer {*/
-/*    display: -webkit-box;*/
-/*    display: -ms-flexbox;*/
-/*    display: flex;*/
-/*    -webkit-box-align: center;*/
-/*    -ms-flex-align: center;*/
-/*    align-items: center;*/
-/*    -webkit-box-pack: end;*/
-/*    -ms-flex-pack: end;*/
-/*    justify-content: flex-end;*/
-/*    padding: 1rem;*/
-/*    border-top: 1px solid #e9ecef*/
-/*}*/
+.modal-footer {
+   display: -webkit-box;
+   display: -ms-flexbox;
+   display: flex;
+   -webkit-box-align: center;
+   -ms-flex-align: center;
+   align-items: center;
+   -webkit-box-pack: end;
+   -ms-flex-pack: end;
+   justify-content: flex-end;
+   padding: 1rem;
+   border-top: 1px solid #e9ecef
+}
 
-/*.modal-footer > :not(:first-child) {*/
-/*    margin-left: .25rem*/
-/*}*/
+.modal-footer > :not(:first-child) {
+   margin-left: .25rem
+}
 
-/*.modal-footer > :not(:last-child) {*/
-/*    margin-right: .25rem*/
-/*}*/
+.modal-footer > :not(:last-child) {
+   margin-right: .25rem
+}
 
 .modal-scrollbar-measure {
    position: absolute;
@@ -5524,6 +5524,9 @@ button.close {
 @media (min-width: 992px) {
    .modal-lg {
        max-width: 800px
+   }
+   .modal-xl {
+       max-width: 1140px
    }
 }
 

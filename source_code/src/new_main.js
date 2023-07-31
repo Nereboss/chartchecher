@@ -32,6 +32,8 @@ let imageURL_auto;
 let imageWidth;
 let imageHeight;
 
+let chartDrawHeight = -1;        //the height of the chart that will be drawn in the UI so that it is the same as the image
+
 //data needed to draw the chart axis
 var chartWidth;
 var chartHeight;
@@ -70,6 +72,8 @@ const shareWholeUIButton = document.getElementById('wholeUIBTN')
 shareWholeUIButton.addEventListener('click', function() {shareButtonClicked('#share-content')})
 const shareChartOnlyButton = document.getElementById('chartOnlyBTN')
 shareChartOnlyButton.addEventListener('click', function() {shareButtonClicked('#share-chart')})
+const openManualModeButton = document.getElementById('manualModeBTN')
+openManualModeButton.addEventListener('click', function() {window.location.href = '/views/analyze.html'})
 
 
 // -----------------------------functions for event listeners---------------------------------
@@ -156,16 +160,25 @@ chrome.storage.sync.get(['key'], function (result) {
  */
 function drawUI(backendData) {
 
+    //shows the modal asking the user to confirm if the data was extracted correctly
+    $(document).ready(function(){
+        $("#controlChartModal").modal('show');
+    });
+
     //process backend data into global variables
     processBackendData(backendData);
     //draw the original image into the UI
     drawOriginalImage();
     //draw the control chart into the UI
-    drawChart(d3.select('#original-chart'), true)
+    drawChart(d3.select('#original-chart'), true, true)
     //draw the improved chart into the UI
     drawChart(d3.select('#recommended-chart'));
     //draw the misleading features into the UI
     drawMisleadFeaturesList();
+
+    //draw the control chart modal
+    drawOriginalImage('original-image-modal')
+    drawChart(d3.select('#control-chart-modal'), true)
 }
 
 function processBackendData(backendData) {
@@ -203,9 +216,10 @@ function processBackendData(backendData) {
 
 /**
  * function draws the original image into the UI
+ * @param {html_element} elementToDraw the element in which the image will be drawn; default is 'original-image' 
  */
-function drawOriginalImage() {
-    const img = document.getElementById('original-image');
+function drawOriginalImage(elementToDraw='original-image') {
+    const img = document.getElementById(elementToDraw);
     toDataURL(imageURL_auto,
         function (dataUrl) {
             img.src = dataUrl;
@@ -226,8 +240,9 @@ function drawOriginalImage() {
  * if all detected tactics are false, it will draw the chart from the input-image (control chart)
  * @param {html_element} parentDiv the div in which the chart will be drawn
  * @param {boolean} controlChart whether or not to draw the control chart
+ * @param {boolean} hidden whether or not the chart starts as hidden (for the chart that is placed instead of the original image)
  */
-function drawChart(parentDiv, controlChart = false) {
+function drawChart(parentDiv, controlChart = false, hidden = false) {
 
     //-----------------set aspect ratio-----------------
 
@@ -328,9 +343,14 @@ function drawChart(parentDiv, controlChart = false) {
     let elementID;
     if(controlChart) {
         elementID = 'controlSVG';
-        display = 'display: none';
     } else {
         elementID = 'recommendedSVG';
+    }
+    let display;
+    if(hidden) {
+        display = 'display: none';
+    }
+    else {
         display = 'display: block';
     }
 
@@ -343,13 +363,33 @@ function drawChart(parentDiv, controlChart = false) {
     let svg = parentDiv
         .append('svg')
         .attr('class', 'mx-auto')
-        .attr('width', xAxisSize + EXPAND_WIDTH)
-        .attr('height', yAxisSize + EXPAND_HEIGHT)
+        .attr('width', '100%')
+        .attr('height', (chartDrawHeight == -1 ? 400 : chartDrawHeight) +'px')
+        .attr('viewBox', '0 0 ' + (xAxisSize + EXPAND_WIDTH) + ' ' + (yAxisSize + EXPAND_HEIGHT))
         .attr('id', elementID)
-        .attr('style', display)
-        .append('g')
+        .attr('style', display);
+
+    svg.append('g')
         .attr('align', 'center')
         .attr('transform', 'translate(20,30)');
+
+
+    //-----------------adjust chart height-----------------
+
+    //if the chart height has not been set yet, it needs to be done during the first time the chart is drawn
+    if (chartDrawHeight == -1) {
+        let testImage = new Image();
+        testImage.src = imageURL_auto;
+        testImage.onload = () => { 
+            //needs to be executed after the image is loaded as the height of the div adjusts with the image
+            const elem = document.querySelector("#original-image-div");
+            if(elem) {
+                const rect = elem.getBoundingClientRect();
+                chartDrawHeight = rect.height;
+                svg.attr('height',  + rect.height + 'px')   //adjust the height of the chart to be the same as the image
+            }
+        }
+    }
 
     
     //-----------------draw chart title-----------------
