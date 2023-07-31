@@ -35,7 +35,7 @@
                 <div class="col-4 justify-content-center align-items-center">
                     <div class="d-flex justify-content-end align-items-center">
                         <div class="p-1">
-                            <button type="button" class="btn btn-primary" id="share-button" data-toggle="modal" data-target="#exampleModalCenter">
+                            <button type="button" class="btn btn-primary" id="share-button" data-toggle="modal" data-target="#sharingModal">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-share" viewbox="0 0 16 16">
                                     <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z">
                                     </path>
@@ -135,8 +135,9 @@
             <!--End Bottom Buttons-->
 
             <!--Start sharing modal-->
-            <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+
+            <div class="modal fade" id="sharingModal" tabindex="-1" role="dialog" aria-labelledby="SharingModalitle" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLongTitle">Right-click the image to copy or save it</h5>
@@ -168,6 +169,69 @@
             </div>
 
             <!--End sharing modal-->
+
+            <!--Start control chart modal-->
+
+            <div class="modal fade" id="controlChartModal" tabindex="-1" role="dialog" aria-labelledby="ControlChartModalTitle" aria-hidden="true">
+                <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <div class="modal-title" id="exampleModalLongTitle">
+                        <h4>Check if the control chart correctly represents the original image.</h4>
+                        If the control chart looks similar to the original image, you can continue to the results, otherwise the data should be adjusted in the manual mode.
+                    </div>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    </div>
+                    <div class="modal-body" style="background-color: #e3e3e3;">
+
+                        <div class="row justify-content-center" style="position: relative; padding-bottom: 10px;">
+                            <div class="col-6">
+                                <div class="card h-100">
+                                    <div class="card-header" style="text-align: center">
+                                        <h3 style="font-weight: bold;">Original Image</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div>
+                                            <img class="mx-auto" style="z-index: 0; position: relative; display: block" width="100%" id="original-image-modal" src=""> <!--JS inserts the correct source for the image here-->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card h-100">
+                                    <div class="card-header" style="text-align: center">
+                                        <h3 style="font-weight: bold;">Control Chart</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row align-items-center h-100">
+                                            <div class="col justify-content-center" id="control-chart-modal">
+                                                <!--JS inserts the  drawn chart here TODO: make the svg scale correctly</svg> -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-38px, -50%); width: 100px;">
+                                <div class="justify-content-center align-items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="75" height="75" fill="#c50000" class="bi bi-arrow-right" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="manualModeBTN">Open manual mode</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Continue</button>
+                      </div>
+                </div>
+                </div>
+            </div>
+
+            <!-- End control chart modal -->
 
         </div>
     </div>

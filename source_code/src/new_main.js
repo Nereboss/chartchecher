@@ -70,6 +70,8 @@ const shareWholeUIButton = document.getElementById('wholeUIBTN')
 shareWholeUIButton.addEventListener('click', function() {shareButtonClicked('#share-content')})
 const shareChartOnlyButton = document.getElementById('chartOnlyBTN')
 shareChartOnlyButton.addEventListener('click', function() {shareButtonClicked('#share-chart')})
+const openManualModeButton = document.getElementById('manualModeBTN')
+openManualModeButton.addEventListener('click', function() {window.location.href = '/views/analyze.html'})
 
 
 // -----------------------------functions for event listeners---------------------------------
@@ -156,16 +158,25 @@ chrome.storage.sync.get(['key'], function (result) {
  */
 function drawUI(backendData) {
 
+    //shows the modal asking the user to confirm if the data was extracted correctly
+    $(document).ready(function(){
+        $("#controlChartModal").modal('show');
+    });
+
     //process backend data into global variables
     processBackendData(backendData);
     //draw the original image into the UI
     drawOriginalImage();
     //draw the control chart into the UI
-    drawChart(d3.select('#original-chart'), true)
+    drawChart(d3.select('#original-chart'), true, true)
     //draw the improved chart into the UI
     drawChart(d3.select('#recommended-chart'));
     //draw the misleading features into the UI
     drawMisleadFeaturesList();
+
+    //draw the control chart modal
+    drawOriginalImage('original-image-modal')
+    drawChart(d3.select('#control-chart-modal'), true)
 }
 
 function processBackendData(backendData) {
@@ -203,9 +214,10 @@ function processBackendData(backendData) {
 
 /**
  * function draws the original image into the UI
+ * @param {html_element} elementToDraw the element in which the image will be drawn; default is 'original-image' 
  */
-function drawOriginalImage() {
-    const img = document.getElementById('original-image');
+function drawOriginalImage(elementToDraw='original-image') {
+    const img = document.getElementById(elementToDraw);
     toDataURL(imageURL_auto,
         function (dataUrl) {
             img.src = dataUrl;
@@ -226,8 +238,9 @@ function drawOriginalImage() {
  * if all detected tactics are false, it will draw the chart from the input-image (control chart)
  * @param {html_element} parentDiv the div in which the chart will be drawn
  * @param {boolean} controlChart whether or not to draw the control chart
+ * @param {boolean} hidden whether or not the chart starts as hidden (for the chart that is placed instead of the original image)
  */
-function drawChart(parentDiv, controlChart = false) {
+function drawChart(parentDiv, controlChart = false, hidden = false) {
 
     //-----------------set aspect ratio-----------------
 
@@ -328,9 +341,14 @@ function drawChart(parentDiv, controlChart = false) {
     let elementID;
     if(controlChart) {
         elementID = 'controlSVG';
-        display = 'display: none';
     } else {
         elementID = 'recommendedSVG';
+    }
+    let display;
+    if(hidden) {
+        display = 'display: none';
+    }
+    else {
         display = 'display: block';
     }
 
