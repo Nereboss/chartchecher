@@ -32,6 +32,8 @@ let imageURL_auto;
 let imageWidth;
 let imageHeight;
 
+let chartDrawHeight = -1;        //the height of the chart that will be drawn in the UI so that it is the same as the image
+
 //data needed to draw the chart axis
 var chartWidth;
 var chartHeight;
@@ -362,13 +364,32 @@ function drawChart(parentDiv, controlChart = false, hidden = false) {
         .append('svg')
         .attr('class', 'mx-auto')
         .attr('width', '100%')
-        .attr('height', '100%')
+        .attr('height', (chartDrawHeight == -1 ? 400 : chartDrawHeight) +'px')
         .attr('viewBox', '0 0 ' + (xAxisSize + EXPAND_WIDTH) + ' ' + (yAxisSize + EXPAND_HEIGHT))
         .attr('id', elementID)
-        .attr('style', display)
-        .append('g')
+        .attr('style', display);
+
+    svg.append('g')
         .attr('align', 'center')
         .attr('transform', 'translate(20,30)');
+
+
+    //-----------------adjust chart height-----------------
+
+    //if the chart height has not been set yet, it needs to be done during the first time the chart is drawn
+    if (chartDrawHeight == -1) {
+        let testImage = new Image();
+        testImage.src = imageURL_auto;
+        testImage.onload = () => { 
+            //needs to be executed after the image is loaded as the height of the div adjusts with the image
+            const elem = document.querySelector("#original-image-div");
+            if(elem) {
+                const rect = elem.getBoundingClientRect();
+                chartDrawHeight = rect.height;
+                svg.attr('height',  + rect.height + 'px')   //adjust the height of the chart to be the same as the image
+            }
+        }
+    }
 
     
     //-----------------draw chart title-----------------
