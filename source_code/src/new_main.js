@@ -361,8 +361,9 @@ function drawChart(parentDiv, controlChart = false, hidden = false) {
     let svg = parentDiv
         .append('svg')
         .attr('class', 'mx-auto')
-        .attr('width', xAxisSize + EXPAND_WIDTH)
-        .attr('height', yAxisSize + EXPAND_HEIGHT)
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .attr('viewBox', '0 0 ' + (xAxisSize + EXPAND_WIDTH) + ' ' + (yAxisSize + EXPAND_HEIGHT))
         .attr('id', elementID)
         .attr('style', display)
         .append('g')
